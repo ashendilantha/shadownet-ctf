@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  stage8-entry:
+    build:
+      context: ./entry-host
+      dockerfile: Dockerfile
+    container_name: stage8-entry-host
+    ports:
+      - "3008:3000"
+    networks:
+      - public-net
+      - internal-net
+    restart: unless-stopped
+
+  stage8-metadata:
+    build:
+      context: ./db-host
+      dockerfile: Dockerfile
+    container_name: stage8-metadata-service
+    networks:
+      internal-net:
+        ipv4_address: 192.168.100.10
+    restart: unless-stopped
+
+  stage8-mysql:
+    image: mysql:8.0
+    container_name: stage8-mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: RootSecurePassword2026!
+      MYSQL_DATABASE: nexacorp
+    volumes:
+      - ./db-host/init_mysql.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      internal-net:
+        ipv4_address: 192.168.100.20
+    restart: unless-stopped
+
+networks:
+  public-net:
+    driver: bridge
+  internal-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24

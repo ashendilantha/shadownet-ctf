@@ -1,103 +1,110 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
-import crypto from 'crypto';
-
-function hashFlag(flag: string): string {
-  return crypto.createHash('sha256').update(flag).digest('hex');
-}
+import { hashFlag } from '@/lib/crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    //verify authentication
     const user = await verifyAuth(request);
     if (!user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required. Please login first.' },
         { status: 401 }
       );
     }
 
     const { challenge_id, flag } = await request.json();
 
-    const supabase = createServerComponentClient({ cookies });
+    if (!challenge_id || !flag) {
+      return NextResponse.json(
+        { error: 'Challenge ID and flag are required' },
+        { status: 400 }
+      );
+    }
 
-    //check if already solved
-    const { data: existing } = await supabase
+    // Check if challenge is already solved by user
+    const { data: existingSolve } = await supabase
       .from('submissions')
-      .select('*')
+      .select('id')
       .eq('user_id', user.sub)
       .eq('challenge_id', challenge_id)
       .eq('is_correct', true)
       .single();
 
-    if (existing) {
+    if (existingSolve) {
       return NextResponse.json(
-        { error: 'Challenge already solved', correct: false },
+        {
+          correct: false,
+          alreadySolved: true,
+          message: 'You have already solved this challenge!',
+        },
         { status: 200 }
       );
     }
 
-    //get challenge
-    const { data: challenge } = await supabase
+    // Fetch challenge from DB
+    const { data: challenge, error: challengeError } = await supabase
       .from('challenges')
-      .select('*')
+      .select('id, name, points, flag_hash')
       .eq('id', challenge_id)
       .single();
 
-    if (!challenge) {
+    if (challengeError || !challenge) {
       return NextResponse.json(
         { error: 'Challenge not found' },
         { status: 404 }
       );
     }
 
-    //verify flag
-    const flag_hash = hashFlag(flag);
-    const is_correct = flag_hash === challenge.flag_hash;
+    // Verify submitted flag
+    const submittedHash = hashFlag(flag);
+    const isCorrect = submittedHash === challenge.flag_hash;
 
-    //record submission
-    const { error: submitError } = await supabase
-      .from('submissions')
-      .insert({
-        user_id: user.sub,
-        challenge_id,
-        submitted_flag: flag,
-        is_correct,
-      });
+    // Record submission
+    await supabase.from('submissions').insert({
+      user_id: user.sub,
+      challenge_id,
+      submitted_flag: flag.trim(),
+      is_correct: isCorrect,
+    });
 
-    if (submitError) throw submitError;
-
-    //update score if correct
-    if (is_correct) {
-      const { data: score } = await supabase
+    if (isCorrect) {
+      // Get current score
+      const { data: currentScore } = await supabase
         .from('scores')
         .select('total_points, challenges_solved')
         .eq('user_id', user.sub)
         .single();
 
+      const newPoints = (currentScore?.total_points || 0) + challenge.points;
+      const newSolved = (currentScore?.challenges_solved || 0) + 1;
+
+      // Update score
       await supabase
         .from('scores')
-        .update({
-          total_points: (score?.total_points || 0) + challenge.points,
-          challenges_solved: (score?.challenges_solved || 0) + 1,
+        .upsert({
+          user_id: user.sub,
+          total_points: newPoints,
+          challenges_solved: newSolved,
           last_submission_at: new Date().toISOString(),
-        })
-        .eq('user_id', user.sub);
+        });
+
+      return NextResponse.json({
+        correct: true,
+        message: `🎯 Correct Flag! You earned +${challenge.points} XP!`,
+        points: challenge.points,
+      });
     }
 
-    return NextResponse.json(
-      {
-        correct: is_correct,
-        message: is_correct ? 'Flag accepted!' : 'Incorrect flag',
-        points: is_correct ? challenge.points : 0,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      correct: false,
+      message: '❌ Incorrect flag. Verify your analysis and try again.',
+      points: 0,
+    });
   } catch (error) {
+    console.error('Submission processing error:', error);
     return NextResponse.json(
-      { error: 'Submission failed' },
+      { error: 'Failed to process submission' },
       { status: 500 }
     );
   }
