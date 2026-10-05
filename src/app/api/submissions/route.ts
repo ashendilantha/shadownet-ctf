@@ -80,14 +80,18 @@ export async function POST(request: NextRequest) {
       const newSolved = (currentScore?.challenges_solved || 0) + 1;
 
       // Update score
-      await supabase
+      const { error: scoreUpdateError } = await supabase
         .from('scores')
-        .upsert({
-          user_id: user.sub,
+        .update({
           total_points: newPoints,
           challenges_solved: newSolved,
           last_submission_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', user.sub);
+
+      if (scoreUpdateError) {
+        console.error('Score update error:', scoreUpdateError);
+      }
 
       return NextResponse.json({
         correct: true,
