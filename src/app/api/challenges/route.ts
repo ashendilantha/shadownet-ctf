@@ -6,7 +6,15 @@ export async function GET(request: NextRequest) {
   try {
     const authUser = await verifyAuth(request);
 
-    // Get active challenges (without exposing flag_hash to client)
+    // Require authentication to access challenge list
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please log in to access the challenges.' },
+        { status: 401 }
+      );
+    }
+
+    // Get all active challenges
     const { data: challenges, error } = await supabase
       .from('challenges')
       .select('id, name, domain, difficulty, description, points, delivery_method, stage_number, is_active')
@@ -21,26 +29,43 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If user is authenticated, check which challenges they solved
-    let solvedIds = new Set<number>();
-    if (authUser) {
-      const { data: solvedSubmissions } = await supabase
-        .from('submissions')
-        .select('challenge_id')
-        .eq('user_id', authUser.sub)
-        .eq('is_correct', true);
+    // Get user's solved submissions
+    const { data: solvedSubmissions } = await supabase
+      .from('submissions')
+      .select('challenge_id')
+      .eq('user_id', authUser.sub)
+      .eq('is_correct', true);
 
-      if (solvedSubmissions) {
-        solvedSubmissions.forEach((s) => solvedIds.add(s.challenge_id));
-      }
+    const solvedIds = new Set<number>();
+    if (solvedSubmissions) {
+      solvedSubmissions.forEach((s) => solvedIds.add(s.challenge_id));
     }
 
-    const challengesWithSolved = challenges.map((c) => ({
-      ...c,
-      solved: solvedIds.has(c.id),
-    }));
+    // Map challenge unlock state (Stage 1 always unlocked; Stage N requires Stage N-1 solved)
+    const challengesWithState = (challenges || []).map((c) => {
+      const isSolved = solvedIds.has(c.id);
+      let isUnlocked = false;
 
-    return NextResponse.json({ challenges: challengesWithSolved });
+      if (c.stage_number === 1) {
+        isUnlocked = true;
+      } else {
+        // Stage N is unlocked only if stage N-1 is solved
+        const prevChallenge = challenges?.find(
+          (prev) => prev.stage_number === c.stage_number - 1
+        );
+        isUnlocked = prevChallenge ? solvedIds.has(prevChallenge.id) : false;
+      }
+
+      return {
+        ...c,
+        solved: isSolved,
+        unlocked: isUnlocked,
+        locked: !isUnlocked,
+        required_stage: c.stage_number > 1 ? c.stage_number - 1 : null,
+      };
+    });
+
+    return NextResponse.json({ challenges: challengesWithState });
   } catch (error) {
     console.error('Challenges route error:', error);
     return NextResponse.json(

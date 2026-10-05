@@ -18,8 +18,14 @@ export async function GET(
     }
 
     const authUser = await verifyAuth(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please log in first.' },
+        { status: 401 }
+      );
+    }
 
-    // Get challenge without flag_hash
+    // Get current challenge
     const { data: challenge, error } = await supabase
       .from('challenges')
       .select('id, name, domain, difficulty, description, points, delivery_method, stage_number, is_active')
@@ -33,33 +39,67 @@ export async function GET(
       );
     }
 
-    // Get hints for this challenge
+    // Check unlock state: Stage N requires Stage N-1 solved
+    if (challenge.stage_number > 1) {
+      const { data: prevChallenge } = await supabase
+        .from('challenges')
+        .select('id')
+        .eq('stage_number', challenge.stage_number - 1)
+        .single();
+
+      if (prevChallenge) {
+        const { data: prevSolved } = await supabase
+          .from('submissions')
+          .select('id')
+          .eq('user_id', authUser.sub)
+          .eq('challenge_id', prevChallenge.id)
+          .eq('is_correct', true)
+          .single();
+
+        if (!prevSolved) {
+          return NextResponse.json(
+            {
+              error: `Stage ${challenge.stage_number} is locked. You must complete Stage ${challenge.stage_number - 1} first.`,
+              locked: true,
+              required_stage: challenge.stage_number - 1,
+              challenge: {
+                id: challenge.id,
+                name: challenge.name,
+                domain: challenge.domain,
+                difficulty: challenge.difficulty,
+                stage_number: challenge.stage_number,
+                points: challenge.points,
+                locked: true,
+              },
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
+    // Check if current user already solved this challenge
+    const { data: solvedSubmission } = await supabase
+      .from('submissions')
+      .select('id')
+      .eq('user_id', authUser.sub)
+      .eq('challenge_id', challengeId)
+      .eq('is_correct', true)
+      .single();
+
+    // Get hints
     const { data: hints } = await supabase
       .from('hints')
       .select('id, hint_level, hint_text, point_penalty')
       .eq('challenge_id', challengeId)
       .order('hint_level', { ascending: true });
 
-    // Check if solved by current user
-    let isSolved = false;
-    if (authUser) {
-      const { data: solvedSubmission } = await supabase
-        .from('submissions')
-        .select('id')
-        .eq('user_id', authUser.sub)
-        .eq('challenge_id', challengeId)
-        .eq('is_correct', true)
-        .single();
-
-      if (solvedSubmission) {
-        isSolved = true;
-      }
-    }
-
     return NextResponse.json({
       challenge: {
         ...challenge,
-        solved: isSolved,
+        solved: !!solvedSubmission,
+        locked: false,
+        unlocked: true,
       },
       hints: hints || [],
     });

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const user = await verifyAuth(request);
     if (!user) {
       return NextResponse.json(
-        { error: 'Authentication required. Please login first.' },
+        { error: 'Authentication required. Please log in first.' },
         { status: 401 }
       );
     }
@@ -20,6 +20,46 @@ export async function POST(request: NextRequest) {
         { error: 'Challenge ID and flag are required' },
         { status: 400 }
       );
+    }
+
+    // Fetch challenge from DB
+    const { data: challenge, error: challengeError } = await supabase
+      .from('challenges')
+      .select('id, name, points, flag_hash, stage_number')
+      .eq('id', challenge_id)
+      .single();
+
+    if (challengeError || !challenge) {
+      return NextResponse.json(
+        { error: 'Challenge not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if stage is locked for this user (Stage N requires Stage N-1 solved)
+    if (challenge.stage_number > 1) {
+      const { data: prevChallenge } = await supabase
+        .from('challenges')
+        .select('id')
+        .eq('stage_number', challenge.stage_number - 1)
+        .single();
+
+      if (prevChallenge) {
+        const { data: prevSolved } = await supabase
+          .from('submissions')
+          .select('id')
+          .eq('user_id', user.sub)
+          .eq('challenge_id', prevChallenge.id)
+          .eq('is_correct', true)
+          .single();
+
+        if (!prevSolved) {
+          return NextResponse.json(
+            { error: `Stage ${challenge.stage_number} is locked. You must solve Stage ${challenge.stage_number - 1} first.` },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     // Check if challenge is already solved by user
@@ -39,20 +79,6 @@ export async function POST(request: NextRequest) {
           message: 'You have already solved this challenge!',
         },
         { status: 200 }
-      );
-    }
-
-    // Fetch challenge from DB
-    const { data: challenge, error: challengeError } = await supabase
-      .from('challenges')
-      .select('id, name, points, flag_hash')
-      .eq('id', challenge_id)
-      .single();
-
-    if (challengeError || !challenge) {
-      return NextResponse.json(
-        { error: 'Challenge not found' },
-        { status: 404 }
       );
     }
 
@@ -93,9 +119,14 @@ export async function POST(request: NextRequest) {
         console.error('Score update error:', scoreUpdateError);
       }
 
+      const nextStageMsg =
+        challenge.stage_number < 8
+          ? ` 🔓 Stage 0${challenge.stage_number + 1} has been unlocked!`
+          : ' 🏆 All 8 stages pwned! Campaign completed!';
+
       return NextResponse.json({
         correct: true,
-        message: `🎯 Correct Flag! You earned +${challenge.points} XP!`,
+        message: `🎯 Correct Flag! You earned +${challenge.points} XP!${nextStageMsg}`,
         points: challenge.points,
       });
     }
