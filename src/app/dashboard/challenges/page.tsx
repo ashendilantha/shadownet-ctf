@@ -34,23 +34,31 @@ export default function ChallengesListPage() {
 
   if (authError) {
     return (
-      <div className="max-w-xl mx-auto my-16 bg-[#111417] border border-[#252A30] rounded-2xl p-8 sm:p-10 text-center font-mono space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
-        <div className="w-16 h-16 rounded-2xl bg-[#171B20] border border-[#FF6B00]/40 flex items-center justify-center text-3xl mx-auto text-[#FF6B00] shadow-[0_0_20px_rgba(255,107,0,0.25)]">
-          🔒
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-[#F5F5F5]">RESTRICTED CLEARANCE AREA</h2>
-          <p className="text-xs text-[#8B949E] leading-relaxed">
-            The ShadowNet Challenge Deck is accessible only to authenticated operatives. Please enroll or authenticate your session to view and engage targets.
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          <Link href="/auth/login" className="btn-primary w-full sm:w-auto">
-            OPERATIVE LOGIN →
-          </Link>
-          <Link href="/auth/register" className="btn-secondary w-full sm:w-auto">
-            CREATE ACCOUNT
-          </Link>
+      <div className="auth-container">
+        <div className="max-w-lg w-full bg-[#111417]/95 backdrop-blur-2xl border border-[#252A30] rounded-2xl p-8 sm:p-12 text-center font-mono space-y-6 shadow-[0_0_60px_rgba(0,0,0,0.8)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent"></div>
+          <div className="w-20 h-20 rounded-2xl bg-[#171B20] border border-[#FF6B00]/40 flex items-center justify-center text-4xl mx-auto text-[#FF6B00] shadow-[0_0_30px_rgba(255,107,0,0.3)]">
+            🔒
+          </div>
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold text-[#FF6B00] bg-[#FF6B00]/15 px-3 py-1 rounded-full border border-[#FF6B00]/30">
+              SECURITY PROTOCOL ACTIVE
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#F5F5F5] tracking-tight">
+              RESTRICTED CLEARANCE
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed font-sans max-w-sm mx-auto">
+              The ShadowNet Challenge Deck is accessible only to authenticated operatives. Please log in or enroll to engage targets.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <Link href="/auth/login" className="btn-primary w-full sm:w-auto py-3.5 text-xs font-bold">
+              OPERATIVE LOGIN →
+            </Link>
+            <Link href="/auth/register" className="btn-secondary w-full sm:w-auto py-3.5 text-xs font-bold">
+              ENROLL HANDLE
+            </Link>
+          </div>
         </div>
       </div>
     );
