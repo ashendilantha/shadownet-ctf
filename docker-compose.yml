@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: shadownet-dashboard
+    ports:
+      - "5000:5000"  # Web dashboard
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///scores.db
+    volumes:
+      - ./dashboard/database.db:/app/database.db
+    networks:
+      - frontend
+    restart: unless-stopped
+    depends_on:
+      - stage3-crypto
+      - stage4-web
+      - stage5-scripting
+
+  stage3-crypto:
+    build:
+      context: ./stages/stage3-cryptography
+      dockerfile: Dockerfile
+    container_name: stage3-crypto
+    ports:
+      - "5000:5000"
+    networks:
+      - stage3-net
+      - backend
+    restart: unless-stopped
+    environment:
+      - KEY=SECRET
+      - FLAG=SHADOWNET{VIGENERE_ORACLE_BROKEN}
+
+  stage4-web:
+    build:
+      context: ./stages/stage4-web-security
+      dockerfile: Dockerfile
+    container_name: stage4-web
+    ports:
+      - "3000:3000"
+    networks:
+      - stage4-net
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./stages/stage4-web-security/database.db:/app/database.db
+    environment:
+      - FLASK_ENV=production
+
+  stage5-scripting:
+    build:
+      context: ./stages/stage5-scripting
+      dockerfile: Dockerfile
+    container_name: stage5-scripting
+    ports:
+      - "5001:5001"
+    networks:
+      - stage5-net
+      - backend
+    restart: unless-stopped
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  stage3-net:
+    driver: bridge
+  stage4-net:
+    driver: bridge
+  stage5-net:
+    driver: bridge
