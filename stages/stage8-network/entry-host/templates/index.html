@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NexaCorp - URL Fetcher Service</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 5px; max-width: 600px; margin: 0 auto; }
+        input { width: 90%; padding: 10px; }
+        button { padding: 10px 20px; background: #667eea; color: white; border: none; cursor: pointer; }
+        .result { background: #e8f4f8; padding: 15px; margin-top: 20px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NexaCorp - Internal URL Fetcher</h1>
+        <p>Fetch content from URLs (internal testing only)</p>
+        
+        <form id="fetchForm">
+            <label>URL to fetch:</label><br>
+            <input type="text" id="urlInput" placeholder="http://example.com" required><br>
+            <button type="submit">Fetch</button>
+        </form>
+        
+        <div id="result" class="result" style="display:none;">
+            <h3>Response:</h3>
+            <pre id="resultContent"></pre>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('fetchForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const url = document.getElementById('urlInput').value;
+            
+            const response = await fetch(`/fetch?url=${encodeURIComponent(url)}`);
+            const data = await response.json();
+            
+            document.getElementById('resultContent').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('result').style.display = 'block';
+        };
+    </script>
+</body>
+</html>
