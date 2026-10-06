@@ -94,8 +94,7 @@ export async function POST(request: NextRequest) {
     const { data: created, error } = await supabase
       .from('challenges')
       .insert(newChallengeData)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -103,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Challenge created successfully',
-      challenge: created,
+      challenge: created && created.length > 0 ? created[0] : newChallengeData,
     });
   } catch (error) {
     console.error('Admin create challenge error:', error);
@@ -131,6 +130,7 @@ export async function PATCH(request: NextRequest) {
       is_active,
       points,
       name,
+      domain,
       description,
       difficulty,
       delivery_method,
@@ -138,8 +138,13 @@ export async function PATCH(request: NextRequest) {
       new_raw_flag,
     } = body;
 
-    if (!id) {
+    if (id === undefined || id === null) {
       return NextResponse.json({ error: 'Challenge ID is required' }, { status: 400 });
+    }
+
+    const challengeId = parseInt(String(id), 10);
+    if (isNaN(challengeId)) {
+      return NextResponse.json({ error: 'Valid Challenge ID integer is required' }, { status: 400 });
     }
 
     const updates: Record<string, any> = {};
@@ -147,6 +152,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof points === 'number') updates.points = points;
     if (typeof stage_number === 'number') updates.stage_number = stage_number;
     if (typeof name === 'string' && name.trim()) updates.name = name.trim();
+    if (typeof domain === 'string' && domain.trim()) updates.domain = domain.trim();
     if (typeof description === 'string') updates.description = description;
     if (typeof difficulty === 'string') updates.difficulty = difficulty;
     if (typeof delivery_method === 'string') updates.delivery_method = delivery_method;
@@ -157,17 +163,17 @@ export async function PATCH(request: NextRequest) {
     const { data: updated, error } = await supabase
       .from('challenges')
       .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', challengeId)
+      .select();
 
     if (error) {
+      console.error('Database update error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({
       message: 'Challenge updated successfully',
-      challenge: updated,
+      challenge: updated && updated.length > 0 ? updated[0] : { id: challengeId, ...updates },
     });
   } catch (error) {
     console.error('Admin update challenge error:', error);
@@ -203,7 +209,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Challenge ID is required' }, { status: 400 });
     }
 
-    const cId = parseInt(challengeId, 10);
+    const cId = parseInt(String(challengeId), 10);
 
     // 1. Delete associated hints
     await supabase.from('hints').delete().eq('challenge_id', cId);

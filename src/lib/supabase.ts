@@ -5,12 +5,13 @@ const supabaseUrl =
   process.env.SUPERBASE_URL ||
   'https://bsvvvibseqlapprvhuwz.supabase.co';
 
-const supabaseAnonKey =
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPERBASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzdnZ2aWJzZXFsYXBwcnZodXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MDEyMTQsImV4cCI6MjEwNjE3NzIxNH0.J4Y7ppYnasWLC5Bhafnpj-N9mZ7SSPhbIoE0hCG7T_8';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzdnZ2aWJzZXFsYXBwcnZodXd6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDYwMTIxNCwiZXhwIjoyMTA2MTc3MjE0fQ.NzGdWkvw0d-huyQ0CVXq6DHqnMPiL4jW7CObak77g9U';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,

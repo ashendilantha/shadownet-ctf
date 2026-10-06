@@ -104,8 +104,7 @@ export async function PATCH(request: NextRequest) {
       .from('users')
       .update(updates)
       .eq('id', id)
-      .select('id, username, email, team_name, is_admin, created_at')
-      .single();
+      .select('id, username, email, team_name, is_admin, created_at');
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -113,7 +112,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Operative profile updated successfully',
-      user: updated,
+      user: updated && updated.length > 0 ? updated[0] : { id, ...updates },
     });
   } catch (error) {
     console.error('Admin update user error:', error);
