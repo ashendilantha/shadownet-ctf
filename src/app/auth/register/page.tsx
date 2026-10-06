@@ -31,8 +31,9 @@ export default function RegisterPage() {
         router.push('/dashboard/challenges');
         router.refresh();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed. Try another handle.');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      setError(errorObj.response?.data?.error || 'Registration failed. Try another handle.');
     } finally {
       setLoading(false);
     }
@@ -40,53 +41,52 @@ export default function RegisterPage() {
 
   return (
     <div className="auth-container">
-      <div className="max-w-md w-full bg-[#111417]/95 backdrop-blur-2xl border border-[#252A30] rounded-2xl p-8 sm:p-12 shadow-[0_0_60px_rgba(0,0,0,0.8)] relative overflow-hidden">
-        {/* Subtle Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent"></div>
-
-        <div className="text-center mb-8">
-          <div className="inline-flex w-16 h-16 rounded-2xl bg-[#171B20] border border-[#22D3EE]/40 items-center justify-center font-mono font-bold text-[#22D3EE] text-2xl mb-4 shadow-[0_0_25px_rgba(34,211,238,0.3)]">
+      <div className="max-w-md w-full cyber-panel rounded-xl p-6 sm:p-8 relative overflow-hidden">
+        <div className="text-center mb-6">
+          <div className="inline-flex w-12 h-12 rounded-lg bg-[#171B20] border border-[#22D3EE]/30 items-center justify-center font-mono font-bold text-[#22D3EE] text-xl mb-3">
             🛡️
           </div>
-          <div className="inline-block px-3 py-1 bg-[#090B0D] border border-[#252A30] rounded-full text-[11px] font-mono text-[#22D3EE] mb-2">
-            NEW OPERATIVE RECRUITMENT
+          <div className="inline-block px-2.5 py-0.5 bg-[#090B0D] border border-[#232830] rounded-full text-[10px] font-mono text-[#22D3EE] mb-2 font-semibold">
+            Create your account
           </div>
-          <h2 className="font-mono text-2xl sm:text-3xl font-black text-[#F5F5F5] tracking-tight">
-            ENROLL HANDLE
+          <h2 className="text-2xl font-bold font-sans text-[#F5F5F5] tracking-tight">
+            Create account
           </h2>
-          <p className="text-xs sm:text-sm text-[#8B949E] mt-1.5 font-sans">
-            Register your hacker profile for the ShadowNet Cyber Range
+          <p className="text-xs text-[#8B949E] mt-1 font-sans">
+            Join the ShadowNet challenge range.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/40 font-mono text-xs text-[#EF4444] flex items-center gap-3">
-            <span className="text-base">⚠️</span>
+          <div className="mb-5 p-3 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/40 font-mono text-xs text-[#EF4444] flex items-center gap-2.5 animate-fade-in">
+            <span className="text-sm">⚠️</span>
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-3.5">
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              CALLSIGN / USERNAME <span className="text-[#FF6B00]">*</span>
+            <label htmlFor="username" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Username <span className="text-[#FF6B00]">*</span>
             </label>
             <input
               type="text"
+              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="e.g. cipher_zero"
+              placeholder="Username"
               className="cyber-input"
             />
           </div>
 
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              ACCESS CIPHER / PASSWORD <span className="text-[#FF6B00]">*</span>
+            <label htmlFor="password" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Password <span className="text-[#FF6B00]">*</span>
             </label>
             <input
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -97,11 +97,12 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              EMAIL ADDRESS (OPTIONAL)
+            <label htmlFor="email" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Email (optional)
             </label>
             <input
               type="email"
+              id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="agent@shadow.ops"
@@ -110,11 +111,12 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              TEAM AFFILIATION (OPTIONAL)
+            <label htmlFor="team-name" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Team (optional)
             </label>
             <input
               type="text"
+              id="team-name"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
               placeholder="e.g. RedTeam-Elite"
@@ -125,16 +127,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 btn-primary py-4 text-xs font-bold tracking-wider"
+            className="w-full mt-2 btn-primary"
           >
-            {loading ? 'ENROLLING...' : 'ENROLL OPERATIVE →'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-[#252A30] text-center font-mono text-xs text-[#8B949E]">
-          Already have security clearance?{' '}
+        <div className="mt-6 pt-5 border-t border-[#232830] text-center font-mono text-xs text-[#8B949E]">
+          Already registered?{' '}
           <Link href="/auth/login" className="text-[#22D3EE] font-bold hover:text-[#FF9F43]">
-            Session Login
+            Sign in
           </Link>
         </div>
       </div>

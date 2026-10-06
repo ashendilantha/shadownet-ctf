@@ -27,8 +27,9 @@ export default function LoginPage() {
         }
         router.refresh();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please verify credentials.');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: string } } };
+      setError(errorObj.response?.data?.error || 'Login failed. Please verify credentials.');
     } finally {
       setLoading(false);
     }
@@ -36,53 +37,52 @@ export default function LoginPage() {
 
   return (
     <div className="auth-container">
-      <div className="max-w-md w-full bg-[#111417]/95 backdrop-blur-2xl border border-[#252A30] rounded-2xl p-8 sm:p-12 shadow-[0_0_60px_rgba(0,0,0,0.8)] relative overflow-hidden">
-        {/* Subtle Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#FF6B00] to-transparent"></div>
-
-        <div className="text-center mb-8">
-          <div className="inline-flex w-16 h-16 rounded-2xl bg-[#171B20] border border-[#FF6B00]/40 items-center justify-center font-mono font-bold text-[#FF6B00] text-2xl mb-4 shadow-[0_0_25px_rgba(255,107,0,0.3)]">
+      <div className="max-w-md w-full cyber-panel rounded-xl p-6 sm:p-8 relative overflow-hidden">
+        <div className="text-center mb-6">
+          <div className="inline-flex w-12 h-12 rounded-lg bg-[#171B20] border border-[#FF6B00]/30 items-center justify-center font-mono font-bold text-[#FF6B00] text-xl mb-3">
             ⚡
           </div>
-          <div className="inline-block px-3 py-1 bg-[#090B0D] border border-[#252A30] rounded-full text-[11px] font-mono text-[#22D3EE] mb-2">
-            OPERATIVE GATEWAY
+          <div className="inline-block px-2.5 py-0.5 bg-[#090B0D] border border-[#232830] rounded-full text-[10px] font-mono text-[#22D3EE] mb-2 font-semibold">
+            Account access
           </div>
-          <h2 className="font-mono text-2xl sm:text-3xl font-black text-[#F5F5F5] tracking-tight">
-            AUTHENTICATE
+          <h2 className="text-2xl font-bold font-sans text-[#F5F5F5] tracking-tight">
+            Sign in
           </h2>
-          <p className="text-xs sm:text-sm text-[#8B949E] mt-1.5 font-sans">
-            Enter credentials to access the ShadowNet Command Deck
+          <p className="text-xs text-[#8B949E] mt-1 font-sans">
+            Enter your account details.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/40 font-mono text-xs text-[#EF4444] flex items-center gap-3">
-            <span className="text-base">⚠️</span>
+          <div className="mb-5 p-3 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/40 font-mono text-xs text-[#EF4444] flex items-center gap-2.5 animate-fade-in">
+            <span className="text-sm">⚠️</span>
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              CALLSIGN / USERNAME
+            <label htmlFor="username" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Username
             </label>
             <input
               type="text"
+              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="e.g. cipher_zero"
+              placeholder="Username"
               className="cyber-input"
             />
           </div>
 
           <div>
-            <label className="block font-mono text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">
-              ACCESS CIPHER / PASSWORD
+            <label htmlFor="password" className="block font-mono text-sm font-medium text-[#8B949E] mb-1.5">
+              Password
             </label>
             <input
               type="password"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -94,16 +94,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 btn-primary py-4 text-xs font-bold tracking-wider"
+            className="w-full mt-2 btn-primary"
           >
-            {loading ? 'AUTHENTICATING...' : 'INITIALIZE SESSION →'}
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-[#252A30] text-center font-mono text-xs text-[#8B949E]">
-          Need security clearance?{' '}
+        <div className="mt-6 pt-5 border-t border-[#232830] text-center font-mono text-xs text-[#8B949E]">
+          New to ShadowNet?{' '}
           <Link href="/auth/register" className="text-[#22D3EE] font-bold hover:text-[#FF9F43]">
-            Enroll Operative Handle
+            Create account
           </Link>
         </div>
       </div>

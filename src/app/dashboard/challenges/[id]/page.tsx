@@ -46,11 +46,12 @@ export default function ChallengeDetailPage({
       setChallenge(res.data.challenge);
       setHints(res.data.hints || []);
       setIsLocked(false);
-    } catch (err: any) {
-      if (err.response?.status === 403 && err.response?.data?.locked) {
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { status?: number; data?: { locked?: boolean; error?: string; challenge?: ChallengeDetail } } };
+      if (errorObj.response?.status === 403 && errorObj.response?.data?.locked) {
         setIsLocked(true);
-        setLockedMsg(err.response?.data?.error || 'Stage locked.');
-        setChallenge(err.response?.data?.challenge || null);
+        setLockedMsg(errorObj.response?.data?.error || 'Stage locked.');
+        setChallenge(errorObj.response?.data?.challenge || null);
       } else {
         setChallenge(null);
       }
@@ -74,9 +75,9 @@ export default function ChallengeDetailPage({
 
   if (loading) {
     return (
-      <div className="text-center py-24 font-mono text-sm text-[#8B949E]">
+      <div className="text-center py-20 font-mono text-xs text-[#8B949E]">
         <span className="inline-block animate-spin mr-2">⚙️</span>
-        INITIALIZING RECONNAISSANCE TELEMETRY...
+        Loading challenge...
       </div>
     );
   }
@@ -84,29 +85,29 @@ export default function ChallengeDetailPage({
   // Locked Screen State
   if (isLocked) {
     return (
-      <div className="max-w-2xl mx-auto my-12 bg-[#111417] border border-[#252A30] rounded-2xl p-8 sm:p-12 text-center font-mono space-y-6 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
-        <div className="w-20 h-20 rounded-2xl bg-[#171B20] border border-[#EF4444]/40 flex items-center justify-center text-4xl mx-auto text-[#EF4444] shadow-[0_0_25px_rgba(239,68,68,0.2)]">
+      <div className="max-w-xl mx-auto my-8 cyber-panel rounded-xl p-6 sm:p-8 text-center space-y-5">
+        <div className="w-12 h-12 rounded-lg bg-[#171B20] border border-[#EF4444]/30 flex items-center justify-center text-2xl mx-auto text-[#EF4444]">
           🔒
         </div>
 
-        <div className="space-y-2">
-          <span className="text-xs font-bold text-[#EF4444] bg-[#EF4444]/10 px-3 py-1 rounded-full border border-[#EF4444]/30">
-            ACCESS RESTRICTED
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold text-[#EF4444] bg-[#EF4444]/10 px-2.5 py-0.5 rounded-full border border-[#EF4444]/30 inline-block">
+            Locked
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#F5F5F5]">
-            STAGE 0{challenge?.stage_number || id} IS LOCKED
+          <h2 className="text-xl sm:text-2xl font-bold font-sans text-[#F5F5F5]">
+            Stage 0{challenge?.stage_number || id} is Locked
           </h2>
-          <p className="text-xs sm:text-sm text-[#8B949E] max-w-md mx-auto leading-relaxed">
-            {lockedMsg || 'You must conquer the previous stage before accessing this attack vector.'}
+          <p className="text-xs text-[#8B949E] max-w-sm mx-auto leading-relaxed font-sans">
+            {lockedMsg || 'Complete the previous stage to unlock this challenge.'}
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/dashboard/challenges" className="btn-primary w-full sm:w-auto">
-            ← RETURN TO ACTIVE MISSIONS
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
+          <Link href="/dashboard/challenges" className="btn-primary w-full sm:w-auto h-10 px-5 text-xs font-bold">
+            Challenges
           </Link>
-          <Link href="/dashboard/progress" className="btn-secondary w-full sm:w-auto">
-            VIEW CAMPAIGN MAP
+          <Link href="/dashboard/progress" className="btn-secondary w-full sm:w-auto h-10 px-5 text-xs font-bold">
+            Progress
           </Link>
         </div>
       </div>
@@ -115,10 +116,10 @@ export default function ChallengeDetailPage({
 
   if (!challenge) {
     return (
-      <div className="max-w-md mx-auto my-16 bg-[#111417] border border-[#252A30] rounded-2xl p-8 text-center font-mono space-y-4">
-        <h2 className="text-xl font-bold text-[#EF4444]">404 - TARGET NOT FOUND</h2>
-        <p className="text-xs text-[#8B949E]">The requested challenge payload does not exist in registry.</p>
-        <Link href="/dashboard/challenges" className="btn-primary">
+      <div className="max-w-md mx-auto my-12 bg-[#111417] border border-[#232830] rounded-xl p-6 text-center font-mono space-y-4">
+        <h2 className="text-lg font-bold text-[#EF4444] font-sans">404 - Target Not Found</h2>
+        <p className="text-xs text-[#8B949E]">The requested challenge payload does not exist in the registry.</p>
+        <Link href="/dashboard/challenges" className="btn-primary text-xs py-2 px-4">
           RETURN TO CHALLENGES
         </Link>
       </div>
@@ -128,86 +129,87 @@ export default function ChallengeDetailPage({
   const stageConfig = STAGE_CONFIGS[challenge.stage_number];
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-6">
       {/* Top Nav Breadcrumbs */}
       <div className="flex items-center gap-2 font-mono text-xs text-[#8B949E]">
-        <Link href="/dashboard/challenges" className="text-[#22D3EE] hover:text-[#FF9F43]">
-          ← CHALLENGES
+        <Link href="/dashboard/challenges" className="text-[#22D3EE] hover:text-[#FF9F43] transition-colors">
+          Challenges
         </Link>
-        <span>/</span>
-        <span className="text-[#F5F5F5]">STAGE 0{challenge.stage_number}</span>
+        <span className="text-[#232830]">/</span>
+        <span className="text-[#F5F5F5] font-semibold">STAGE 0{challenge.stage_number}</span>
       </div>
 
       {/* Challenge Hero Header */}
-      <div className="bg-[#111417] border border-[#252A30] rounded-2xl p-6 sm:p-8 relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-[#111417] border border-[#232830] rounded-xl p-5 sm:p-7 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div>
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-[#171B20] text-[#22D3EE] border border-[#252A30]">
-                STAGE 0{challenge.stage_number}
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[#171B20] text-[#22D3EE] border border-[#232830]">
+                Stage 0{challenge.stage_number}
               </span>
-              <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-[#FF9F43]/10 text-[#FF9F43] border border-[#FF9F43]/30">
-                {challenge.difficulty.toUpperCase()}
+              <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-[#FF9F43]/10 text-[#FF9F43] border border-[#FF9F43]/30">
+                {challenge.difficulty}
               </span>
-              <span className="font-mono text-xs text-[#8B949E]">
-                DOMAIN: <strong className="text-[#F5F5F5]">{challenge.domain}</strong>
+              <span className="font-mono text-[11px] text-[#8B949E]">
+                <strong className="text-[#F5F5F5]">{challenge.domain}</strong>
               </span>
             </div>
 
-            <h1 className="font-mono text-2xl sm:text-4xl font-black text-[#F5F5F5] mb-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5F5F5] font-sans tracking-tight">
               {challenge.name}
             </h1>
           </div>
 
-          <div className="flex md:flex-col items-end justify-between md:justify-center gap-2 bg-[#171B20] border border-[#252A30] rounded-xl p-5 min-w-[160px]">
-            <span className="text-[10px] font-mono text-[#8B949E]">TARGET VALUE</span>
-            <span className="font-mono text-2xl sm:text-3xl font-black text-[#FF6B00]">
-              +{challenge.points} <span className="text-xs text-[#FF9F43]">XP</span>
+          <div className="flex md:flex-col items-end justify-between md:justify-center gap-1.5 bg-[#171B20] border border-[#232830] rounded-lg p-3.5 sm:p-4 min-w-[140px] flex-shrink-0">
+            <span className="text-sm font-mono text-[#8B949E]">Points</span>
+            <span className="font-mono text-xl sm:text-2xl font-black text-[#FF6B00]">
+              +{challenge.points} <span className="text-xs font-bold text-[#FF9F43]">XP</span>
             </span>
             {challenge.solved && (
-              <span className="font-mono text-xs font-bold text-[#22C55E]">✓ COMPLETED</span>
+              <span className="font-mono text-sm font-medium text-[#22C55E]">Solved</span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Briefing & Target Access */}
+      {/* 2-Column Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Briefing, Environment, & Flag Submission */}
         <div className="lg:col-span-2 space-y-6">
           {/* Mission Briefing */}
-          <div className="bg-[#111417] border border-[#252A30] rounded-2xl p-6 sm:p-8">
-            <h3 className="font-mono text-sm font-bold text-[#F5F5F5] mb-3 flex items-center gap-2">
-              <span className="text-[#FF6B00]">◈</span> MISSION OBJECTIVE & BRIEFING
+          <div className="cyber-panel p-5 sm:p-6">
+            <h3 className="font-sans text-base font-semibold text-[#F5F5F5] mb-2.5">
+              Briefing
             </h3>
-            <p className="text-sm sm:text-base text-[#F5F5F5] leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-[#E2E8F0] leading-relaxed font-sans">
               {challenge.description}
             </p>
           </div>
 
           {/* Connection / Environment Information */}
-          <div className="bg-[#111417] border border-[#252A30] rounded-2xl p-6 sm:p-8">
-            <h3 className="font-mono text-sm font-bold text-[#F5F5F5] mb-4 flex items-center gap-2">
-              <span className="text-[#22D3EE]">[SYS_ENV]</span> DEPLOYMENT & ACCESS TELEMETRY
+          <div className="cyber-panel p-5 sm:p-6">
+            <h3 className="font-sans text-base font-semibold text-[#F5F5F5] mb-3.5">
+              Access details
             </h3>
 
-            <div className="space-y-4 font-mono text-xs">
-              <div className="p-4 bg-[#090B0D] border border-[#252A30] rounded-xl">
-                <span className="text-[#8B949E] block mb-1">DELIVERY INFRASTRUCTURE:</span>
-                <span className="text-[#22D3EE] font-bold text-sm">
-                  {challenge.delivery_method?.toUpperCase()}
+            <div className="space-y-3 font-mono text-xs">
+              <div className="p-3.5 bg-[#090B0D] border border-[#232830] rounded-lg">
+                <span className="text-xs text-[#8B949E] block mb-0.5">Delivery</span>
+                <span className="text-[#22D3EE] font-semibold text-sm">
+                  {challenge.delivery_method}
                 </span>
               </div>
 
               {stageConfig && (
                 <>
-                  <div className="p-4 bg-[#090B0D] border border-[#252A30] rounded-xl">
-                    <span className="text-[#8B949E] block mb-1">INTERACTION / PROMPT GUIDE:</span>
-                    <span className="text-[#F5F5F5] leading-relaxed">{stageConfig.accessGuide}</span>
+                  <div className="p-3.5 bg-[#090B0D] border border-[#232830] rounded-lg">
+                    <span className="text-xs text-[#8B949E] block mb-0.5">How to connect</span>
+                    <span className="text-[#F5F5F5] text-xs leading-relaxed font-sans">{stageConfig.accessGuide}</span>
                   </div>
 
-                  <div className="p-4 bg-[#090B0D] border border-[#252A30] rounded-xl">
-                    <span className="text-[#8B949E] block mb-1">STATUS CHECK COMMAND:</span>
-                    <code className="text-[#22D3EE] font-bold text-sm bg-[#111417] px-2.5 py-1 rounded border border-[#252A30] inline-block">
+                  <div className="p-3.5 bg-[#090B0D] border border-[#232830] rounded-lg">
+                    <span className="text-xs text-[#8B949E] block mb-1">Status command</span>
+                    <code className="text-[#22D3EE] font-bold text-xs bg-[#111417] px-2.5 py-1 rounded border border-[#232830] inline-block font-mono">
                       {stageConfig.statusCheck}
                     </code>
                   </div>
@@ -224,41 +226,42 @@ export default function ChallengeDetailPage({
           />
         </div>
 
-        {/* Right Column: Hints & Intel */}
+        {/* Right Column: Tactical Hints & Engagement Protocol */}
         <div className="space-y-6">
-          <div className="bg-[#111417] border border-[#252A30] rounded-2xl p-6">
-            <h3 className="font-mono text-sm font-bold text-[#F5F5F5] mb-4 flex items-center gap-2">
-              <span className="text-[#FF9F43]">💡</span> TACTICAL INTEL & HINTS
+          {/* Tactical Hints */}
+          <div className="cyber-panel p-5">
+            <h3 className="font-sans text-base font-semibold text-[#F5F5F5] mb-3">
+              Hints
             </h3>
 
             {hints.length === 0 ? (
               <p className="font-mono text-xs text-[#8B949E]">
-                No hints available for this mission. Rely on your reconnaissance tools.
+                No hints available.
               </p>
             ) : (
-              <div className="space-y-3 font-mono text-xs">
+              <div className="space-y-2.5 font-mono text-xs">
                 {hints.map((hint) => {
                   const isOpen = unlockedHints.has(hint.id);
                   return (
                     <div
                       key={hint.id}
-                      className="bg-[#171B20] border border-[#252A30] rounded-xl overflow-hidden"
+                      className="bg-[#171B20] border border-[#232830] rounded-lg overflow-hidden transition-colors"
                     >
                       <button
                         onClick={() => toggleHint(hint.id)}
-                        className="w-full text-left p-4 flex items-center justify-between hover:bg-[#252A30]/30 transition-colors cursor-pointer"
+                        className="w-full text-left p-3 flex items-center justify-between hover:bg-[#1D2228] transition-colors cursor-pointer"
                       >
-                        <span className="font-bold text-[#F5F5F5]">
-                          HINT 0{hint.hint_level}
+                        <span className="font-bold text-[#F5F5F5] text-xs">
+                          Hint {hint.hint_level}
                         </span>
-                        <span className="text-[#FF9F43] text-[11px] font-bold">
-                          {isOpen ? '▲ CONCEAL' : '▼ DECRYPT HINT'}
+                        <span className="text-[#FF9F43] text-[10px] font-bold">
+                          {isOpen ? 'Hide' : 'Show'}
                         </span>
                       </button>
 
                       {isOpen && (
-                        <div className="p-4 pt-0 text-[#8B949E] border-t border-[#252A30]/50 bg-[#090B0D]">
-                          <p className="text-[#F5F5F5] leading-relaxed pt-3">
+                        <div className="p-3 pt-0 text-[#8B949E] border-t border-[#232830]/50 bg-[#090B0D] animate-fade-in">
+                          <p className="text-[#F5F5F5] text-xs leading-relaxed pt-2.5 font-sans">
                             {hint.hint_text}
                           </p>
                         </div>
@@ -271,12 +274,14 @@ export default function ChallengeDetailPage({
           </div>
 
           {/* Engagement Protocol */}
-          <div className="bg-[#111417] border border-[#252A30] rounded-2xl p-6 font-mono text-xs text-[#8B949E] space-y-3">
-            <h4 className="text-[#F5F5F5] font-bold">⚠️ ENGAGEMENT PROTOCOL:</h4>
-            <ul className="list-disc list-inside space-y-1.5 text-[11px] leading-relaxed">
-              <li>Target designated simulated subnets only.</li>
-              <li>Flag format is case-sensitive: <code className="text-[#FF6B00]">SHADOWNET{'{...}'}</code>.</li>
-              <li>Clearing this stage automatically unlocks the next stage.</li>
+          <div className="cyber-panel p-5 font-mono text-xs text-[#8B949E] space-y-2.5">
+            <h4 className="text-[#F5F5F5] text-base font-semibold">
+              Rules
+            </h4>
+            <ul className="list-disc list-inside space-y-1.5 text-[11px] leading-relaxed font-sans">
+              <li>Use the assigned sandbox only.</li>
+              <li>Flag format is case-sensitive: <code className="text-[#FF6B00] font-mono">SHADOWNET{'{...}'}</code>.</li>
+              <li>Solving unlocks the next stage.</li>
             </ul>
           </div>
         </div>

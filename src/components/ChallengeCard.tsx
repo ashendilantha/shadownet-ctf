@@ -36,63 +36,62 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
   const getDeliveryBadge = (method?: string) => {
     switch (method?.toLowerCase()) {
       case 'static':
-        return '📁 STATIC WEB';
+        return 'Static web';
       case 'docker':
-        return '🐳 DOCKER';
+        return 'Docker';
       case 'vm':
       case 'vms':
-        return '🖥️ VM CLUSTER';
+        return 'VM cluster';
       default:
-        return '⚡ SERVICE';
+        return 'Service';
     }
   };
 
   return (
     <div
-      className={`cyber-card p-7 sm:p-8 flex flex-col justify-between relative overflow-hidden transition-all duration-300 ${
+      className={`cyber-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-200 group ${
         isSolved
-          ? 'border-[#22C55E]/60 shadow-[0_0_25px_rgba(34,197,94,0.15)] bg-gradient-to-b from-[#111915] to-[#0E1210]'
+          ? 'border-[#22C55E]/40 bg-[#111614]'
           : isLocked
-          ? 'border-[#252A30] opacity-75 bg-[#0B0E11]'
-          : 'border-[#FF6B00]/60 shadow-[0_0_25px_rgba(255,107,0,0.2)] bg-[#171B20] hover:border-[#FF6B00]'
+          ? 'border-[#252A30] opacity-65 bg-[#0C0F12]'
+          : 'border-[#252A30] hover:border-[#FF6B00]/60 bg-[#171B20]'
       }`}
     >
       {/* Top Header */}
       <div>
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2.5">
-            <span className="font-mono text-xs font-black px-3 py-1 rounded-md bg-[#090B0D] text-[#22D3EE] border border-[#252A30]">
-              STAGE 0{challenge.stage_number}
+        <div className="flex items-center justify-between gap-2 mb-3.5">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[#090B0D] text-[#22D3EE] border border-[#252A30]">
+              Stage 0{challenge.stage_number}
             </span>
             <span
-              className={`font-mono text-xs font-bold px-2.5 py-1 rounded-md border ${getDifficultyColor(
+              className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${getDifficultyColor(
                 challenge.difficulty
               )}`}
             >
-              {challenge.difficulty.toUpperCase()}
+              {challenge.difficulty}
             </span>
           </div>
 
           {/* Status Badge */}
           {isSolved ? (
-            <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[#22C55E] bg-[#22C55E]/15 px-3 py-1 rounded-full border border-[#22C55E]/40">
-              ✓ PWNED
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#22C55E] bg-[#22C55E]/15 px-2.5 py-0.5 rounded-full border border-[#22C55E]/30">
+              Solved
             </span>
           ) : isLocked ? (
-            <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-[#8B949E] bg-[#111417] px-3 py-1 rounded-md border border-[#252A30]">
-              🔒 LOCKED
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-medium text-[#8B949E] bg-[#111417] px-2 py-0.5 rounded border border-[#252A30]">
+              Locked
             </span>
           ) : (
-            <span className="inline-flex items-center gap-2 font-mono text-xs font-bold text-[#FF6B00] bg-[#FF6B00]/15 px-3 py-1 rounded-md border border-[#FF6B00]/40 animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-[#FF6B00]"></span>
-              ACTIVE TARGET
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#FF6B00] bg-[#FF6B00]/10 px-2.5 py-0.5 rounded-full border border-[#FF6B00]/30">
+              Available
             </span>
           )}
         </div>
 
         {/* Title */}
         <h3
-          className={`font-mono text-xl sm:text-2xl font-black mb-3 ${
+          className={`font-sans text-base font-semibold mb-2 leading-snug transition-colors ${
             isSolved
               ? 'text-[#F5F5F5]'
               : isLocked
@@ -103,27 +102,27 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
           {challenge.name}
         </h3>
 
-        {/* Domain Tag */}
-        <div className="flex flex-wrap items-center gap-2.5 mb-4">
-          <span className="font-mono text-xs text-[#22D3EE] bg-[#090B0D] px-3 py-1 rounded-md border border-[#252A30] font-semibold">
-            DOMAIN: {challenge.domain}
+        {/* Domain & Delivery Tags */}
+        <div className="flex flex-wrap items-center gap-2 mb-3.5">
+          <span className="font-mono text-[11px] text-[#22D3EE] bg-[#090B0D] px-2 py-0.5 rounded border border-[#252A30] font-medium">
+            {challenge.domain}
           </span>
-          <span className="font-mono text-xs text-[#8B949E]">
+          <span className="font-mono text-[11px] text-[#8B949E] bg-[#090B0D] px-2 py-0.5 rounded border border-[#252A30]">
             {getDeliveryBadge(challenge.delivery_method)}
           </span>
         </div>
 
         {/* Description or Locked Message */}
         {isLocked ? (
-          <div className="p-4 my-2 bg-[#090B0D] border border-[#252A30] rounded-xl text-xs sm:text-sm font-mono text-[#8B949E] flex items-center gap-3">
-            <span className="text-lg">🔒</span>
+          <div className="p-3 my-2 bg-[#090B0D] border border-[#252A30] rounded-lg text-xs font-mono text-[#8B949E] flex items-center gap-2.5">
+            <span className="text-sm">🔒</span>
             <span>
-              Requires solving <strong className="text-[#F5F5F5]">Stage 0{challenge.required_stage}</strong> to unlock this target.
+              Clear stage <strong className="text-[#F5F5F5">0{challenge.required_stage}</strong> to unlock.
             </span>
           </div>
         ) : (
           challenge.description && (
-            <p className="text-sm text-[#8B949E] line-clamp-3 mb-6 leading-relaxed font-sans">
+            <p className="text-xs text-[#8B949E] line-clamp-2 mb-4 leading-relaxed font-sans">
               {challenge.description}
             </p>
           )
@@ -131,31 +130,31 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
       </div>
 
       {/* Footer / CTA */}
-      <div className="pt-5 mt-3 border-t border-[#252A30] flex items-center justify-between">
+      <div className="pt-3.5 mt-2 border-t border-[#252A30] flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <span className="text-[11px] font-mono text-[#8B949E] uppercase tracking-wider">BOUNTY REWARD</span>
-          <span className="font-mono text-xl sm:text-2xl font-black text-[#FF6B00]">
-            +{challenge.points} <span className="text-xs text-[#FF9F43]">XP</span>
+          <span className="text-[10px] font-mono text-[#8B949E]">Points</span>
+          <span className="font-mono text-base font-black text-[#FF6B00] leading-tight">
+            +{challenge.points} <span className="text-[11px] font-bold text-[#FF9F43]">XP</span>
           </span>
         </div>
 
         {isLocked ? (
           <button
             disabled
-            className="font-mono text-xs font-semibold px-5 py-3 rounded-lg bg-[#111417] text-[#8B949E] border border-[#252A30] cursor-not-allowed"
+            className="btn-secondary"
           >
-            🔒 LOCKED
+            Locked
           </button>
         ) : (
           <Link
             href={`/dashboard/challenges/${challenge.id}`}
-            className={`font-mono text-xs sm:text-sm font-bold px-6 py-3 rounded-lg transition-all flex items-center gap-2 ${
+            className={`text-sm font-medium ${
               isSolved
                 ? 'btn-secondary text-[#22C55E] border-[#22C55E]/40 hover:text-[#22C55E]'
                 : 'btn-primary'
             }`}
           >
-            {isSolved ? 'REVIEW MISSION ⚡' : 'ENGAGE TARGET →'}
+            {isSolved ? 'Review' : 'Open challenge'}
           </Link>
         )}
       </div>
