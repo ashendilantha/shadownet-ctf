@@ -14,6 +14,7 @@ export default function Navbar() {
     total_points: number;
     challenges_solved: number;
     team_name?: string;
+    is_admin?: boolean;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -99,6 +100,19 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            {user?.is_admin && (
+              <Link
+                href="/admin"
+                className={`px-3.5 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-all duration-150 flex items-center gap-2 ${
+                  pathname.startsWith('/admin')
+                    ? 'bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444] shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                    : 'text-[#EF4444] hover:bg-[#EF4444]/15 border border-[#EF4444]/50'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-[#EF4444] animate-pulse"></span>
+                ⚡ ADMIN PANEL
+              </Link>
+            )}
           </nav>
 
           {/* User / Auth State */}
@@ -170,6 +184,15 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
+            {user?.is_admin && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-lg text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/30 font-bold"
+              >
+                ⚡ ADMIN PANEL
+              </Link>
+            )}
             <div className="pt-2 border-t border-[#252A30] flex flex-col gap-2">
               {!loading && user ? (
                 <button

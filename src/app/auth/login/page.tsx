@@ -20,7 +20,11 @@ export default function LoginPage() {
     try {
       const res = await axios.post('/api/auth/login', { username, password });
       if (res.status === 200) {
-        router.push('/dashboard/challenges');
+        if (res.data.user?.is_admin) {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard/challenges');
+        }
         router.refresh();
       }
     } catch (err: any) {
