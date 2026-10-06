@@ -1,0 +1,15 @@
+services:
+  stage2-stego:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stage2-stego
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+    networks:
+      - stage2-net
+
+networks:
+  stage2-net:
+    driver: bridge

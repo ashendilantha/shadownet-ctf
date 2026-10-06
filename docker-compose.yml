@@ -1,25 +1,16 @@
 version: '3.8'
 
 services:
-  dashboard:
+  stage2-stego:
     build:
-      context: ./dashboard
+      context: ./stages/stage2-stego
       dockerfile: Dockerfile
-    container_name: shadownet-dashboard
+    container_name: stage2-stego
     ports:
-      - "5000:5000"  # Web dashboard
-    environment:
-      - FLASK_ENV=production
-      - DATABASE_URL=sqlite:///scores.db
-    volumes:
-      - ./dashboard/database.db:/app/database.db
+      - "5000:5000"
+    restart: unless-stopped
     networks:
       - frontend
-    restart: unless-stopped
-    depends_on:
-      - stage3-crypto
-      - stage4-web
-      - stage5-scripting
 
   stage3-crypto:
     build:
