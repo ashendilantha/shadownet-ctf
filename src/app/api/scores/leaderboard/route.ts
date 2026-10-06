@@ -9,10 +9,9 @@ export async function GET() {
         total_points,
         challenges_solved,
         last_submission_at,
-        users:user_id (id, username, team_name)
+        users:user_id (id, username, team_name, is_admin)
       `)
-      .order('total_points', { ascending: false })
-      .limit(50);
+      .order('total_points', { ascending: false });
 
     if (error) {
       console.error('Leaderboard query error:', error);
@@ -22,9 +21,14 @@ export async function GET() {
       );
     }
 
-    const formatted = (leaderboard || []).map((entry: any, index: number) => ({
+    // Exclude admins - leaderboard is exclusively for competitive players
+    const playerOnlyScores = (leaderboard || [])
+      .filter((entry: any) => !entry.users?.is_admin && entry.users?.username)
+      .slice(0, 50);
+
+    const formatted = playerOnlyScores.map((entry: any, index: number) => ({
       rank: index + 1,
-      username: entry.users?.username || 'Anonymous Hacker',
+      username: entry.users?.username || 'Anonymous Operative',
       team_name: entry.users?.team_name || 'Individual',
       total_points: entry.total_points,
       challenges_solved: entry.challenges_solved,

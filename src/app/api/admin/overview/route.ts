@@ -12,10 +12,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 1. Total Operatives (users)
-    const { count: totalUsers, error: usersError } = await supabase
+    // 1. Total Operatives (players vs admins)
+    const { count: totalUsers } = await supabase
       .from('users')
       .select('*', { count: 'exact', head: true });
+
+    const { count: totalPlayers } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_admin', false);
+
+    const { count: totalAdmins } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_admin', true);
 
     // 2. Total Challenges & Active Challenges
     const { data: challenges, error: chalError } = await supabase
@@ -73,6 +83,8 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       stats: {
         totalUsers: totalUsers || 0,
+        totalPlayers: totalPlayers || 0,
+        totalAdmins: totalAdmins || 0,
         totalChallenges,
         activeChallenges,
         totalSubmissions: totalSubmissions || 0,
