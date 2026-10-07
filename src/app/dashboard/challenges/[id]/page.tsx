@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, useCallback, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
@@ -39,9 +39,10 @@ export default function ChallengeDetailPage({
   const [isLocked, setIsLocked] = useState(false);
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
-  const [siteOrigin, setSiteOrigin] = useState('');
+  const [collapsedHints, setCollapsedHints] = useState<Set<number>>(new Set());
+  const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
 
-  const fetchChallenge = async () => {
+  const fetchChallenge = useCallback(async () => {
     try {
       const res = await axios.get(`/api/challenges/${id}`);
       setChallenge(res.data.challenge);
@@ -59,17 +60,43 @@ export default function ChallengeDetailPage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchChallenge();
-    if (typeof window !== 'undefined') {
-      setSiteOrigin(window.location.origin);
-    }
-  }, [id]);
+  }, [fetchChallenge]);
 
-  const toggleHint = (hintId: number) => {
-    setUnlockedHints((prev) => {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && challenge?.id) {
+      const saved = localStorage.getItem(`shadownet_unlocked_hints_${challenge.id}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setUnlockedHints(new Set(parsed));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, [challenge?.id]);
+
+  const handleUnlockHint = (hintId: number, hintLevel: number) => {
+    const nextUnlocked = new Set(unlockedHints);
+    nextUnlocked.add(hintId);
+    setUnlockedHints(nextUnlocked);
+    if (typeof window !== 'undefined' && challenge?.id) {
+      localStorage.setItem(`shadownet_unlocked_hints_${challenge.id}`, JSON.stringify(Array.from(nextUnlocked)));
+    }
+    setUnlockMessage(`Tactical Hint ${hintLevel} decrypted. 40 XP penalty registered.`);
+    setTimeout(() => {
+      setUnlockMessage(null);
+    }, 4000);
+  };
+
+  const toggleCollapse = (hintId: number) => {
+    setCollapsedHints((prev) => {
       const next = new Set(prev);
       if (next.has(hintId)) next.delete(hintId);
       else next.add(hintId);
@@ -140,7 +167,9 @@ export default function ChallengeDetailPage({
           Target Deck
         </Link>
         <span className="text-[#232B36]">/</span>
-        <span className="text-[#F5F5F5] font-semibold">STAGE 0{challenge.stage_number} {'//'} {stageConfig?.subsystemCode || `TARGET-0${challenge.stage_number}`}</span>
+        <span className="text-[#F5F5F5] font-semibold">
+          STAGE 0{challenge.stage_number} {'//'} {stageConfig?.subsystemCode || `TARGET-0${challenge.stage_number}`}
+        </span>
       </div>
 
       {/* Challenge Hero Header */}
@@ -232,10 +261,10 @@ export default function ChallengeDetailPage({
                   </div>
 
                   <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg">
-                    <span className="text-[10px] text-[#8B949E] block mb-1 uppercase">Tactical Verification Command</span>
-                    <code className="text-[#10B981] font-bold text-xs bg-[#141920] px-2.5 py-1 rounded border border-[#232B36] inline-block font-mono">
+                    <span className="text-[10px] text-[#8B949E] block mb-1 uppercase">Tactical Verification Status</span>
+                    <span className="text-[#10B981] font-bold text-xs bg-[#141920] px-2.5 py-1 rounded border border-[#232B36] inline-block font-mono">
                       {stageConfig.statusCheck}
-                    </code>
+                    </span>
                   </div>
                 </>
               )}
@@ -251,7 +280,7 @@ export default function ChallengeDetailPage({
                     <span className="text-[#FF6B00]">📦</span> Intercepted Transmission Package
                   </h3>
                   <p className="text-xs text-[#8B949E] font-sans mt-0.5">
-                    Package includes 27 intercepted audio frequencies (1 authentic + 26 decoy channels) and image exhibits.
+                    Package includes 27 intercepted audio frequencies (1 authentic + 26 decoy channels) and photographic exhibits.
                   </p>
                 </div>
                 <a
@@ -276,15 +305,12 @@ export default function ChallengeDetailPage({
                 </div>
               </div>
 
-              {/* CLI Command Helper */}
-              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1.5">
-                <span className="text-[#8B949E] block text-[11px] font-semibold">Direct Download & Steghide Extraction Command:</span>
-                <code className="text-[#FF8533] block break-all">
-                  wget {siteOrigin ? `${siteOrigin}/downloads/stage2-covert-transmissions.zip` : '/downloads/stage2-covert-transmissions.zip'}
-                </code>
-                <code className="text-[#8B949E] block">
-                  unzip stage2-covert-transmissions.zip
-                </code>
+              {/* Covert Extraction Protocol Brief */}
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">COVERT EXTRACTION PROTOCOL:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  The intercepted package contains classified drone photography with encrypted intelligence payloads, alongside multi-frequency audio recordings. Analyze spectrogram signals and decode photographic assets using recovered operative passphrases.
+                </p>
               </div>
             </div>
           )}
@@ -300,41 +326,91 @@ export default function ChallengeDetailPage({
         {/* Right Column: Tactical Hints & Engagement Protocol */}
         <div className="space-y-6">
           {/* Tactical Hints */}
-          <div className="cyber-panel p-5 bg-[#0E1217]">
-            <h3 className="font-sans text-base font-bold text-[#F5F5F5] mb-3 flex items-center gap-2">
-              <span className="text-[#F59E0B]">💡</span> Tactical Intelligence Hints
-            </h3>
+          <div className="cyber-panel p-5 bg-[#0E1217] space-y-4">
+            <div className="flex items-center justify-between border-b border-[#232B36] pb-2.5">
+              <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                <span className="text-[#F59E0B]">💡</span> Tactical Intelligence Hints
+              </h3>
+              <span className="font-mono text-[10px] text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 font-bold">
+                40 XP / HINT
+              </span>
+            </div>
+
+            {unlockMessage && (
+              <div className="p-2.5 bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-lg text-xs text-[#F59E0B] font-mono flex items-center gap-2 animate-fade-in">
+                <span>⚡</span>
+                <span>{unlockMessage}</span>
+              </div>
+            )}
 
             {(hints.length === 0 && (!stageConfig?.hints || stageConfig.hints.length === 0)) ? (
               <p className="font-mono text-xs text-[#8B949E]">
-                No tactical hints logged for this target.
+                No tactical intel logged for this target.
               </p>
             ) : (
-              <div className="space-y-2.5 font-mono text-xs">
+              <div className="space-y-3 font-mono text-xs">
                 {(hints.length > 0 ? hints : (stageConfig?.hints || [])).map((hint) => {
-                  const isOpen = unlockedHints.has(hint.id);
+                  const isUnlocked = unlockedHints.has(hint.id);
+                  const isCollapsed = collapsedHints.has(hint.id);
+
+                  if (!isUnlocked) {
+                    return (
+                      <div
+                        key={hint.id}
+                        className="bg-[#141920] border border-[#232B36] rounded-lg p-3.5 space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#F5F5F5] text-xs flex items-center gap-1.5 font-sans">
+                            <span className="text-[#8B949E]">🔒</span> Classified Intel #{hint.hint_level}
+                          </span>
+                          <span className="text-[#EF4444] text-[10px] font-bold bg-[#EF4444]/10 px-2 py-0.5 rounded border border-[#EF4444]/25">
+                            -40 XP
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#8B949E] font-sans leading-relaxed">
+                          Encrypted surveillance and tactical intelligence for Stage 0{challenge.stage_number}.
+                        </p>
+                        <button
+                          onClick={() => handleUnlockHint(hint.id, hint.hint_level)}
+                          className="w-full py-2 px-3 bg-[#1A212B] hover:bg-[#242C37] text-[#FF9F43] border border-[#FF9F43]/40 hover:border-[#FF9F43] rounded font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_10px_rgba(255,159,67,0.1)]"
+                        >
+                          <span>🔓</span> Decrypt Intel (-40 XP)
+                        </button>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={hint.id}
-                      className="bg-[#141920] border border-[#232B36] rounded-lg overflow-hidden transition-colors"
+                      className="bg-[#141920] border border-[#F59E0B]/40 rounded-lg overflow-hidden transition-colors shadow-[0_0_12px_rgba(245,158,11,0.08)]"
                     >
                       <button
-                        onClick={() => toggleHint(hint.id)}
+                        onClick={() => toggleCollapse(hint.id)}
                         className="w-full text-left p-3 flex items-center justify-between hover:bg-[#1A212B] transition-colors cursor-pointer"
                       >
-                        <span className="font-bold text-[#F5F5F5] text-xs">
-                          Hint {hint.hint_level}
-                        </span>
-                        <span className="text-[#FF9F43] text-[10px] font-bold">
-                          {isOpen ? '▲ Hide' : '▼ Decrypt'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#10B981] text-xs">✓</span>
+                          <span className="font-bold text-[#F5F5F5] text-xs font-sans">
+                            Tactical Intel #{hint.hint_level}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#F59E0B] text-[10px] font-bold">
+                            {isCollapsed ? '▼ View' : '▲ Hide'}
+                          </span>
+                        </div>
                       </button>
 
-                      {isOpen && (
-                        <div className="p-3 pt-0 text-[#8B949E] border-t border-[#232B36]/50 bg-[#080A0D] animate-fade-in">
+                      {!isCollapsed && (
+                        <div className="p-3.5 pt-0 text-[#8B949E] border-t border-[#232B36]/50 bg-[#080A0D] animate-fade-in space-y-2">
                           <p className="text-[#F5F5F5] text-xs leading-relaxed pt-2.5 font-sans">
                             {hint.hint_text}
                           </p>
+                          <div className="flex items-center justify-between pt-1 border-t border-[#232B36]/30 text-[10px] text-[#8B949E] font-mono">
+                            <span>INTEL STATUS: DECRYPTED</span>
+                            <span className="text-[#F59E0B] font-bold">COST: 40 XP</span>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -360,3 +436,4 @@ export default function ChallengeDetailPage({
     </div>
   );
 }
+

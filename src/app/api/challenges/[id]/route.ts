@@ -97,8 +97,9 @@ export async function GET(
       .eq('challenge_id', challengeId)
       .order('hint_level', { ascending: true });
 
-    const fallbackHints = STAGE_CONFIGS[challenge.stage_number]?.hints || [];
-    const finalHints = (hints && hints.length > 0) ? hints : fallbackHints;
+    // Tactical hints configured for the stage
+    const configuredHints = STAGE_CONFIGS[challenge.stage_number]?.hints;
+    const finalHints = (configuredHints && configuredHints.length > 0) ? configuredHints : (hints || []);
 
     return NextResponse.json({
       challenge: {

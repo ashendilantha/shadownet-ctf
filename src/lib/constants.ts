@@ -29,6 +29,13 @@ export interface AttackSimStep {
   delayMs?: number;
 }
 
+export interface HintItem {
+  id: number;
+  hint_level: number;
+  hint_text: string;
+  point_penalty?: number;
+}
+
 export interface StageInfo {
   stage: number;
   name: string;
@@ -45,7 +52,7 @@ export interface StageInfo {
   port?: string;
   statusCheck: string;
   accessGuide: string;
-  hints?: Array<{ id: number; hint_level: number; hint_text: string; point_penalty?: number }>;
+  hints: HintItem[];
 }
 
 export const STAGE_CONFIGS: Record<number, StageInfo> = {
@@ -69,13 +76,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[INTEL] Security policy breach detected! Perimeter flag extracted.', type: 'success' },
     ],
     port: '5000 (dashboard)',
-    statusCheck: 'curl http://localhost:5000',
+    statusCheck: 'Port 5000 Active',
     accessGuide: 'Inspect public files, metadata and website headers for intelligence leaks.',
     hints: [
       {
         id: 101,
         hint_level: 1,
-        hint_text: 'Inspect HTML source comments on the public website and check HTTP response headers for internal debugging tokens.',
+        hint_text: 'Inspect the HTML source comments and look for unscrubbed developer remarks containing internal deployment coordinates.',
+        point_penalty: 40,
+      },
+      {
+        id: 102,
+        hint_level: 2,
+        hint_text: 'Examine custom HTTP response headers returned by the server for exposed debugging keys and author metadata.',
+        point_penalty: 40,
       },
     ],
   },
@@ -89,8 +103,8 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     targetSystem: 'NexaCorp SIGINT Satellite Uplink & Decoy Array',
     subsystemCode: 'NEXA-SIGINT-02',
     storyBrief: 'A rogue NexaCorp insider smuggled out an encrypted surveillance transmission bundle before going silent. NexaCorp automated counter-measures flooded the frequency with 26 decoy jamming audio streams. Demodulate the authentic carrier wave and recover the whistleblower payload.',
-    attackVector: 'Multi-Channel Audio Spectrogram Demodulation & Steghide',
-    vectorSummary: 'Filter out 26 jamming decoy frequencies, analyze the authentic carrier audio spectrogram in Audacity, and extract hidden assets via steghide with password "shelter".',
+    attackVector: 'Multi-Channel Audio Spectrogram Demodulation & Steganography',
+    vectorSummary: 'Filter out 26 jamming decoy frequencies, analyze the authentic carrier audio spectrogram in audio analysis software, and decrypt hidden assets using passphrase "shelter".',
     attackSimSteps: [
       { text: '[SIGINT] Intercepting NexaCorp satellite burst transmission...', type: 'info' },
       { text: '[ALERT] 26 high-frequency jamming decoy channels detected!', type: 'warn' },
@@ -99,18 +113,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[STEG] Demodulating covert audio spectrogram and parsing image payload', type: 'success' },
     ],
     port: 'N/A (Downloadable Package)',
-    statusCheck: 'unzip stage2-covert-transmissions.zip',
-    accessGuide: 'Download and extract the intercepted transmission package (.zip). Use steghide with passphrase "shelter" to extract intel from whistleblower.jpg, and inspect the frequency spectrogram of the authentic audio in Audacity.',
+    statusCheck: 'Package Available',
+    accessGuide: 'Download the intercepted transmission package. Analyze the photographic exhibit using passphrase "shelter" to recover hidden intel, and inspect audio spectrograms.',
     hints: [
       {
         id: 201,
         hint_level: 1,
-        hint_text: 'Use steghide with passphrase "shelter" to extract the embedded intel from the exhibit photo: steghide extract -sf whistleblower.jpg -p shelter',
+        hint_text: 'The whistleblower concealed an encrypted document inside the drone photo exhibit. Use the bunker emergency codeword "shelter" as the steganography extraction passphrase.',
+        point_penalty: 40,
       },
       {
         id: 202,
         hint_level: 2,
-        hint_text: 'Carrier frequency channel 14 holds the genuine transmission. Open the corresponding audio in Audacity, switch view from Waveform to Spectrogram, and read the embedded flag.',
+        hint_text: 'Out of the 27 audio files, carrier channel 14 carries the authentic signal. Analyze its frequency spectrogram in an audio analysis tool to visually read the hidden flag.',
+        point_penalty: 40,
       },
     ],
   },
@@ -134,8 +150,22 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[SOLVE] Master cryptographic key recovered byte-by-byte!', type: 'success' },
     ],
     port: '5000',
-    statusCheck: 'nc localhost 5000',
-    accessGuide: 'Connect via TCP/Netcat to interact with the encryption oracle: nc localhost 5000',
+    statusCheck: 'Port 5000 Active',
+    accessGuide: 'Connect via raw TCP socket to interact with the encryption oracle daemon.',
+    hints: [
+      {
+        id: 301,
+        hint_level: 1,
+        hint_text: 'The encryption oracle operates in Electronic Codebook (ECB) mode, meaning identical plaintext 16-byte blocks always produce identical ciphertext blocks.',
+        point_penalty: 40,
+      },
+      {
+        id: 302,
+        hint_level: 2,
+        hint_text: 'Supply crafted padding to push one secret character at a time into the last byte of a target block, allowing you to guess and recover the key byte-by-byte.',
+        point_penalty: 40,
+      },
+    ],
   },
   4: {
     stage: 4,
@@ -151,14 +181,28 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     vectorSummary: 'Inject crafted authentication strings into the NexaCorp SSO login parameters to force an unauthenticated admin session token.',
     attackSimSteps: [
       { text: '[HTTP] Connecting to NexaCorp SSO gateway on port 3000...', type: 'info' },
-      { text: '[FUZZ] Testing authentication payload: admin\' OR \'1\'=\'1\' --', type: 'exec' },
-      { text: '[SQL] Backend query syntax broken: SELECT * FROM users WHERE user=\'admin\'', type: 'warn' },
+      { text: '[FUZZ] Testing authentication payload against login endpoint...', type: 'exec' },
+      { text: '[SQL] Backend query syntax broken: unsanitized input concatenated', type: 'warn' },
       { text: '[BYPASS] Database tautology true: SQL parser returns root record', type: 'warn' },
       { text: '[AUTH] 200 OK — Admin session established. Internal dashboard unlocked!', type: 'success' },
     ],
     port: '3000',
-    statusCheck: 'curl http://localhost:3000',
-    accessGuide: 'Target the SQL injection vulnerability on the login endpoint: http://localhost:3000',
+    statusCheck: 'Port 3000 Active',
+    accessGuide: 'Target the SQL injection vulnerability on the internal employee login gateway endpoint.',
+    hints: [
+      {
+        id: 401,
+        hint_level: 1,
+        hint_text: 'The login query uses string concatenation for the username parameter. Injecting quote characters breaks the SQL syntax and allows adding custom logic conditions.',
+        point_penalty: 40,
+      },
+      {
+        id: 402,
+        hint_level: 2,
+        hint_text: 'Use an OR condition that is always true combined with comment delimiters to bypass the password verification check and sign in as administrator.',
+        point_penalty: 40,
+      },
+    ],
   },
   5: {
     stage: 5,
@@ -174,14 +218,28 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     vectorSummary: 'Sample consecutive pseudo-random states over TCP netcat, solve for multiplier a and increment c, and predict the next security challenge token.',
     attackSimSteps: [
       { text: '[TCP] Connecting to Token Stream Service on port 5001...', type: 'info' },
-      { text: '[STREAM] Intercepted 6 consecutive 64-bit pseudo-random token states', type: 'info' },
-      { text: '[MATH] Solving Linear Congruential system: X[n+1] = (a * X[n] + c) mod m', type: 'exec' },
+      { text: '[STREAM] Intercepted consecutive 64-bit pseudo-random token states', type: 'info' },
+      { text: '[MATH] Solving Linear Congruential state parameters...', type: 'exec' },
       { text: '[STATE] Modulus and seed state successfully synchronized!', type: 'warn' },
-      { text: '[EXPLOIT] Future challenge token predicted with 100% mathematical accuracy!', type: 'success' },
+      { text: '[EXPLOIT] Future challenge token predicted with mathematical precision!', type: 'success' },
     ],
     port: '5001',
-    statusCheck: 'nc localhost 5001',
-    accessGuide: 'Connect to the token stream and predict next pseudo-random states: nc localhost 5001',
+    statusCheck: 'Port 5001 Active',
+    accessGuide: 'Connect to the token stream and predict upcoming pseudo-random security tokens.',
+    hints: [
+      {
+        id: 501,
+        hint_level: 1,
+        hint_text: 'The token generator generates numbers using a standard Linear Congruential Generator recurrence formula with fixed multiplier and increment constants.',
+        point_penalty: 40,
+      },
+      {
+        id: 502,
+        hint_level: 2,
+        hint_text: 'Collecting several consecutive numbers from the stream lets you solve a system of linear congruences to deduce the modulus, multiplier, and next output token.',
+        point_penalty: 40,
+      },
+    ],
   },
   6: {
     stage: 6,
@@ -194,17 +252,31 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     subsystemCode: 'NEXA-RE-06',
     storyBrief: 'Operatives have retrieved a compiled binary running on NexaCorp’s internal security gateway. The binary contains proprietary verification routines with anti-debugging traps. Decompile the ELF executable in Ghidra/GDB to reverse engineer the internal license algorithm.',
     attackVector: 'Static Decompilation & Dynamic Binary Flow Analysis',
-    vectorSummary: 'SSH into the analysis sandbox, decompile target.bin, inspect assembly branch conditions, and extract the hardcoded encryption routine.',
+    vectorSummary: 'Analyze the target binary in a disassembler, inspect assembly branch conditions, and extract the internal encryption algorithm.',
     attackSimSteps: [
       { text: '[SSH] Uplink established to isolated Reverse Engineering Sandbox VM', type: 'info' },
-      { text: '[ELF] Loading target.bin into disassembler engine: x86_64 GNU/Linux', type: 'info' },
-      { text: '[ASM] Disassembling check_authorization() at virtual offset 0x4011e0...', type: 'exec' },
-      { text: '[FLOW] Identified XOR cipher transform and stack comparison check', type: 'warn' },
+      { text: '[ELF] Loading target binary into disassembler engine: x86_64 Linux', type: 'info' },
+      { text: '[ASM] Disassembling authorization subroutine at virtual entry...', type: 'exec' },
+      { text: '[FLOW] Identified cipher transform and stack comparison check', type: 'warn' },
       { text: '[PATCH] Verification logic reversed! Generated valid serial payload.', type: 'success' },
     ],
     port: 'SSH',
-    statusCheck: 'ssh player@<host>',
-    accessGuide: 'SSH into the reverse engineering sandbox VM and analyze target.bin with Ghidra/GDB.',
+    statusCheck: 'SSH Sandbox Active',
+    accessGuide: 'Log in to the reverse engineering sandbox VM and inspect the target binary using static and dynamic analysis tools.',
+    hints: [
+      {
+        id: 601,
+        hint_level: 1,
+        hint_text: 'Decompile the binary and locate the key validation function. Look at how user input is iterated over in a loop.',
+        point_penalty: 40,
+      },
+      {
+        id: 602,
+        hint_level: 2,
+        hint_text: 'The verification logic applies a symmetric bitwise XOR transformation to your input. Reversing the static reference array reveals the expected key.',
+        point_penalty: 40,
+      },
+    ],
   },
   7: {
     stage: 7,
@@ -215,19 +287,33 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     points: 400,
     targetSystem: 'NexaCorp Production Linux Host (Bastion)',
     subsystemCode: 'NEXA-ROOT-07',
-    storyBrief: 'ShadowNet holds low-privileged shell access (`player`) on a central NexaCorp server. Enumerate system binaries, misconfigured SUID permissions, and unquoted PATH vulnerabilities to escalate execution to UID 0 (root).',
+    storyBrief: 'ShadowNet holds low-privileged shell access on a central NexaCorp server. Enumerate system binaries, misconfigured SUID permissions, and unquoted PATH vulnerabilities to escalate execution to UID 0 (root).',
     attackVector: 'SUID Misconfiguration & Environment Hijacking PrivEsc',
-    vectorSummary: 'Enumerate local SUID files with find / -perm -4000, spot custom NexaCorp maintenance utilities, and exploit unquoted binary calls to spawn a root shell.',
+    vectorSummary: 'Enumerate local SUID files, spot custom NexaCorp maintenance utilities, and exploit unquoted binary calls to spawn a root shell.',
     attackSimSteps: [
-      { text: '[SHELL] Authenticated as unprivileged user: uid=1000(player) gid=1000(player)', type: 'info' },
-      { text: '[ENUM] Scanning filesystem for misconfigured SUID binaries: find / -perm -u=s', type: 'exec' },
-      { text: '[TARGET] Located custom SUID utility: /usr/local/bin/nexa-sysbackup', type: 'warn' },
-      { text: '[HIJACK] Injecting crafted malicious binary into user PATH variable...', type: 'exec' },
-      { text: '[PWN] SUID wrapper executed! Escalated to root: uid=0(root) gid=0(root)', type: 'success' },
+      { text: '[SHELL] Authenticated as unprivileged system operative user', type: 'info' },
+      { text: '[ENUM] Scanning filesystem for misconfigured SUID binaries...', type: 'exec' },
+      { text: '[TARGET] Located custom NexaCorp SUID backup utility', type: 'warn' },
+      { text: '[HIJACK] Exploiting relative executable execution path in SUID wrapper...', type: 'exec' },
+      { text: '[PWN] Elevated execution confirmed: UID 0 (root) shell active', type: 'success' },
     ],
     port: 'SSH',
-    statusCheck: 'ssh player@<host>',
-    accessGuide: 'SSH into the Linux target machine, identify vulnerable SUID binaries, and escalate to root.',
+    statusCheck: 'SSH Bastion Active',
+    accessGuide: 'Log in to the Linux target machine, identify vulnerable SUID binaries, and escalate privileges to root.',
+    hints: [
+      {
+        id: 701,
+        hint_level: 1,
+        hint_text: 'Search for executables owned by root that have the setuid permission bit enabled across the local filesystem.',
+        point_penalty: 40,
+      },
+      {
+        id: 702,
+        hint_level: 2,
+        hint_text: 'Inspect the strings and system calls in the custom backup binary to check if it calls sub-utilities without full absolute paths, enabling PATH environment hijacking.',
+        point_penalty: 40,
+      },
+    ],
   },
   8: {
     stage: 8,
@@ -240,16 +326,30 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     subsystemCode: 'NEXA-CORE-08',
     storyBrief: 'The final capstone operation. NexaCorp’s internal MySQL database containing its most sensitive corporate records is completely isolated from the internet. Exploit a Server-Side Request Forgery (SSRF) flaw on the entry host to pivot across the internal network, query the metadata service, and dump the database.',
     attackVector: 'SSRF Perimeter Pivoting & Internal DB Exfiltration',
-    vectorSummary: 'Exploit SSRF on Entry Host (port 3000) to pivot across internal subnets, query cloud metadata, retrieve DB credentials, and dump the master table.',
+    vectorSummary: 'Exploit SSRF on Entry Host to pivot across internal subnets, query cloud metadata, retrieve DB credentials, and dump the master table.',
     attackSimSteps: [
-      { text: '[ENTRY] Exploiting SSRF parameter on Entry Host: http://10.0.0.1:3000', type: 'info' },
-      { text: '[PIVOT] Forging internal HTTP request to metadata daemon: 169.254.169.254', type: 'exec' },
-      { text: '[CRED] Exfiltrated internal database credentials: root / nexa_vault_pass', type: 'warn' },
-      { text: '[SQL] Tunneling queries to isolated internal MySQL host 10.0.2.10:3306...', type: 'exec' },
-      { text: '[EXFIL] NexaCorp Crown Jewels breached! Flag extracted from classified_intel.', type: 'success' },
+      { text: '[ENTRY] Exploiting SSRF parameter on Entry Host gateway...', type: 'info' },
+      { text: '[PIVOT] Forging internal HTTP request to cloud metadata daemon...', type: 'exec' },
+      { text: '[CRED] Exfiltrated internal database credentials from metadata', type: 'warn' },
+      { text: '[SQL] Tunneling queries to isolated internal MySQL host...', type: 'exec' },
+      { text: '[EXFIL] NexaCorp Crown Jewels breached! Flag extracted.', type: 'success' },
     ],
     port: 'SSH/HTTP',
-    statusCheck: 'Combined test',
-    accessGuide: 'Exploit SSRF on Entry Host (port 3000) to pivot to metadata service and dump internal MySQL database.',
+    statusCheck: 'Subnet Cluster Active',
+    accessGuide: 'Exploit the SSRF vulnerability on the entry host to pivot to internal metadata services and dump the core MySQL database.',
+    hints: [
+      {
+        id: 801,
+        hint_level: 1,
+        hint_text: 'The entry web portal accepts URL inputs that can be manipulated to make internal HTTP requests to the local cloud link-local metadata address.',
+        point_penalty: 40,
+      },
+      {
+        id: 802,
+        hint_level: 2,
+        hint_text: 'Extract the database connection credentials from the metadata endpoint, then use network pivoting or port forwarding to authenticate to the isolated internal MySQL server.',
+        point_penalty: 40,
+      },
+    ],
   },
 };
