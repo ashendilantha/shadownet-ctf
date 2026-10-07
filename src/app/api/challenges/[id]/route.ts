@@ -39,8 +39,10 @@ export async function GET(
       );
     }
 
-    // Check unlock state: Stage N requires Stage N-1 solved
-    if (challenge.stage_number > 1) {
+    // admin skips lock
+    const isAdmin = Boolean(authUser.is_admin);
+
+    if (!isAdmin && challenge.stage_number > 1) {
       const { data: prevChallenge } = await supabase
         .from('challenges')
         .select('id')

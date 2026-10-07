@@ -1077,6 +1077,13 @@ export default function AdminPage() {
 
                   {/* Stage Action Controls */}
                   <div className="flex sm:flex-col items-center gap-2 flex-shrink-0">
+                    <Link
+                      href={`/dashboard/challenges/${c.id}`}
+                      className="w-full btn-primary text-xs font-mono px-4 py-2 flex items-center justify-center gap-1.5 text-center"
+                    >
+                      OPEN STAGE →
+                    </Link>
+
                     <button
                       onClick={() => handleToggleChallenge(c)}
                       disabled={loadingAction}

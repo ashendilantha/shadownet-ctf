@@ -41,19 +41,22 @@ export async function GET(request: NextRequest) {
       solvedSubmissions.forEach((s) => solvedIds.add(s.challenge_id));
     }
 
-    // Map challenge unlock state (Stage 1 always unlocked; Stage N requires Stage N-1 solved)
+    // admin gets all open fr
+    const isAdmin = Boolean(authUser.is_admin);
+
     const challengesWithState = (challenges || []).map((c) => {
       const isSolved = solvedIds.has(c.id);
-      let isUnlocked = false;
+      let isUnlocked = isAdmin;
 
-      if (c.stage_number === 1) {
-        isUnlocked = true;
-      } else {
-        // Stage N is unlocked only if stage N-1 is solved
-        const prevChallenge = challenges?.find(
-          (prev) => prev.stage_number === c.stage_number - 1
-        );
-        isUnlocked = prevChallenge ? solvedIds.has(prevChallenge.id) : false;
+      if (!isAdmin) {
+        if (c.stage_number === 1) {
+          isUnlocked = true;
+        } else {
+          const prevChallenge = challenges?.find(
+            (prev) => prev.stage_number === c.stage_number - 1
+          );
+          isUnlocked = prevChallenge ? solvedIds.has(prevChallenge.id) : false;
+        }
       }
 
       return {
