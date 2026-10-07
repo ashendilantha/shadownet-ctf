@@ -11,7 +11,7 @@
 ## Step 1: Reconnaissance & Asset Retrieval
 Download the covert transmissions archive directly from the challenge portal or CLI:
 ```bash
-wget https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip
+wget http://<platform-domain>/downloads/stage2-covert-transmissions.zip
 unzip stage2-covert-transmissions.zip
 ```
 The archive unpacks 28 operational files:

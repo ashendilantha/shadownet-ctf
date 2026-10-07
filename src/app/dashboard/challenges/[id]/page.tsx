@@ -39,6 +39,7 @@ export default function ChallengeDetailPage({
   const [isLocked, setIsLocked] = useState(false);
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
+  const [siteOrigin, setSiteOrigin] = useState('');
 
   const fetchChallenge = async () => {
     try {
@@ -62,6 +63,9 @@ export default function ChallengeDetailPage({
 
   useEffect(() => {
     fetchChallenge();
+    if (typeof window !== 'undefined') {
+      setSiteOrigin(window.location.origin);
+    }
   }, [id]);
 
   const toggleHint = (hintId: number) => {
@@ -231,7 +235,7 @@ export default function ChallengeDetailPage({
                   </p>
                 </div>
                 <a
-                  href="https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip"
+                  href="/downloads/stage2-covert-transmissions.zip"
                   download="stage2-covert-transmissions.zip"
                   className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
                 >
@@ -256,7 +260,7 @@ export default function ChallengeDetailPage({
               <div className="p-3.5 bg-[#090B0D] border border-[#232830] rounded-lg text-xs font-mono space-y-1.5">
                 <span className="text-[#8B949E] block text-[11px] font-semibold">Direct Download via Terminal:</span>
                 <code className="text-[#22D3EE] block break-all">
-                  wget https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip
+                  wget {siteOrigin ? `${siteOrigin}/downloads/stage2-covert-transmissions.zip` : '/downloads/stage2-covert-transmissions.zip'}
                 </code>
                 <code className="text-[#8B949E] block">
                   unzip stage2-covert-transmissions.zip
