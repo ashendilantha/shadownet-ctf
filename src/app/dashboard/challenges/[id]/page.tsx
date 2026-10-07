@@ -4,7 +4,6 @@ import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
-import AttackVectorModal from '@/components/AttackVectorModal';
 import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
@@ -41,7 +40,6 @@ export default function ChallengeDetailPage({
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
   const [siteOrigin, setSiteOrigin] = useState('');
-  const [showAttackModal, setShowAttackModal] = useState(false);
 
   const fetchChallenge = async () => {
     try {
@@ -136,19 +134,6 @@ export default function ChallengeDetailPage({
 
   return (
     <div className="w-full space-y-6">
-      {/* Attack Vector Schematic Modal */}
-      {showAttackModal && (
-        <AttackVectorModal
-          stageNumber={challenge.stage_number}
-          isOpen={showAttackModal}
-          onClose={() => setShowAttackModal(false)}
-          onProceed={() => setShowAttackModal(false)}
-          challengeTitle={challenge.name}
-          domain={challenge.domain}
-          points={challenge.points}
-        />
-      )}
-
       {/* Top Nav Breadcrumbs */}
       <div className="flex items-center gap-2 font-mono text-xs text-[#8B949E]">
         <Link href="/dashboard/challenges" className="text-[#FF9F43] hover:text-[#FF8533] transition-colors">
@@ -184,15 +169,6 @@ export default function ChallengeDetailPage({
             <h1 className="text-2xl sm:text-3xl font-black text-[#F5F5F5] font-sans tracking-tight">
               {challenge.name}
             </h1>
-
-            <div className="pt-1">
-              <button
-                onClick={() => setShowAttackModal(true)}
-                className="btn-amber text-xs font-bold px-3.5 h-8 flex items-center gap-2"
-              >
-                <span>⚡ Launch Attack Schematic Animation</span>
-              </button>
-            </div>
           </div>
 
           <div className="flex md:flex-col items-end justify-between md:justify-center gap-1.5 bg-[#141920] border border-[#232B36] rounded-lg p-3.5 sm:p-4 min-w-[150px] flex-shrink-0">
