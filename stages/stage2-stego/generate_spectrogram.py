@@ -19,6 +19,55 @@ STEGHIDE_PASSPHRASE = "shelter"
 AUTHENTIC_AUDIO = "intercept_alpha_09.wav"
 DECOY_AUDIO_1 = "intercept_beta_02.wav"
 DECOY_AUDIO_2 = "intercept_gamma_07.wav"
+DECOY_AUDIO_3 = "intercept_delta_04.wav"
+DECOY_AUDIO_4 = "intercept_epsilon_11.wav"
+DECOY_AUDIO_5 = "intercept_zeta_03.wav"
+DECOY_AUDIO_6 = "intercept_eta_05.wav"
+DECOY_AUDIO_7 = "intercept_theta_08.wav"
+DECOY_AUDIO_8 = "intercept_iota_12.wav"
+DECOY_AUDIO_9 = "intercept_kappa_06.wav"
+DECOY_AUDIO_10 = "intercept_lambda_10.wav"
+DECOY_AUDIO_11 = "intercept_mu_13.wav"
+DECOY_AUDIO_12 = "intercept_nu_14.wav"
+DECOY_AUDIO_13 = "intercept_xi_15.wav"
+DECOY_AUDIO_14 = "intercept_omicron_16.wav"
+DECOY_AUDIO_15 = "intercept_pi_17.wav"
+DECOY_AUDIO_16 = "intercept_rho_18.wav"
+DECOY_AUDIO_17 = "intercept_sigma_19.wav"
+DECOY_AUDIO_18 = "intercept_tau_20.wav"
+DECOY_AUDIO_19 = "intercept_upsilon_21.wav"
+DECOY_AUDIO_20 = "intercept_phi_22.wav"
+DECOY_AUDIO_21 = "intercept_chi_23.wav"
+DECOY_AUDIO_22 = "intercept_psi_24.wav"
+DECOY_AUDIO_23 = "intercept_omega_25.wav"
+DECOY_AUDIO_24 = "intercept_alpha2_26.wav"
+DECOY_AUDIO_25 = "intercept_beta2_27.wav"
+DECOY_AUDIO_26 = "intercept_gamma2_28.wav"
+
+DECOY_FILES = [
+    DECOY_AUDIO_1, DECOY_AUDIO_2, DECOY_AUDIO_3, DECOY_AUDIO_4, DECOY_AUDIO_5,
+    DECOY_AUDIO_6, DECOY_AUDIO_7, DECOY_AUDIO_8, DECOY_AUDIO_9, DECOY_AUDIO_10,
+    DECOY_AUDIO_11, DECOY_AUDIO_12, DECOY_AUDIO_13, DECOY_AUDIO_14, DECOY_AUDIO_15,
+    DECOY_AUDIO_16, DECOY_AUDIO_17, DECOY_AUDIO_18, DECOY_AUDIO_19, DECOY_AUDIO_20,
+    DECOY_AUDIO_21, DECOY_AUDIO_22, DECOY_AUDIO_23, DECOY_AUDIO_24, DECOY_AUDIO_25,
+    DECOY_AUDIO_26,
+]
+
+DECOY_MESSAGES = [
+    "DECOY FEED // WRONG FREQUENCY CHANNEL",
+    "JAMMING DETECTED // NO INTELLIGENCE HERE",
+    "INTERCEPT ERROR // CARRIER NOISE ONLY",
+    "FALSE TELEMETRY STREAM // REJECTED",
+    "CHANNEL DESYNCHRONIZED // RETRY",
+    "UNAUTHORIZED TRANSMISSION BAND",
+    "STATIC CARRIER // FREQUENCY DRIFT",
+    "DECOY BROADCAST // WRONG AUDIO STREAM",
+    "CIPHER INVALID // NO PAYLOAD DETECTED",
+    "ENCRYPTED NOISE // INVALID SPECTRUM",
+    "BANDWIDTH OVERLOAD // PACKET CORRUPT",
+    "SIGNAL JAMMED // DECOY NODE 14",
+    "RADIO INTERFERENCE // EMPTY SPECTRUM",
+]
 
 # Whistleblower intelligence paragraph (will be Base64 encoded)
 INTEL_REPORT = f"""[TOP SECRET // SHADOWNET SURVEILLANCE INTERCEPT]
@@ -26,12 +75,12 @@ OPERATION: SHADOW_TRUTH
 SOURCE: INTERNAL WHISTLEBLOWER
 CLEARANCE LEVEL: TOP SECRET
 
-Field intelligence indicates multiple audio transmissions were intercepted from the rogue broadcast node.
+Field intelligence indicates 27 audio transmissions were intercepted from the rogue broadcast node.
+26 decoy frequencies were deployed to jam surveillance extraction.
 
 COMMUNICATION CHANNELS:
-- {DECOY_AUDIO_1}: Decoy channel (scrambled noise / false telemetry).
-- {DECOY_AUDIO_2}: Decoy channel (jamming broadcast / unauthenticated).
-- {AUTHENTIC_AUDIO}: CONFIRMED authentic encrypted transmission.
+- {AUTHENTIC_AUDIO}: CONFIRMED authentic encrypted transmission containing target access key in frequency spectrogram.
+- All 26 other channels (beta, gamma, delta through gamma2): Decoy streams (scrambled noise / jamming telemetry).
 
 INSTRUCTIONS:
 Perform deep frequency domain analysis (Audio Spectrogram view) on '{AUTHENTIC_AUDIO}' in Audacity or Sonic Visualiser.
@@ -206,26 +255,30 @@ def step2_generate_audio_files():
     sf.write(authentic_path, audio_flag, sr)
     print(f"    - [AUTHENTIC] Flag transmission saved to '{authentic_path}'")
 
-    # 2. Decoy Audio 1 (Decoy spectrogram text)
-    decoy1_path = os.path.join(ASSETS_DIR, DECOY_AUDIO_1)
-    audio_decoy1, sr = synthesize_spectrogram_audio(
-        text="DECOY FEED // WRONG FREQUENCY CHANNEL",
-        duration=5.0,
-        sr=44100,
-        f_min=1500,
-        f_max=6000,
-        img_width=850,
-        img_height=100,
-        font_size=28,
-    )
-    sf.write(decoy1_path, audio_decoy1, sr)
-    print(f"    - [DECOY 1] Channel saved to '{decoy1_path}'")
-
-    # 3. Decoy Audio 2 (Radio static and scrambled carrier)
-    decoy2_path = os.path.join(ASSETS_DIR, DECOY_AUDIO_2)
-    audio_decoy2, sr = generate_carrier_noise(duration=5.0, sr=44100)
-    sf.write(decoy2_path, audio_decoy2, sr)
-    print(f"    - [DECOY 2] Scrambled carrier saved to '{decoy2_path}'")
+    # 2. Generate all 26 Decoy Audio files
+    for idx, decoy_name in enumerate(DECOY_FILES, start=1):
+        decoy_path = os.path.join(ASSETS_DIR, decoy_name)
+        if idx % 2 == 1:
+            # Spectrogram message decoy
+            msg = DECOY_MESSAGES[(idx // 2) % len(DECOY_MESSAGES)]
+            audio_decoy, sr = synthesize_spectrogram_audio(
+                text=msg,
+                duration=4.5,
+                sr=44100,
+                f_min=1400,
+                f_max=6000,
+                img_width=850,
+                img_height=100,
+                font_size=26,
+            )
+            sf.write(decoy_path, audio_decoy, sr)
+            print(f"    - [DECOY {idx:02d}/26] Spectrogram channel saved to '{decoy_name}'")
+        else:
+            # Radio carrier / static noise decoy
+            dur = 4.0 + (idx % 3) * 0.5
+            audio_decoy, sr = generate_carrier_noise(duration=dur, sr=44100)
+            sf.write(decoy_path, audio_decoy, sr)
+            print(f"    - [DECOY {idx:02d}/26] Carrier noise channel saved to '{decoy_name}'")
 
 
 def step3_generate_reference_spectrogram():

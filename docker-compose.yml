@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  stage2-stego:
-    build:
-      context: ./stages/stage2-stego
-      dockerfile: Dockerfile
-    container_name: stage2-stego
-    ports:
-      - "5000:5000"
-    restart: unless-stopped
-    networks:
-      - frontend
-
   stage3-crypto:
     build:
       context: ./stages/stage3-cryptography

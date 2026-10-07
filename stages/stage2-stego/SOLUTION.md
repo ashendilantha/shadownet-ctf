@@ -3,28 +3,21 @@
 ## Overview
 - **Domain:** Steganography & Signal Processing
 - **Difficulty:** Medium (+150 XP)
-- **Service Endpoint:** `http://localhost:5000`
+- **Delivery Method:** Downloadable Archive (`stage2-covert-transmissions.zip`)
 - **Flag:** `SHADOWNET{7r4c3s_1n_th3_fr3qu3ncy_d0m41n}`
 
 ---
 
 ## Step 1: Reconnaissance & Asset Retrieval
-Query the service on port 5000:
+Download the covert transmissions archive directly from the challenge portal or CLI:
 ```bash
-curl http://localhost:5000
+wget https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip
+unzip stage2-covert-transmissions.zip
 ```
-Download the evidence files:
-```bash
-wget http://localhost:5000/whistleblower.jpg
-wget http://localhost:5000/intercept_alpha_09.wav
-wget http://localhost:5000/intercept_beta_02.wav
-wget http://localhost:5000/intercept_gamma_07.wav
-```
-Or download the full bundle:
-```bash
-wget http://localhost:5000/stage2-assets.zip
-unzip stage2-assets.zip
-```
+The archive unpacks 29 operational files:
+- `whistleblower.jpg` (encrypted photographic exhibit)
+- `spectrogram_reference.png` (reference guide)
+- 27 intercepted radio transmissions: `intercept_alpha_09.wav` and 26 decoy channels (`intercept_beta_02.wav` through `intercept_gamma2_28.wav`).
 
 ---
 
@@ -41,9 +34,9 @@ This extracts `passphrase.txt`. Decode the Base64 content:
 ```bash
 base64 -d passphrase.txt
 ```
-The report reveals:
-- `intercept_beta_02.wav` and `intercept_gamma_07.wav` are decoys.
-- `intercept_alpha_09.wav` is the authentic transmission containing the flag in the frequency domain.
+The decrypted report reveals:
+- The 26 decoy transmissions (`intercept_beta_02.wav`, `intercept_zeta_03.wav`, etc.) contain dummy noise & spectral decoy patterns.
+- `intercept_alpha_09.wav` is the authentic transmission containing the genuine operational key in the frequency domain.
 
 ---
 
@@ -56,3 +49,4 @@ Open `intercept_alpha_09.wav` in **Audacity** or **Sonic Visualiser**:
    `SHADOWNET{7r4c3s_1n_th3_fr3qu3ncy_d0m41n}`
 
 Submit the flag into the ShadowNet Command Deck.
+

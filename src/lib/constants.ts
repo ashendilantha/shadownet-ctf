@@ -44,9 +44,9 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     difficulty: 'Medium',
     type: 'Static',
     points: 150,
-    port: '5000 (dashboard)',
-    statusCheck: 'curl http://localhost:5000',
-    accessGuide: 'Extract hidden audio spectrogram data and embedded files using steghide.',
+    port: 'N/A (Downloadable Package)',
+    statusCheck: 'unzip stage2-covert-transmissions.zip',
+    accessGuide: 'Download and extract the intercepted transmission package (.zip). Use steghide to extract intel from whistleblower.jpg, and inspect the frequency spectrogram of the authentic audio in Audacity.',
   },
   3: {
     stage: 3,

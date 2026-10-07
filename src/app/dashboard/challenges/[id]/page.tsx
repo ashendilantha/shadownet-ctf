@@ -224,85 +224,48 @@ export default function ChallengeDetailPage({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232830] pb-3">
                 <div>
                   <h3 className="font-sans text-base font-semibold text-[#F5F5F5] flex items-center gap-2">
-                    <span className="text-[#FF6B00]">📦</span> Intercepted Evidence Downloads
+                    <span className="text-[#FF6B00]">📦</span> Intercepted Transmission Package
                   </h3>
                   <p className="text-xs text-[#8B949E] font-sans mt-0.5">
-                    Download recovered audio feeds and image exhibits for offline forensic analysis.
+                    Package includes 27 intercepted audio frequencies (1 authentic + 26 decoy channels) and image exhibits.
                   </p>
                 </div>
                 <a
-                  href="/downloads/stage2/stage2-covert-transmissions.zip"
+                  href="https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip"
                   download="stage2-covert-transmissions.zip"
-                  className="btn-primary text-xs font-mono font-bold px-4 py-2 flex items-center gap-2 text-center justify-center flex-shrink-0"
+                  className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
                 >
-                  ⚡ DOWNLOAD ALL (.ZIP)
+                  ⚡ DOWNLOAD PACKAGE (.ZIP)
                 </a>
               </div>
 
-              {/* Individual File Download Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
-                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg flex items-center justify-between">
-                  <div>
-                    <div className="text-[#F5F5F5] font-bold">whistleblower.jpg</div>
-                    <div className="text-[10px] text-[#8B949E]">Evidence Photograph (58 KB)</div>
-                  </div>
-                  <a
-                    href="/downloads/stage2/whistleblower.jpg"
-                    download
-                    className="px-2.5 py-1 rounded bg-[#171B20] hover:bg-[#232830] text-[#22D3EE] border border-[#232830] text-[11px]"
-                  >
-                    GET FILE
-                  </a>
+              {/* Package Details Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
+                  <div className="text-[#F5F5F5] font-bold">📷 whistleblower.jpg</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">Classified Drone Photo Exhibit (Contains embedded intel)</div>
                 </div>
 
-                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg flex items-center justify-between">
-                  <div>
-                    <div className="text-[#F5F5F5] font-bold">intercept_alpha_09.wav</div>
-                    <div className="text-[10px] text-[#22C55E]">Primary Intercept (573 KB)</div>
-                  </div>
-                  <a
-                    href="/downloads/stage2/intercept_alpha_09.wav"
-                    download
-                    className="px-2.5 py-1 rounded bg-[#171B20] hover:bg-[#232830] text-[#22D3EE] border border-[#232830] text-[11px]"
-                  >
-                    GET FILE
-                  </a>
+                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
+                  <div className="text-[#22D3EE] font-bold">🔊 27 Audio Transmissions</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">1 Authentic Carrier + 26 Jamming Decoy Channels (.wav)</div>
                 </div>
 
-                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg flex items-center justify-between">
-                  <div>
-                    <div className="text-[#F5F5F5] font-bold">intercept_beta_02.wav</div>
-                    <div className="text-[10px] text-[#8B949E]">Decoy Channel (441 KB)</div>
-                  </div>
-                  <a
-                    href="/downloads/stage2/intercept_beta_02.wav"
-                    download
-                    className="px-2.5 py-1 rounded bg-[#171B20] hover:bg-[#232830] text-[#22D3EE] border border-[#232830] text-[11px]"
-                  >
-                    GET FILE
-                  </a>
-                </div>
-
-                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg flex items-center justify-between">
-                  <div>
-                    <div className="text-[#F5F5F5] font-bold">intercept_gamma_07.wav</div>
-                    <div className="text-[10px] text-[#8B949E]">Decoy Channel (441 KB)</div>
-                  </div>
-                  <a
-                    href="/downloads/stage2/intercept_gamma_07.wav"
-                    download
-                    className="px-2.5 py-1 rounded bg-[#171B20] hover:bg-[#232830] text-[#22D3EE] border border-[#232830] text-[11px]"
-                  >
-                    GET FILE
-                  </a>
+                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
+                  <div className="text-[#22C55E] font-bold">📊 Spectral Reference</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">Calibration chart for Audacity / Sonic Visualiser</div>
                 </div>
               </div>
 
               {/* CLI Command Helper */}
-              <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg text-xs font-mono space-y-1">
-                <span className="text-[#8B949E] block text-[11px]">Direct Terminal Download (Port 5000):</span>
-                <code className="text-[#22D3EE] block">wget http://localhost:5000/whistleblower.jpg</code>
-                <code className="text-[#22D3EE] block">wget http://localhost:5000/intercept_alpha_09.wav</code>
+              <div className="p-3.5 bg-[#090B0D] border border-[#232830] rounded-lg text-xs font-mono space-y-1.5">
+                <span className="text-[#8B949E] block text-[11px] font-semibold">Direct Download via Terminal:</span>
+                <code className="text-[#22D3EE] block break-all">
+                  wget https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip
+                </code>
+                <code className="text-[#8B949E] block">
+                  unzip stage2-covert-transmissions.zip
+                </code>
               </div>
             </div>
           )}

@@ -51,3 +51,6 @@ venv/
 # ide
 .vscode/
 .idea/
+
+# screenshots
+ss/
