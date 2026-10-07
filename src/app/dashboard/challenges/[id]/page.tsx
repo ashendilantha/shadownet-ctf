@@ -13,7 +13,6 @@ interface Hint {
   point_penalty: number;
 }
 
-
 interface ChallengeDetail {
   id: number;
   name: string;
