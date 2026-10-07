@@ -21,10 +21,10 @@ export interface Challenge {
 
 interface ChallengeCardProps {
   challenge: Challenge;
-  onPreviewAttack?: (challenge: Challenge) => void;
+  onInfiltrate?: (challenge: Challenge) => void;
 }
 
-export default function ChallengeCard({ challenge, onPreviewAttack }: ChallengeCardProps) {
+export default function ChallengeCard({ challenge, onInfiltrate }: ChallengeCardProps) {
   const isLocked = challenge.locked ?? (!challenge.unlocked && challenge.stage_number > 1);
   const isSolved = challenge.solved;
   const stageConfig = STAGE_CONFIGS[challenge.stage_number];
@@ -169,32 +169,31 @@ export default function ChallengeCard({ challenge, onPreviewAttack }: ChallengeC
         {isLocked ? (
           <button
             disabled
-            className="btn-secondary text-xs h-9"
+            className="btn-secondary text-xs h-9 px-4"
           >
             Locked
           </button>
+        ) : isSolved ? (
+          <Link
+            href={`/dashboard/challenges/${challenge.id}`}
+            className="btn-secondary text-[#10B981] border-[#10B981]/40 hover:text-[#10B981] text-xs h-9 font-bold px-3.5 flex items-center"
+          >
+            Review Intel
+          </Link>
+        ) : onInfiltrate ? (
+          <button
+            onClick={() => onInfiltrate(challenge)}
+            className="btn-primary text-xs h-9 font-bold px-4 flex items-center justify-center cursor-pointer"
+          >
+            Infiltrate
+          </button>
         ) : (
-          <div className="flex items-center gap-1.5">
-            {onPreviewAttack && (
-              <button
-                onClick={() => onPreviewAttack(challenge)}
-                title="Preview Attack Vector Schematic"
-                className="btn-secondary text-xs h-9 px-2.5 text-[#FF9F43] hover:text-[#FF8533]"
-              >
-                ⚡
-              </button>
-            )}
-            <Link
-              href={`/dashboard/challenges/${challenge.id}`}
-              className={`text-xs h-9 font-bold px-3.5 ${
-                isSolved
-                  ? 'btn-secondary text-[#10B981] border-[#10B981]/40 hover:text-[#10B981]'
-                  : 'btn-primary'
-              }`}
-            >
-              {isSolved ? 'Review Intel' : 'Infiltrate'}
-            </Link>
-          </div>
+          <Link
+            href={`/dashboard/challenges/${challenge.id}`}
+            className="btn-primary text-xs h-9 font-bold px-4 flex items-center justify-center"
+          >
+            Infiltrate
+          </Link>
         )}
       </div>
     </div>

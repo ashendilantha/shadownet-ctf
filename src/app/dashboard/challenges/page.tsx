@@ -166,20 +166,13 @@ export default function ChallengesListPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center w-full sm:w-auto">
             <button
               onClick={() => handleOpenAttackModal(nextTarget)}
-              className="btn-secondary text-xs font-bold px-3.5 h-10 whitespace-nowrap text-[#FF9F43] hover:text-[#FF8533]"
-              title="Preview Infiltration Schematic"
-            >
-              ⚡ Attack Vector
-            </button>
-            <Link
-              href={`/dashboard/challenges/${nextTarget.id}`}
-              className="btn-primary text-xs font-bold px-5 h-10 whitespace-nowrap flex-1 sm:flex-none text-center"
+              className="btn-primary text-xs font-bold px-6 h-10 whitespace-nowrap w-full sm:w-auto text-center cursor-pointer"
             >
               Infiltrate · +{nextTarget.points} XP
-            </Link>
+            </button>
           </div>
         </div>
       )}
@@ -234,7 +227,7 @@ export default function ChallengesListPage() {
             <ChallengeCard
               key={challenge.id}
               challenge={challenge}
-              onPreviewAttack={handleOpenAttackModal}
+              onInfiltrate={handleOpenAttackModal}
             />
           ))}
         </div>

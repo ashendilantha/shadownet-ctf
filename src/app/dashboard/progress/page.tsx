@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { STAGE_CONFIGS } from '@/lib/constants';
+import { STAGE_CONFIGS, StageInfo } from '@/lib/constants';
+import AttackVectorModal from '@/components/AttackVectorModal';
 
 interface ProgressData {
   total_points: number;
@@ -12,9 +14,14 @@ interface ProgressData {
 }
 
 export default function ProgressPage() {
+  const router = useRouter();
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
+
+  // Attack Vector Animation Modal state
+  const [activeModalStage, setActiveModalStage] = useState<number | null>(null);
+  const [activeStageData, setActiveStageData] = useState<StageInfo | null>(null);
 
   const fetchProgress = async () => {
     try {
@@ -33,6 +40,17 @@ export default function ProgressPage() {
   useEffect(() => {
     fetchProgress();
   }, []);
+
+  const handleOpenAttackModal = (stage: StageInfo) => {
+    setActiveStageData(stage);
+    setActiveModalStage(stage.stage);
+  };
+
+  const handleProceedToChallenge = () => {
+    if (activeStageData) {
+      router.push(`/dashboard/challenges/${activeStageData.stage}`);
+    }
+  };
 
   if (authError) {
     return (
@@ -67,6 +85,19 @@ export default function ProgressPage() {
 
   return (
     <div className="w-full space-y-6 sm:space-y-8">
+      {/* Attack Vector Animation Modal */}
+      {activeModalStage && (
+        <AttackVectorModal
+          stageNumber={activeModalStage}
+          isOpen={!!activeModalStage}
+          onClose={() => setActiveModalStage(null)}
+          onProceed={handleProceedToChallenge}
+          challengeTitle={activeStageData?.name}
+          domain={activeStageData?.domain}
+          points={activeStageData?.points}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
         <div>
@@ -85,13 +116,13 @@ export default function ProgressPage() {
         <div className="flex items-center gap-2.5 sm:gap-3 font-mono flex-shrink-0">
           <div className="bg-[#141920] border border-[#232B36] px-4 py-2.5 rounded-lg text-right">
             <span className="text-[10px] text-[#8B949E] block">Bounty Earned</span>
-            <span className="text-lg sm:text-xl font-black text-[#FF6B00]">
+            <span className="font-mono text-lg sm:text-xl font-black text-[#FF6B00]">
               {progress?.total_points || 0} <span className="text-xs text-[#FF9F43]">XP</span>
             </span>
           </div>
           <div className="bg-[#141920] border border-[#232B36] px-4 py-2.5 rounded-lg text-right">
             <span className="text-[10px] text-[#8B949E] block">Stages Breached</span>
-            <span className="text-lg sm:text-xl font-black text-[#10B981]">
+            <span className="font-mono text-lg sm:text-xl font-black text-[#10B981]">
               {solvedSet.size}/8
             </span>
           </div>
@@ -183,17 +214,20 @@ export default function ProgressPage() {
                     >
                       Locked
                     </button>
-                  ) : (
+                  ) : isSolved ? (
                     <Link
                       href={`/dashboard/challenges/${stage.stage}`}
-                      className={`text-xs h-9 font-bold px-4 whitespace-nowrap flex items-center ${
-                        isSolved
-                          ? 'btn-secondary text-[#10B981] border-[#10B981]/40 hover:text-[#10B981]'
-                          : 'btn-primary'
-                      }`}
+                      className="btn-secondary text-[#10B981] border-[#10B981]/40 hover:text-[#10B981] text-xs h-9 font-bold px-4 whitespace-nowrap flex items-center"
                     >
-                      {isSolved ? 'Review Intel' : 'Infiltrate'}
+                      Review Intel
                     </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleOpenAttackModal(stage)}
+                      className="btn-primary text-xs h-9 font-bold px-4 whitespace-nowrap flex items-center cursor-pointer"
+                    >
+                      Infiltrate
+                    </button>
                   )}
                 </div>
               </div>
