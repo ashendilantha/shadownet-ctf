@@ -51,33 +51,33 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Challenges', href: '/dashboard/challenges' },
+    { name: 'Target Deck', href: '/dashboard/challenges' },
     { name: 'Leaderboard', href: '/dashboard/leaderboard' },
-    { name: 'Progress', href: '/dashboard/progress' },
+    { name: 'Killchain Progress', href: '/dashboard/progress' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#111417]/95 border-b border-[#232830] backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full bg-[#080A0D]/95 border-b border-[#232B36] backdrop-blur-md">
       <div className="w-full app-container">
         <div className="flex items-center justify-between h-16">
           {/* Left: Brand Logo & Main Nav Links */}
           <div className="flex items-center gap-6 lg:gap-8">
             <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-[#171B20] border border-[#FF6B00]/60 flex items-center justify-center font-mono font-bold text-[#FF6B00] text-base shadow-[0_0_10px_rgba(255,107,0,0.2)] group-hover:border-[#FF6B00] transition-colors">
+              <div className="w-8 h-8 rounded-lg bg-[#141920] border border-[#FF6B00]/70 flex items-center justify-center font-mono font-bold text-[#FF6B00] text-base shadow-[0_0_12px_rgba(255,107,0,0.3)] group-hover:border-[#FF8533] transition-all">
                 ⚡
               </div>
               <div className="flex flex-col">
-                <span className="font-mono font-black text-base tracking-wider text-[#F5F5F5] group-hover:text-[#FF6B00] transition-colors leading-none">
+                <span className="font-mono font-black text-base tracking-wider text-[#F5F5F5] group-hover:text-[#FF8533] transition-colors leading-none">
                   SHADOW<span className="text-[#FF6B00]">NET</span>
                 </span>
-                <span className="text-[9px] font-mono text-[#22D3EE] tracking-widest uppercase mt-0.5 font-semibold">
-                  CYBER RANGE CTF
+                <span className="text-[9px] font-mono text-[#FF9F43] tracking-widest uppercase mt-0.5 font-bold">
+                  UNDERGROUND COLLECTIVE
                 </span>
               </div>
             </Link>
 
             {/* Nav Divider */}
-            <div className="hidden md:block w-px h-5 bg-[#232830]"></div>
+            <div className="hidden md:block w-px h-5 bg-[#232B36]"></div>
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-1">
@@ -87,10 +87,10 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    className={`px-3 py-2 rounded-md text-xs font-semibold tracking-wide transition-all ${
                       isActive
-                        ? 'bg-[#FF6B00]/10 text-[#FF9F43] border border-[#FF6B00]/25'
-                        : 'text-[#8B949E] border border-transparent hover:text-[#F5F5F5] hover:bg-[#171B20]'
+                        ? 'bg-[#FF6B00]/15 text-[#FF8533] border border-[#FF6B00]/35 shadow-[0_0_8px_rgba(255,107,0,0.15)]'
+                        : 'text-[#8B949E] border border-transparent hover:text-[#F5F5F5] hover:bg-[#141920]'
                     }`}
                   >
                     {link.name}
@@ -100,14 +100,14 @@ export default function Navbar() {
               {user?.is_admin && (
                 <Link
                   href="/admin"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 flex items-center gap-1.5 ml-1 ${
+                  className={`px-3 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ml-1 ${
                     pathname.startsWith('/admin')
-                        ? 'bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30'
-                      : 'text-[#EF4444] hover:bg-[#EF4444]/15 border border-[#EF4444]/40'
+                      ? 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/40'
+                      : 'text-[#EF4444] hover:bg-[#EF4444]/15 border border-[#EF4444]/30'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444] animate-pulse"></span>
-                  ADMIN PANEL
+                  COMMAND CORE
                 </Link>
               )}
             </nav>
@@ -115,33 +115,33 @@ export default function Navbar() {
 
           {/* Right: Live Status Pill + Auth / User Area */}
           <div className="hidden sm:flex items-center gap-3.5">
-            {/* Live Status Indicator */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#171B20] border border-[#232830] rounded-full text-[11px] font-mono text-[#8B949E]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse"></span>
-              <span className="text-[#22D3EE] font-semibold">Online</span>
+            {/* Live Target Status Indicator */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#10151C] border border-[#232B36] rounded-full text-[11px] font-mono text-[#8B949E]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+              <span className="text-[#10B981] font-bold">NexaCorp Uplink</span>
             </div>
 
             {!loading && user ? (
               <div className="flex items-center gap-2.5">
                 {/* Operative Score Pill */}
-                <div className="flex items-center gap-2 px-3 py-1 bg-[#171B20] border border-[#232830] rounded-lg">
-                  <span className="text-[11px] font-mono text-[#8B949E]">USER</span>
+                <div className="flex items-center gap-2 px-3 py-1 bg-[#10151C] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] font-mono text-[#8B949E]">OPERATIVE</span>
                   <span className="text-xs font-mono font-bold text-[#F5F5F5]">
                     {user.username}
                   </span>
-                  <span className="text-[#232830]">|</span>
-                  <span className="text-xs font-mono font-bold text-[#FF6B00]">
+                  <span className="text-[#232B36]">|</span>
+                  <span className="text-xs font-mono font-black text-[#FF6B00]">
                     {user.total_points} XP
                   </span>
-                  <span className="text-[#232830]">|</span>
-                  <span className="text-xs font-mono text-[#22D3EE] font-semibold">
+                  <span className="text-[#232B36]">|</span>
+                  <span className="text-xs font-mono text-[#10B981] font-bold">
                     {user.challenges_solved}/8
                   </span>
                 </div>
 
                 <button
                   onClick={handleLogout}
-                  className="px-2.5 py-1 text-xs font-mono font-semibold text-[#8B949E] hover:text-[#EF4444] hover:bg-[#171B20] border border-[#232830] rounded-lg transition-colors cursor-pointer"
+                  className="px-2.5 py-1 text-xs font-mono font-semibold text-[#8B949E] hover:text-[#EF4444] hover:bg-[#141920] border border-[#232B36] rounded-lg transition-colors cursor-pointer"
                 >
                   Sign out
                 </button>
@@ -158,7 +158,7 @@ export default function Navbar() {
                   href="/auth/register"
                   className="btn-primary text-xs h-8.5 px-4"
                 >
-                  Create account
+                  Join Collective
                 </Link>
               </div>
             ) : null}
@@ -169,7 +169,7 @@ export default function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation menu"
-              className="w-11 h-11 p-2 rounded-lg bg-[#171B20] border border-[#232830] text-[#F5F5F5] font-mono text-sm hover:border-[#FF6B00]/40 transition-colors"
+              className="w-10 h-10 p-2 rounded-lg bg-[#141920] border border-[#232B36] text-[#F5F5F5] font-mono text-sm hover:border-[#FF6B00]/40 transition-colors"
             >
               {mobileMenuOpen ? '✕' : '☰'}
             </button>
@@ -178,16 +178,16 @@ export default function Navbar() {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-3 border-t border-[#232830] space-y-1.5 font-mono text-xs animate-fade-in">
+          <div className="md:hidden py-3 border-t border-[#232B36] space-y-1.5 font-mono text-xs animate-fade-in">
             {user && (
-              <div className="p-3 mb-2 rounded-lg bg-[#171B20] border border-[#232830] flex items-center justify-between">
+              <div className="p-3 mb-2 rounded-lg bg-[#10151C] border border-[#232B36] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[#8B949E]">USER</span>
+                  <span className="text-[#8B949E]">OPERATIVE</span>
                   <span className="font-bold text-[#F5F5F5]">{user.username}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#FF6B00]">{user.total_points} XP</span>
-                  <span className="text-[#22D3EE]">({user.challenges_solved}/8)</span>
+                  <span className="font-black text-[#FF6B00]">{user.total_points} XP</span>
+                  <span className="text-[#10B981]">({user.challenges_solved}/8)</span>
                 </div>
               </div>
             )}
@@ -202,7 +202,7 @@ export default function Navbar() {
                   className={`block px-3.5 py-2.5 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-[#FF6B00]/15 text-[#FF6B00] font-bold border border-[#FF6B00]/40'
-                      : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#171B20]'
+                      : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#141920]'
                   }`}
                 >
                   {link.name}
@@ -216,11 +216,11 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3.5 py-2.5 rounded-lg text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/30 font-bold"
               >
-                  Admin
+                Command Core
               </Link>
             )}
 
-            <div className="pt-2 mt-2 border-t border-[#232830]">
+            <div className="pt-2 mt-2 border-t border-[#232B36]">
               {!loading && user ? (
                 <button
                   onClick={() => {
@@ -245,7 +245,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="btn-primary text-center flex-1 text-xs py-2"
                   >
-                    Create account
+                    Join Collective
                   </Link>
                 </div>
               ) : null}

@@ -16,18 +16,18 @@ export default function HomePage() {
   }, []);
 
   const terminalLogs = [
-    { text: '[INIT] Perimeter gateway online.', color: 'text-[#8B949E]' },
-    { text: '[NET] 8 target vectors mapped.', color: 'text-[#22D3EE]' },
-    { text: '[AUTH] Session validation active.', color: 'text-[#22C55E]' },
-    { text: '[STAGE 01] Public metadata exposed.', color: 'text-[#F59E0B]' },
-    { text: '[STAGE 02] Audio signal decrypted.', color: 'text-[#FF9F43]' },
-    { text: '[STAGE 03] Oracle key recovered.', color: 'text-[#FF6B00]' },
-    { text: '[STAGE 04] Legacy portal bypassed.', color: 'text-[#22D3EE]' },
-    { text: '[STAGE 05] Token sequence predicted.', color: 'text-[#22C55E]' },
-    { text: '[STAGE 06] Binary access granted.', color: 'text-[#FF6B00]' },
-    { text: '[STAGE 07] Root access obtained.', color: 'text-[#22C55E]' },
-    { text: '[STAGE 08] Database pivot complete.', color: 'text-[#22C55E]' },
-    { text: '[STATUS] Range online. Awaiting operators.', color: 'text-[#FF6B00]' },
+    { text: '[UPLINK] ShadowNet clandestine tunnel established.', color: 'text-[#8B949E]' },
+    { text: '[TARGET] NexaCorp global infrastructure perimeter mapped.', color: 'text-[#FF8533]' },
+    { text: '[AUTH] Operative cryptographic key verified.', color: 'text-[#10B981]' },
+    { text: '[STAGE 01] NexaCorp DMZ web headers & metadata harvested.', color: 'text-[#F59E0B]' },
+    { text: '[STAGE 02] Intercepted satellite transmission demodulated.', color: 'text-[#FF9F43]' },
+    { text: '[STAGE 03] Oracle ECB block cipher byte boundary aligned.', color: 'text-[#FF6B00]' },
+    { text: '[STAGE 04] NexaAuth SSO gateway bypassed via SQL injection.', color: 'text-[#FF8533]' },
+    { text: '[STAGE 05] Session generator LCG state mathematical seed solved.', color: 'text-[#10B981]' },
+    { text: '[STAGE 06] Internal ELF daemon reversed & license patched.', color: 'text-[#FF6B00]' },
+    { text: '[STAGE 07] Linux bastion SUID utility exploited — UID 0 (root).', color: 'text-[#10B981]' },
+    { text: '[STAGE 08] SSRF pivot to internal cloud metadata & MySQL exfil.', color: 'text-[#10B981]' },
+    { text: '[STATUS] Collective command active. Awaiting operative deployment.', color: 'text-[#FF6B00]' },
   ];
 
   useEffect(() => {
@@ -39,42 +39,44 @@ export default function HomePage() {
 
   return (
     <div className="w-full space-y-8 sm:space-y-10 pb-6">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#111417] border border-[#232830] rounded-xl p-5 sm:p-7 lg:p-8">
+      {/* Hero Section: Story Briefing & Live Infiltration Telemetry */}
+      <section className="relative overflow-hidden bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 lg:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+        {/* Glow & Scanlines */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#FF9F43] to-[#10B981]"></div>
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-          {/* Left Column: Mission Brief & Headlines */}
+          {/* Left Column: Story Directive & Mission Brief */}
           <div className="lg:col-span-7 space-y-4">
             {/* Status Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#171B20] border border-[#232830] rounded-full text-xs font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse"></span>
-              <span className="text-[#22D3EE] font-semibold">NexaCorp range</span>
-              <span className="text-[#232830]">·</span>
-              <span className="text-[#8B949E]">CTF v2.4</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#141920] border border-[#232B36] rounded-full text-xs font-mono">
+              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+              <span className="text-[#FF8533] font-bold">NexaCorp Infiltration</span>
+              <span className="text-[#232B36]">·</span>
+              <span className="text-[#8B949E]">Campaign v2.4</span>
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#F5F5F5] font-sans leading-tight">
-              Offensive{' '}
-              <span className="text-[#FF6B00]">
-                Cyber Warfare
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#F5F5F5] font-sans leading-tight tracking-tight">
+              Infiltrate{' '}
+              <span className="text-[#FF6B00] drop-shadow-[0_0_20px_rgba(255,107,0,0.35)]">
+                NexaCorp
               </span>{' '}
-              Simulation
+              Infrastructure
             </h1>
 
-            {/* Description */}
-            <p className="text-sm sm:text-base text-[#8B949E] font-sans leading-relaxed max-w-xl">
-              Take on eight linked security challenges, from public reconnaissance to an internal network pivot.
+            {/* Story Description */}
+            <p className="text-xs sm:text-sm text-[#8B949E] font-sans leading-relaxed max-w-xl">
+              Take the mantle of an elite operative inside the <strong className="text-[#F5F5F5]">ShadowNet Underground Collective</strong>. Breaching NexaCorp requires chaining eight sequential exploits—from public OSINT recon and steganography to binary disassembly, privilege escalation, and internal subnet network pivoting.
             </p>
 
             {/* Call to Actions */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               {user ? (
                 <Link
                   href="/dashboard/challenges"
                   className="btn-primary text-xs sm:text-sm px-5 py-2.5 font-bold"
                 >
-                  <span>⚡ ACCESS COMMAND DECK</span>
+                  <span>⚡ ACCESS TARGET DECK</span>
                   <span>→</span>
                 </Link>
               ) : (
@@ -83,44 +85,44 @@ export default function HomePage() {
                     href="/auth/register"
                     className="btn-primary text-xs sm:text-sm px-5 py-2.5 font-bold"
                   >
-                    <span>Create account</span>
+                    <span>Join the Collective</span>
                   </Link>
                   <Link
                     href="/auth/login"
                     className="btn-secondary text-xs sm:text-sm px-4.5 py-2.5 font-bold"
                   >
-                    <span>Sign in</span>
+                    <span>Operative Sign In</span>
                   </Link>
                 </>
               )}
 
               <Link
                 href="/dashboard/leaderboard"
-                className="btn-secondary text-xs sm:text-sm px-4.5 py-2.5 font-bold text-[#22D3EE] hover:text-[#22D3EE]"
+                className="btn-secondary text-xs sm:text-sm px-4.5 py-2.5 font-bold text-[#FF9F43] hover:text-[#FF8533]"
               >
-                <span>Leaderboard</span>
+                <span>Operative Roster</span>
               </Link>
             </div>
           </div>
 
-          {/* Right Column: Live Terminal Telemetry */}
+          {/* Right Column: Infiltration Telemetry Terminal */}
           <div className="lg:col-span-5 w-full">
-            <div className="terminal-window border-[#232830]">
+            <div className="terminal-window border-[#232B36]">
               <div className="terminal-header justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="terminal-dot bg-[#EF4444]"></span>
                   <span className="terminal-dot bg-[#F59E0B]"></span>
-                  <span className="terminal-dot bg-[#22C55E]"></span>
+                  <span className="terminal-dot bg-[#10B981]"></span>
                   <span className="text-[11px] text-[#8B949E] ml-1.5 font-mono">
-                    Range telemetry
+                    Breach Telemetry
                   </span>
                 </div>
-                <span className="text-[10px] text-[#22D3EE] font-mono font-bold bg-[#171B20] px-2 py-0.5 rounded border border-[#232830]">
-                  ONLINE
+                <span className="text-[10px] text-[#10B981] font-mono font-bold bg-[#141920] px-2 py-0.5 rounded border border-[#232B36]">
+                  UPLINK ACTIVE
                 </span>
               </div>
 
-              <div className="p-4 font-mono text-xs space-y-1.5 h-[240px] sm:h-[260px] overflow-y-auto bg-[#06080A]">
+              <div className="p-4 font-mono text-xs space-y-1.5 h-[240px] sm:h-[260px] overflow-y-auto bg-[#050709]">
                 {terminalLogs.slice(0, terminalStep).map((log, idx) => (
                   <div key={idx} className={`${log.color} flex items-start gap-2 leading-relaxed`}>
                     <span className="text-[#FF6B00] font-bold select-none">❯</span>
@@ -135,160 +137,160 @@ export default function HomePage() {
                 )}
               </div>
 
-              <div className="p-2.5 bg-[#0E1216] border-t border-[#232830] flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
-                <span>TARGET: NEXACORP-RANGE-01</span>
-                <span className="text-[#22C55E] font-semibold">● RANGE ONLINE</span>
+              <div className="p-2.5 bg-[#0B0E12] border-t border-[#232B36] flex items-center justify-between text-[11px] font-mono text-[#8B949E]">
+                <span>TARGET: NEXACORP-GLOBAL-SYSTEMS</span>
+                <span className="text-[#10B981] font-semibold">● INFILTRATION READY</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Telemetry Metric Cards */}
-        <div className="mt-6 pt-5 border-t border-[#232830] grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-[#171B20] border border-[#232830] p-3.5 rounded-xl">
-            <span className="font-mono text-[10px] font-semibold text-[#22D3EE] block mb-0.5">Total points</span>
+        <div className="mt-6 pt-5 border-t border-[#232B36] grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-[#141920] border border-[#232B36] p-3.5 rounded-xl">
+            <span className="font-mono text-[10px] font-bold text-[#FF8533] block mb-0.5">Total Bounty</span>
             <span className="font-mono text-xl sm:text-2xl font-black text-[#FF6B00]">2,250 XP</span>
           </div>
-          <div className="bg-[#171B20] border border-[#232830] p-3.5 rounded-xl">
-            <span className="font-mono text-[10px] font-semibold text-[#22D3EE] block mb-0.5">Challenges</span>
-            <span className="font-mono text-xl sm:text-2xl font-black text-[#F5F5F5]">8 stages</span>
+          <div className="bg-[#141920] border border-[#232B36] p-3.5 rounded-xl">
+            <span className="font-mono text-[10px] font-bold text-[#FF8533] block mb-0.5">Target Defenses</span>
+            <span className="font-mono text-xl sm:text-2xl font-black text-[#F5F5F5]">8 Stages</span>
           </div>
-          <div className="bg-[#171B20] border border-[#232830] p-3.5 rounded-xl">
-            <span className="font-mono text-[10px] font-semibold text-[#22D3EE] block mb-0.5">Unlock order</span>
-            <span className="font-mono text-xl sm:text-2xl font-black text-[#22C55E]">In order</span>
+          <div className="bg-[#141920] border border-[#232B36] p-3.5 rounded-xl">
+            <span className="font-mono text-[10px] font-bold text-[#FF8533] block mb-0.5">Infiltration Path</span>
+            <span className="font-mono text-xl sm:text-2xl font-black text-[#10B981]">Sequential</span>
           </div>
-          <div className="bg-[#171B20] border border-[#232830] p-3.5 rounded-xl">
-            <span className="font-mono text-[10px] font-semibold text-[#22D3EE] block mb-0.5">Flag checks</span>
-            <span className="font-mono text-xl sm:text-2xl font-black text-[#FF9F43]">Live</span>
+          <div className="bg-[#141920] border border-[#232B36] p-3.5 rounded-xl">
+            <span className="font-mono text-[10px] font-bold text-[#FF8533] block mb-0.5">Flag Validation</span>
+            <span className="font-mono text-xl sm:text-2xl font-black text-[#FF9F43]">Realtime</span>
           </div>
         </div>
       </section>
 
-      {/* Killchain Phase Overview */}
+      {/* Killchain Phase Roadmap */}
       <section className="space-y-5">
         <div className="text-center max-w-xl mx-auto space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#171B20] border border-[#232830] rounded-full text-[11px] font-mono text-[#FF6B00] font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#141920] border border-[#232B36] rounded-full text-[11px] font-mono text-[#FF6B00] font-bold">
             <span>◈</span>
-            <span>Campaign</span>
+            <span>NexaCorp Killchain Phases</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#F5F5F5] font-sans tracking-tight">
-            Eight-stage challenge path
+          <h2 className="text-2xl sm:text-3xl font-black text-[#F5F5F5] font-sans tracking-tight">
+            The Infiltration Roadmap
           </h2>
           <p className="text-xs sm:text-sm text-[#8B949E] font-sans">
-            Solve each stage to unlock the next.
+            Breach each defense ring sequentially to penetrate deeper into NexaCorp&apos;s internal network.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Phase 1 */}
-          <div className="cyber-card p-4 flex flex-col justify-between space-y-3">
+          <div className="cyber-card p-4.5 flex flex-col justify-between space-y-3 bg-[#10151C]">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-[#22D3EE] bg-[#090B0D] px-2 py-0.5 rounded border border-[#232830]">
+                <span className="font-mono text-[10px] font-bold text-[#FF8533] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36]">
                   Phase 01
                 </span>
-                <span className="text-[11px] font-mono text-[#22C55E] font-bold">Stages 1–2</span>
+                <span className="text-[11px] font-mono text-[#10B981] font-bold">Stages 1–2</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F5F5F5]">
-                Perimeter Recon & Stego
+                Perimeter Recon & SIGINT
               </h3>
               <p className="text-xs text-[#8B949E] leading-relaxed font-sans">
-                Find exposed metadata and recover the hidden audio signal.
+                Harvest leaked employee metadata and demodulate intercepted whistleblower transmissions.
               </p>
             </div>
-            <div className="pt-2.5 border-t border-[#232830] font-mono text-[10px] text-[#22D3EE] font-semibold">
-              OSINT · Audio
+            <div className="pt-2.5 border-t border-[#232B36] font-mono text-[10px] text-[#FF8533] font-semibold">
+              OSINT · Audio Stego
             </div>
           </div>
 
           {/* Phase 2 */}
-          <div className="cyber-card p-4 flex flex-col justify-between space-y-3">
+          <div className="cyber-card p-4.5 flex flex-col justify-between space-y-3 bg-[#10151C]">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-[#FF9F43] bg-[#090B0D] px-2 py-0.5 rounded border border-[#232830]">
+                <span className="font-mono text-[10px] font-bold text-[#FF9F43] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36]">
                   Phase 02
                 </span>
                 <span className="text-[11px] font-mono text-[#FF9F43] font-bold">Stages 3–4</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F5F5F5]">
-                Crypto Oracle & SQLi
+                Crypto Oracle & SSO Bypass
               </h3>
               <p className="text-xs text-[#8B949E] leading-relaxed font-sans">
-                Recover a cipher key and test a legacy login for SQL injection.
+                Recover cryptographic keys via oracle probing and inject SQL payloads into the employee SSO gateway.
               </p>
             </div>
-            <div className="pt-2.5 border-t border-[#232830] font-mono text-[10px] text-[#FF9F43] font-semibold">
-              Crypto · Web
+            <div className="pt-2.5 border-t border-[#232B36] font-mono text-[10px] text-[#FF9F43] font-semibold">
+              AES Oracle · SQL Injection
             </div>
           </div>
 
           {/* Phase 3 */}
-          <div className="cyber-card p-4 flex flex-col justify-between space-y-3">
+          <div className="cyber-card p-4.5 flex flex-col justify-between space-y-3 bg-[#10151C]">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-[#FF6B00] bg-[#090B0D] px-2 py-0.5 rounded border border-[#232830]">
+                <span className="font-mono text-[10px] font-bold text-[#FF6B00] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36]">
                   Phase 03
                 </span>
                 <span className="text-[11px] font-mono text-[#FF6B00] font-bold">Stages 5–6</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F5F5F5]">
-                PRNG & Reverse Eng
+                PRNG Forecast & Binary RE
               </h3>
               <p className="text-xs text-[#8B949E] leading-relaxed font-sans">
-                Predict a token stream and inspect a compiled Linux binary.
+                Solve pseudo-random generator state algorithms and decompile proprietary ELF binaries in Ghidra.
               </p>
             </div>
-            <div className="pt-2.5 border-t border-[#232830] font-mono text-[10px] text-[#FF6B00] font-semibold">
-              PRNG · Reverse engineering
+            <div className="pt-2.5 border-t border-[#232B36] font-mono text-[10px] text-[#FF6B00] font-semibold">
+              PRNG Math · Reverse Engineering
             </div>
           </div>
 
           {/* Phase 4 */}
-          <div className="cyber-card p-4 flex flex-col justify-between space-y-3">
+          <div className="cyber-card p-4.5 flex flex-col justify-between space-y-3 bg-[#10151C]">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold text-[#EF4444] bg-[#090B0D] px-2 py-0.5 rounded border border-[#232830]">
+                <span className="font-mono text-[10px] font-bold text-[#EF4444] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36]">
                   Phase 04
                 </span>
                 <span className="text-[11px] font-mono text-[#EF4444] font-bold">Stages 7–8</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F5F5F5]">
-                PrivEsc & Subnet Pivoting
+                Root PrivEsc & Subnet Pivoting
               </h3>
               <p className="text-xs text-[#8B949E] leading-relaxed font-sans">
-                Escalate Linux privileges and pivot to an isolated database.
+                Escalate Linux execution to root and trigger SSRF pivots to exfiltrate NexaCorp&apos;s master database.
               </p>
             </div>
-            <div className="pt-2.5 border-t border-[#232830] font-mono text-[10px] text-[#EF4444] font-semibold">
-              Linux · Network
+            <div className="pt-2.5 border-t border-[#232B36] font-mono text-[10px] text-[#EF4444] font-semibold">
+              Linux Root · SSRF Exfiltration
             </div>
           </div>
         </div>
       </section>
 
       {/* Rules of Engagement & Readiness */}
-      <section className="cyber-panel p-5 sm:p-6">
+      <section className="cyber-panel p-5 sm:p-6 bg-[#0E1217]">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-1.5 font-mono text-xs text-[#22D3EE] font-bold">
-              <span>Rules</span>
+            <div className="flex items-center gap-1.5 font-mono text-xs text-[#FF8533] font-bold">
+              <span>Collective Rules of Engagement</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-[#F5F5F5] font-sans">
-              Before you begin
+              Directive Before Infiltration
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed font-sans">
-              Sandboxed targets. Stages unlock in order. Flags are case-sensitive: <code className="text-[#FF6B00] font-mono font-semibold">SHADOWNET{'{...}'}</code>.
+              All target hosts run in isolated sandboxes. Defense rings unlock in strict chronological order upon submitting the authentic flag hash: <code className="text-[#FF6B00] font-mono font-bold">SHADOWNET{'{...}'}</code>.
             </p>
           </div>
 
           <div className="w-full lg:w-auto flex-shrink-0">
             {user ? (
               <Link href="/dashboard/challenges" className="btn-primary text-xs sm:text-sm px-5 py-2.5 font-bold w-full text-center">
-                View challenges
+                Launch Target Deck
               </Link>
             ) : (
               <Link href="/auth/register" className="btn-primary text-xs sm:text-sm px-5 py-2.5 font-bold w-full text-center">
-                Create account
+                Join Collective
               </Link>
             )}
           </div>

@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { STAGE_CONFIGS } from '@/lib/constants';
 
 export interface Challenge {
   id: number;
@@ -16,14 +19,20 @@ export interface Challenge {
   required_stage?: number | null;
 }
 
-export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
+interface ChallengeCardProps {
+  challenge: Challenge;
+  onPreviewAttack?: (challenge: Challenge) => void;
+}
+
+export default function ChallengeCard({ challenge, onPreviewAttack }: ChallengeCardProps) {
   const isLocked = challenge.locked ?? (!challenge.unlocked && challenge.stage_number > 1);
   const isSolved = challenge.solved;
+  const stageConfig = STAGE_CONFIGS[challenge.stage_number];
 
-  const getDifficultyColor = (diff: string) => {
+  const getDifficultyBadge = (diff: string) => {
     switch (diff.toLowerCase()) {
       case 'easy':
-        return 'text-[#22C55E] bg-[#22C55E]/10 border-[#22C55E]/30';
+        return 'text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30';
       case 'medium':
         return 'text-[#FF9F43] bg-[#FF9F43]/10 border-[#FF9F43]/30';
       case 'hard':
@@ -38,12 +47,12 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
       case 'static':
         return 'Static web';
       case 'docker':
-        return 'Docker';
+        return 'Docker runtime';
       case 'vm':
       case 'vms':
-        return 'VM cluster';
+        return 'VM sandbox';
       default:
-        return 'Service';
+        return 'Daemon service';
     }
   };
 
@@ -51,21 +60,32 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
     <div
       className={`cyber-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-200 group ${
         isSolved
-          ? 'border-[#22C55E]/40 bg-[#111614]'
+          ? 'border-[#10B981]/40 bg-[#0B1410] shadow-[0_2px_12px_rgba(16,185,129,0.08)]'
           : isLocked
-          ? 'border-[#252A30] opacity-65 bg-[#0C0F12]'
-          : 'border-[#252A30] hover:border-[#FF6B00]/60 bg-[#171B20]'
+          ? 'border-[#202732] opacity-60 bg-[#090C10]'
+          : 'border-[#26303D] hover:border-[#FF6B00]/70 bg-[#10151C] hover:shadow-[0_4px_20px_rgba(255,107,0,0.12)]'
       }`}
     >
+      {/* Decorative Top Line */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-0.5 ${
+          isSolved
+            ? 'bg-[#10B981]'
+            : isLocked
+            ? 'bg-[#232B36]'
+            : 'bg-gradient-to-r from-[#FF6B00] via-[#FF9F43] to-transparent'
+        }`}
+      ></div>
+
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between gap-2 mb-3.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[#090B0D] text-[#22D3EE] border border-[#252A30]">
+            <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[#07090C] text-[#FF8533] border border-[#232B36]">
               Stage 0{challenge.stage_number}
             </span>
             <span
-              className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${getDifficultyColor(
+              className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${getDifficultyBadge(
                 challenge.difficulty
               )}`}
             >
@@ -75,28 +95,36 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
 
           {/* Status Badge */}
           {isSolved ? (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#22C55E] bg-[#22C55E]/15 px-2.5 py-0.5 rounded-full border border-[#22C55E]/30">
-              Solved
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#10B981] bg-[#10B981]/15 px-2.5 py-0.5 rounded-full border border-[#10B981]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+              Breached
             </span>
           ) : isLocked ? (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-medium text-[#8B949E] bg-[#111417] px-2 py-0.5 rounded border border-[#252A30]">
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-medium text-[#8B949E] bg-[#0E1217] px-2.5 py-0.5 rounded border border-[#232B36]">
               Locked
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#FF6B00] bg-[#FF6B00]/10 px-2.5 py-0.5 rounded-full border border-[#FF6B00]/30">
-              Available
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#FF8533] bg-[#FF6B00]/10 px-2.5 py-0.5 rounded-full border border-[#FF6B00]/30 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B00]"></span>
+              Target Active
             </span>
           )}
         </div>
 
+        {/* Subsystem Code */}
+        <div className="text-[10px] font-mono text-[#8B949E] mb-1 flex items-center gap-1.5">
+          <span className="text-[#FF6B00] font-bold">TARGET:</span>
+          <span>{stageConfig?.subsystemCode || `NEXA-0${challenge.stage_number}`}</span>
+        </div>
+
         {/* Title */}
         <h3
-          className={`font-sans text-base font-semibold mb-2 leading-snug transition-colors ${
+          className={`font-sans text-base font-bold mb-2 leading-snug transition-colors ${
             isSolved
               ? 'text-[#F5F5F5]'
               : isLocked
               ? 'text-[#8B949E]'
-              : 'text-[#F5F5F5] group-hover:text-[#FF6B00]'
+              : 'text-[#F5F5F5] group-hover:text-[#FF8533]'
           }`}
         >
           {challenge.name}
@@ -104,20 +132,20 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
 
         {/* Domain & Delivery Tags */}
         <div className="flex flex-wrap items-center gap-2 mb-3.5">
-          <span className="font-mono text-[11px] text-[#22D3EE] bg-[#090B0D] px-2 py-0.5 rounded border border-[#252A30] font-medium">
+          <span className="font-mono text-[11px] text-[#FF9F43] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36] font-medium">
             {challenge.domain}
           </span>
-          <span className="font-mono text-[11px] text-[#8B949E] bg-[#090B0D] px-2 py-0.5 rounded border border-[#252A30]">
+          <span className="font-mono text-[11px] text-[#8B949E] bg-[#07090C] px-2 py-0.5 rounded border border-[#232B36]">
             {getDeliveryBadge(challenge.delivery_method)}
           </span>
         </div>
 
         {/* Description or Locked Message */}
         {isLocked ? (
-          <div className="p-3 my-2 bg-[#090B0D] border border-[#252A30] rounded-lg text-xs font-mono text-[#8B949E] flex items-center gap-2.5">
+          <div className="p-3 my-2 bg-[#07090C] border border-[#232B36] rounded-lg text-xs font-mono text-[#8B949E] flex items-center gap-2.5">
             <span className="text-sm">🔒</span>
             <span>
-              Clear stage <strong className="text-[#F5F5F5">0{challenge.required_stage}</strong> to unlock.
+              Clear stage <strong className="text-[#F5F5F5]">0{challenge.required_stage}</strong> to unlock target.
             </span>
           </div>
         ) : (
@@ -130,9 +158,9 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
       </div>
 
       {/* Footer / CTA */}
-      <div className="pt-3.5 mt-2 border-t border-[#252A30] flex items-center justify-between gap-3">
+      <div className="pt-3.5 mt-2 border-t border-[#232B36] flex items-center justify-between gap-3">
         <div className="flex flex-col">
-          <span className="text-[10px] font-mono text-[#8B949E]">Points</span>
+          <span className="text-[10px] font-mono text-[#8B949E]">Reward</span>
           <span className="font-mono text-base font-black text-[#FF6B00] leading-tight">
             +{challenge.points} <span className="text-[11px] font-bold text-[#FF9F43]">XP</span>
           </span>
@@ -141,21 +169,32 @@ export default function ChallengeCard({ challenge }: { challenge: Challenge }) {
         {isLocked ? (
           <button
             disabled
-            className="btn-secondary"
+            className="btn-secondary text-xs h-9"
           >
             Locked
           </button>
         ) : (
-          <Link
-            href={`/dashboard/challenges/${challenge.id}`}
-            className={`text-sm font-medium ${
-              isSolved
-                ? 'btn-secondary text-[#22C55E] border-[#22C55E]/40 hover:text-[#22C55E]'
-                : 'btn-primary'
-            }`}
-          >
-            {isSolved ? 'Review' : 'Open challenge'}
-          </Link>
+          <div className="flex items-center gap-1.5">
+            {onPreviewAttack && (
+              <button
+                onClick={() => onPreviewAttack(challenge)}
+                title="Preview Attack Vector Schematic"
+                className="btn-secondary text-xs h-9 px-2.5 text-[#FF9F43] hover:text-[#FF8533]"
+              >
+                ⚡
+              </button>
+            )}
+            <Link
+              href={`/dashboard/challenges/${challenge.id}`}
+              className={`text-xs h-9 font-bold px-3.5 ${
+                isSolved
+                  ? 'btn-secondary text-[#10B981] border-[#10B981]/40 hover:text-[#10B981]'
+                  : 'btn-primary'
+              }`}
+            >
+              {isSolved ? 'Review Intel' : 'Infiltrate'}
+            </Link>
+          </div>
         )}
       </div>
     </div>

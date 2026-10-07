@@ -36,20 +36,20 @@ export default function FlagSubmitForm({
 
       if (response.data.correct) {
         setStatus('success');
-        setMessage(response.data.message || 'Flag accepted! XP awarded.');
+        setMessage(response.data.message || 'Target defense breached! Flag accepted and XP awarded.');
         setFlag('');
         onSuccess?.();
       } else if (response.data.alreadySolved) {
         setStatus('already');
-        setMessage(response.data.message || 'You already solved this challenge.');
+        setMessage(response.data.message || 'You have already breached this NexaCorp target.');
       } else {
         setStatus('error');
-        setMessage(response.data.message || 'Incorrect flag. Try again!');
+        setMessage(response.data.message || 'Invalid flag hash. Defense countermeasure rejected submission.');
       }
     } catch (error: any) {
       setStatus('error');
       setMessage(
-        error.response?.data?.error || 'Submission failed. Check network or login status.'
+        error.response?.data?.error || 'Submission failed. Check network or operative authentication status.'
       );
     } finally {
       setLoading(false);
@@ -57,13 +57,13 @@ export default function FlagSubmitForm({
   };
 
   return (
-    <div className="cyber-panel p-5 sm:p-6">
+    <div className="cyber-panel p-5 sm:p-6 bg-[#0E1217]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3.5">
-        <h4 className="font-sans text-base font-semibold text-[#F5F5F5]">
-          Submit flag
+        <h4 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+          <span className="text-[#FF6B00]">⚡</span> Submit Exfiltrated Flag
         </h4>
         <span className="font-mono text-[11px] text-[#8B949E]">
-          Format: <code className="text-[#22D3EE] font-bold">SHADOWNET{'{...}'}</code>
+          Format: <code className="text-[#FF8533] font-bold">SHADOWNET{'{...}'}</code>
         </span>
       </div>
 
@@ -77,16 +77,23 @@ export default function FlagSubmitForm({
             placeholder="SHADOWNET{...}"
             disabled={loading}
             required
-            className="cyber-input py-2.5 px-3.5 text-xs font-mono placeholder:text-[#8B949E]/40"
+            className="cyber-input py-2.5 px-3.5 text-xs font-mono placeholder:text-[#555E6B]"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading || !flag.trim()}
-          className="btn-primary py-2.5 px-6 text-xs font-bold whitespace-nowrap"
+          className="btn-primary py-2.5 px-6 text-xs font-bold whitespace-nowrap flex items-center justify-center gap-2"
         >
-          {loading ? 'Checking...' : 'Submit'}
+          {loading ? (
+            <>
+              <span className="inline-block animate-spin">⚙️</span>
+              <span>Verifying Hash...</span>
+            </>
+          ) : (
+            <span>Submit Hash</span>
+          )}
         </button>
       </form>
 
@@ -94,10 +101,10 @@ export default function FlagSubmitForm({
         <div
           className={`mt-3 p-3 rounded-lg font-mono text-xs border flex items-center gap-2.5 animate-fade-in ${
             status === 'success'
-              ? 'bg-[#22C55E]/10 border-[#22C55E]/40 text-[#22C55E]'
+              ? 'bg-[#10B981]/15 border-[#10B981]/40 text-[#10B981]'
               : status === 'already'
-              ? 'bg-[#22D3EE]/10 border-[#22D3EE]/40 text-[#22D3EE]'
-              : 'bg-[#EF4444]/10 border-[#EF4444]/40 text-[#EF4444]'
+              ? 'bg-[#FF9F43]/15 border-[#FF9F43]/40 text-[#FF9F43]'
+              : 'bg-[#EF4444]/15 border-[#EF4444]/40 text-[#EF4444]'
           }`}
         >
           <span className="text-sm">{status === 'success' ? '🎯' : status === 'already' ? 'ℹ️' : '⚠️'}</span>

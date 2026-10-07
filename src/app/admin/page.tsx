@@ -467,7 +467,7 @@ export default function AdminPage() {
 
       {/* Header Bar */}
       <div className="p-6 sm:p-8 rounded-2xl bg-[#111417] border border-[#252A30] mb-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#EF4444] to-[#22D3EE]"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#EF4444] to-[#FF8533]"></div>
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
@@ -478,12 +478,12 @@ export default function AdminPage() {
               <span className="text-[#8B949E] text-xs font-mono">
                 CALLSIGN: <span className="text-[#F5F5F5] font-bold">{currentUser.username}</span>
               </span>
-              <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[10px] font-mono text-[#22D3EE]">
+              <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[10px] font-mono text-[#FF8533]">
                 LEADERBOARD: EXCLUDED (ADMIN NOT PLAYER)
               </span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black font-mono text-[#F5F5F5] tracking-tight">
-              SHADOW<span className="text-[#FF6B00]">COMMAND</span> // PLATFORM CONTROLLER
+              SHADOW<span className="text-[#FF6B00]">COMMAND</span> {'//'} PLATFORM CONTROLLER
             </h1>
             <p className="text-xs sm:text-sm text-[#8B949E] mt-1 max-w-2xl font-sans">
               Full enterprise CTF management: operative dossiers & player removal, stage CRUD & dynamic flag hashes, live telemetry, and scoring governance.
@@ -491,7 +491,7 @@ export default function AdminPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#171B20] border border-[#252A30] rounded-xl text-xs font-mono text-[#22D3EE]">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#171B20] border border-[#252A30] rounded-xl text-xs font-mono text-[#FF8533]">
               <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-ping"></span>
               CORE_ENGINE: ARMED
             </div>
@@ -577,7 +577,7 @@ export default function AdminPage() {
               <div className="text-3xl font-black font-mono text-[#F5F5F5]">
                 {stats?.totalPlayers ?? '...'}
               </div>
-              <div className="mt-2 text-[11px] font-mono text-[#22D3EE]">
+              <div className="mt-2 text-[11px] font-mono text-[#FF8533]">
                 {stats?.totalAdmins ?? 1} COMMAND ADMIN(S) (EXCLUDED FROM RANKS)
               </div>
             </div>
@@ -623,7 +623,7 @@ export default function AdminPage() {
           {/* Infrastructure Health */}
           <div className="p-6 rounded-2xl bg-[#111417] border border-[#252A30]">
             <h3 className="text-base font-mono font-bold text-[#F5F5F5] mb-4 flex items-center gap-2">
-              <span className="text-[#22D3EE]">⚡</span> PLATFORM & COMPETITION CONTROLS
+              <span className="text-[#FF8533]">⚡</span> PLATFORM & COMPETITION CONTROLS
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
               <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30]">
@@ -635,8 +635,8 @@ export default function AdminPage() {
               </div>
               <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30]">
                 <div className="text-[#8B949E] mb-1">USER DELETION PRIVILEGE</div>
-                <div className="text-[#22D3EE] font-bold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#22D3EE]"></span>
+                <div className="text-[#FF8533] font-bold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#FF8533]"></span>
                   ENABLED WITH CASCADE PURGE
                 </div>
               </div>
@@ -658,7 +658,7 @@ export default function AdminPage() {
               </h3>
               <button
                 onClick={() => setActiveTab('submissions')}
-                className="text-xs font-mono text-[#22D3EE] hover:underline"
+                className="text-xs font-mono text-[#FF8533] hover:underline"
               >
                 VIEW FULL AUDIT LOG →
               </button>
@@ -691,7 +691,7 @@ export default function AdminPage() {
                         <td className="py-3 text-[#F5F5F5] font-bold">
                           {log.username}
                         </td>
-                        <td className="py-3 text-[#22D3EE]">
+                        <td className="py-3 text-[#FF8533]">
                           {log.challenge_name}
                         </td>
                         <td className="py-3 text-[#8B949E] max-w-[200px] truncate font-mono">
@@ -904,7 +904,7 @@ export default function AdminPage() {
                       <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#8B949E]">
                         {c.domain}
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#22D3EE]">
+                      <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#FF8533]">
                         {c.delivery_method}
                       </span>
                       <span
@@ -936,7 +936,7 @@ export default function AdminPage() {
                           </div>
                           {c.flag_hash && (
                             <div className="text-[11px] text-[#8B949E] truncate max-w-sm">
-                              HASH: <span className="text-[#22D3EE]">{c.flag_hash.substring(0, 16)}...</span>
+                              HASH: <span className="text-[#FF8533]">{c.flag_hash.substring(0, 16)}...</span>
                             </div>
                           )}
                         </div>
@@ -1150,11 +1150,11 @@ export default function AdminPage() {
 
           {/* Dossier Modal / Drawer */}
           {selectedDossier && (
-            <div className="p-6 rounded-2xl bg-[#111417] border border-[#22D3EE]/50 shadow-[0_0_50px_rgba(34,211,238,0.15)] space-y-6 animate-fade-in relative">
+            <div className="p-6 rounded-2xl bg-[#111417] border border-[#FF8533]/50 shadow-[0_0_50px_rgba(34,211,238,0.15)] space-y-6 animate-fade-in relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#252A30] pb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 rounded bg-[#22D3EE]/15 border border-[#22D3EE]/40 text-[10px] font-mono text-[#22D3EE]">
+                    <span className="px-2 py-0.5 rounded bg-[#FF8533]/15 border border-[#FF8533]/40 text-[10px] font-mono text-[#FF8533]">
                       DOSSIER // {selectedDossier.id}
                     </span>
                     {selectedDossier.is_admin ? (
@@ -1172,7 +1172,7 @@ export default function AdminPage() {
                   </h3>
                   <div className="text-xs font-mono text-[#8B949E] mt-0.5 flex flex-wrap gap-3">
                     <span>EMAIL: <strong className="text-[#F5F5F5]">{selectedDossier.email}</strong></span>
-                    <span>TEAM: <strong className="text-[#22D3EE]">{selectedDossier.team_name || 'Solo Operative'}</strong></span>
+                    <span>TEAM: <strong className="text-[#FF8533]">{selectedDossier.team_name || 'Solo Operative'}</strong></span>
                     <span>REGISTERED: <strong className="text-[#8B949E]">{new Date(selectedDossier.created_at).toLocaleDateString()}</strong></span>
                   </div>
                 </div>
@@ -1215,7 +1215,7 @@ export default function AdminPage() {
                 </div>
                 <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30]">
                   <div className="text-[#8B949E] mb-1">TOTAL ATTEMPTS</div>
-                  <div className="text-2xl font-bold text-[#22D3EE]">{selectedDossier.total_attempts}</div>
+                  <div className="text-2xl font-bold text-[#FF8533]">{selectedDossier.total_attempts}</div>
                 </div>
                 <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30]">
                   <div className="text-[#8B949E] mb-1">LAST SUBMISSION</div>
@@ -1251,7 +1251,7 @@ export default function AdminPage() {
 
               {/* Complete Submission Log for this Operative */}
               <div>
-                <h4 className="text-xs font-mono font-bold text-[#22D3EE] mb-3 flex items-center gap-2">
+                <h4 className="text-xs font-mono font-bold text-[#FF8533] mb-3 flex items-center gap-2">
                   <span>📋</span> ATTEMPT HISTORY LEDGER ({selectedDossier.submission_history?.length || 0})
                 </h4>
                 <div className="max-h-60 overflow-y-auto rounded-xl border border-[#252A30] bg-[#171B20]">
@@ -1275,7 +1275,7 @@ export default function AdminPage() {
                             <td className="p-2.5 text-[#8B949E] whitespace-nowrap">
                               {new Date(sub.created_at).toLocaleTimeString()}
                             </td>
-                            <td className="p-2.5 text-[#22D3EE]">
+                            <td className="p-2.5 text-[#FF8533]">
                               Stage {sub.stage_number}
                             </td>
                             <td className="p-2.5 text-[#8B949E] font-mono break-all max-w-xs">
@@ -1325,7 +1325,7 @@ export default function AdminPage() {
                       <td className="py-3 text-[#8B949E]">
                         {op.email}
                       </td>
-                      <td className="py-3 text-[#22D3EE]">
+                      <td className="py-3 text-[#FF8533]">
                         {op.team_name || 'Solo'}
                       </td>
                       <td className="py-3">
@@ -1348,7 +1348,7 @@ export default function AdminPage() {
                           <button
                             onClick={() => handleOpenDossier(op.id)}
                             disabled={loadingDossier}
-                            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#22D3EE]/15 hover:bg-[#22D3EE]/25 text-[#22D3EE] border border-[#22D3EE]/40 transition-all"
+                            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#FF8533]/15 hover:bg-[#FF8533]/25 text-[#FF8533] border border-[#FF8533]/40 transition-all"
                           >
                             👁️ VIEW DETAILS
                           </button>
@@ -1436,7 +1436,7 @@ export default function AdminPage() {
                       <td className="py-3 text-[#F5F5F5] font-bold">
                         {sub.username}
                       </td>
-                      <td className="py-3 text-[#22D3EE]">
+                      <td className="py-3 text-[#FF8533]">
                         Stage {sub.stage_number}: {sub.challenge_name}
                       </td>
                       <td className="py-3 text-[#8B949E] font-mono break-all max-w-xs">
