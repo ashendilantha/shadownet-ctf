@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
+import { STAGE_CONFIGS } from '@/lib/constants';
 
 export async function GET(
   request: NextRequest,
@@ -96,6 +97,9 @@ export async function GET(
       .eq('challenge_id', challengeId)
       .order('hint_level', { ascending: true });
 
+    const fallbackHints = STAGE_CONFIGS[challenge.stage_number]?.hints || [];
+    const finalHints = (hints && hints.length > 0) ? hints : fallbackHints;
+
     return NextResponse.json({
       challenge: {
         ...challenge,
@@ -103,7 +107,7 @@ export async function GET(
         locked: false,
         unlocked: true,
       },
-      hints: hints || [],
+      hints: finalHints,
     });
   } catch (error) {
     console.error('Challenge detail error:', error);

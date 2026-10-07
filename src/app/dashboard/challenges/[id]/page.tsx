@@ -278,12 +278,15 @@ export default function ChallengeDetailPage({
 
               {/* CLI Command Helper */}
               <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1.5">
-                <span className="text-[#8B949E] block text-[11px] font-semibold">Direct Download via Terminal:</span>
+                <span className="text-[#8B949E] block text-[11px] font-semibold">Direct Download & Steghide Extraction Command:</span>
                 <code className="text-[#FF8533] block break-all">
                   wget {siteOrigin ? `${siteOrigin}/downloads/stage2-covert-transmissions.zip` : '/downloads/stage2-covert-transmissions.zip'}
                 </code>
                 <code className="text-[#8B949E] block">
                   unzip stage2-covert-transmissions.zip
+                </code>
+                <code className="text-[#10B981] block font-bold">
+                  steghide extract -sf whistleblower.jpg -p shelter
                 </code>
               </div>
             </div>
@@ -305,13 +308,13 @@ export default function ChallengeDetailPage({
               <span className="text-[#F59E0B]">💡</span> Tactical Intelligence Hints
             </h3>
 
-            {hints.length === 0 ? (
+            {(hints.length === 0 && (!stageConfig?.hints || stageConfig.hints.length === 0)) ? (
               <p className="font-mono text-xs text-[#8B949E]">
                 No tactical hints logged for this target.
               </p>
             ) : (
               <div className="space-y-2.5 font-mono text-xs">
-                {hints.map((hint) => {
+                {(hints.length > 0 ? hints : (stageConfig?.hints || [])).map((hint) => {
                   const isOpen = unlockedHints.has(hint.id);
                   return (
                     <div

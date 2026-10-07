@@ -45,6 +45,7 @@ export interface StageInfo {
   port?: string;
   statusCheck: string;
   accessGuide: string;
+  hints?: Array<{ id: number; hint_level: number; hint_text: string; point_penalty?: number }>;
 }
 
 export const STAGE_CONFIGS: Record<number, StageInfo> = {
@@ -70,6 +71,13 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '5000 (dashboard)',
     statusCheck: 'curl http://localhost:5000',
     accessGuide: 'Inspect public files, metadata and website headers for intelligence leaks.',
+    hints: [
+      {
+        id: 101,
+        hint_level: 1,
+        hint_text: 'Inspect HTML source comments on the public website and check HTTP response headers for internal debugging tokens.',
+      },
+    ],
   },
   2: {
     stage: 2,
@@ -82,7 +90,7 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     subsystemCode: 'NEXA-SIGINT-02',
     storyBrief: 'A rogue NexaCorp insider smuggled out an encrypted surveillance transmission bundle before going silent. NexaCorp automated counter-measures flooded the frequency with 26 decoy jamming audio streams. Demodulate the authentic carrier wave and recover the whistleblower payload.',
     attackVector: 'Multi-Channel Audio Spectrogram Demodulation & Steghide',
-    vectorSummary: 'Filter out 26 jamming decoy frequencies, analyze the authentic carrier audio spectrogram in Audacity, and extract hidden assets via steghide.',
+    vectorSummary: 'Filter out 26 jamming decoy frequencies, analyze the authentic carrier audio spectrogram in Audacity, and extract hidden assets via steghide with password "shelter".',
     attackSimSteps: [
       { text: '[SIGINT] Intercepting NexaCorp satellite burst transmission...', type: 'info' },
       { text: '[ALERT] 26 high-frequency jamming decoy channels detected!', type: 'warn' },
@@ -92,7 +100,19 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     ],
     port: 'N/A (Downloadable Package)',
     statusCheck: 'unzip stage2-covert-transmissions.zip',
-    accessGuide: 'Download and extract the intercepted transmission package (.zip). Use steghide to extract intel from whistleblower.jpg, and inspect the frequency spectrogram of the authentic audio in Audacity.',
+    accessGuide: 'Download and extract the intercepted transmission package (.zip). Use steghide with passphrase "shelter" to extract intel from whistleblower.jpg, and inspect the frequency spectrogram of the authentic audio in Audacity.',
+    hints: [
+      {
+        id: 201,
+        hint_level: 1,
+        hint_text: 'Use steghide with passphrase "shelter" to extract the embedded intel from the exhibit photo: steghide extract -sf whistleblower.jpg -p shelter',
+      },
+      {
+        id: 202,
+        hint_level: 2,
+        hint_text: 'Carrier frequency channel 14 holds the genuine transmission. Open the corresponding audio in Audacity, switch view from Waveform to Spectrogram, and read the embedded flag.',
+      },
+    ],
   },
   3: {
     stage: 3,
