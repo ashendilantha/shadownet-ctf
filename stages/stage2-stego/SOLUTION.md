@@ -14,9 +14,8 @@ Download the covert transmissions archive directly from the challenge portal or 
 wget https://bsvvvibseqlapprvhuwz.supabase.co/storage/v1/object/public/challenges/stage2-covert-transmissions.zip
 unzip stage2-covert-transmissions.zip
 ```
-The archive unpacks 29 operational files:
+The archive unpacks 28 operational files:
 - `whistleblower.jpg` (encrypted photographic exhibit)
-- `spectrogram_reference.png` (reference guide)
 - 27 intercepted radio transmissions: `intercept_alpha_09.wav` and 26 decoy channels (`intercept_beta_02.wav` through `intercept_gamma2_28.wav`).
 
 ---

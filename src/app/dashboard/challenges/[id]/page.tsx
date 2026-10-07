@@ -240,7 +240,7 @@ export default function ChallengeDetailPage({
               </div>
 
               {/* Package Details Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
                 <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
                   <div className="text-[#F5F5F5] font-bold">📷 whistleblower.jpg</div>
                   <div className="text-[10px] text-[#8B949E] mt-1">Classified Drone Photo Exhibit (Contains embedded intel)</div>
@@ -249,11 +249,6 @@ export default function ChallengeDetailPage({
                 <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
                   <div className="text-[#22D3EE] font-bold">🔊 27 Audio Transmissions</div>
                   <div className="text-[10px] text-[#8B949E] mt-1">1 Authentic Carrier + 26 Jamming Decoy Channels (.wav)</div>
-                </div>
-
-                <div className="p-3 bg-[#090B0D] border border-[#232830] rounded-lg">
-                  <div className="text-[#22C55E] font-bold">📊 Spectral Reference</div>
-                  <div className="text-[10px] text-[#8B949E] mt-1">Calibration chart for Audacity / Sonic Visualiser</div>
                 </div>
               </div>
 

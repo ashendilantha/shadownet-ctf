@@ -15,7 +15,7 @@ python3 generate_spectrogram.py
 
 echo "[+] Creating release zip package (excluding passphrase.txt)..."
 rm -f stage2-covert-transmissions.zip
-zip -j stage2-covert-transmissions.zip assets/*.wav assets/whistleblower.jpg assets/spectrogram_reference.png
+zip -j stage2-covert-transmissions.zip assets/*.wav assets/whistleblower.jpg
 
 echo "[✓] Stage 2 package generated: stage2-covert-transmissions.zip"
 echo "    Delivery method: Downloadable Archive (Supabase Storage / Web Dashboard)"

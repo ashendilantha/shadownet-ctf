@@ -307,8 +307,8 @@ def step3_generate_reference_spectrogram():
 if __name__ == "__main__":
     print("=" * 60)
     print("SHADOWNET CTF - STAGE 2 STEGANOGRAPHY ASSET GENERATOR")
-    print("=" * 60)
     step1_create_whistleblower_image_and_embed()
     step2_generate_audio_files()
-    step3_generate_reference_spectrogram()
+    # skip reference png so flag stays hidden
+    # step3_generate_reference_spectrogram()
     print("\nAll assets generated successfully in 'assets/' directory.")

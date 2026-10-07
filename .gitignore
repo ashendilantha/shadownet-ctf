@@ -54,3 +54,10 @@ venv/
 
 # screenshots
 ss/
+
+# stego reference images (contains flag)
+*spectrogram_reference.png
+
+# zip packages
+*.zip
+
