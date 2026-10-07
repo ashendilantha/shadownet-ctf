@@ -285,9 +285,6 @@ export default function ChallengeDetailPage({
                 <code className="text-[#8B949E] block">
                   unzip stage2-covert-transmissions.zip
                 </code>
-                <code className="text-[#10B981] block font-bold">
-                  steghide extract -sf whistleblower.jpg -p shelter
-                </code>
               </div>
             </div>
           )}
