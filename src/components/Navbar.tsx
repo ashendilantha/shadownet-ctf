@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
+import OperativeArtwork from '@/components/OperativeArtwork';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -63,8 +64,13 @@ export default function Navbar() {
           {/* Left: Brand Logo & Main Nav Links */}
           <div className="flex items-center gap-6 lg:gap-8">
             <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-[#141920] border border-[#FF6B00]/70 flex items-center justify-center font-mono font-bold text-[#FF6B00] text-base shadow-[0_0_12px_rgba(255,107,0,0.3)] group-hover:border-[#FF8533] transition-all">
-                ⚡
+              <div className="operative-avatar relative w-9 h-9 rounded-lg bg-[#141920] border border-[#FF6B00]/70 overflow-hidden transition-all group-hover:border-[#FF8533]">
+                <OperativeArtwork
+                  alt=""
+                  sizes="36px"
+                  loading="eager"
+                  className="h-full w-full object-cover object-top"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-mono font-black text-base tracking-wider text-[#F5F5F5] group-hover:text-[#FF8533] transition-colors leading-none">

@@ -7,6 +7,7 @@ import axios from 'axios';
 import ChallengeCard, { Challenge } from '@/components/ChallengeCard';
 import ProgressBar from '@/components/ProgressBar';
 import AttackVectorModal from '@/components/AttackVectorModal';
+import OperativeArtwork from '@/components/OperativeArtwork';
 
 export default function ChallengesListPage() {
   const router = useRouter();
@@ -111,7 +112,7 @@ export default function ChallengesListPage() {
 
       {/* Header & Stats Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
-        <div>
+        <div className="relative z-10">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
             <span className="font-mono text-[11px] font-bold text-[#FF8533]">
@@ -127,7 +128,7 @@ export default function ChallengesListPage() {
         </div>
 
         {/* Stats Pill */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+        <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
           <div className="bg-[#141920] border border-[#232B36] rounded-lg px-4 py-2.5 text-right">
             <span className="text-[10px] font-mono text-[#8B949E] block">Loot XP</span>
             <span className="font-mono text-lg sm:text-xl font-black text-[#FF6B00]">
@@ -232,6 +233,13 @@ export default function ChallengesListPage() {
           ))}
         </div>
       )}
+
+      <div className="challenge-operative-dock" aria-hidden="true">
+        <OperativeArtwork
+          sizes="(max-width: 640px) 96px, 144px"
+          className="challenge-figure h-auto w-full object-contain"
+        />
+      </div>
     </div>
   );
 }

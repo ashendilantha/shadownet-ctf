@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
+import OperativeArtwork from '@/components/OperativeArtwork';
 import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
@@ -176,7 +177,7 @@ export default function ChallengeDetailPage({
       <div className="bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 relative overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#9FEF00] via-[#9FEF00] to-[#9FEF00]"></div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[#141920] text-[#FF8533] border border-[#232B36]">
@@ -213,6 +214,19 @@ export default function ChallengeDetailPage({
           </div>
         </div>
       </div>
+
+      <section className="operative-guide px-1 sm:px-3" aria-label="Field operative briefing">
+        <div className="operative-dialogue">
+          <div className="mb-2 flex flex-wrap items-center gap-2 font-mono text-[10px] font-bold uppercase">
+            <span className="text-[#9FEF00]">SHADE // FIELD NOTE</span>
+            <span className="text-[#6B7894]">{stageConfig?.subsystemCode || `STAGE-0${challenge.stage_number}`}</span>
+          </div>
+          <h2 className="mb-1 text-sm sm:text-base font-bold text-white">{challenge.name}</h2>
+          <p className="text-xs sm:text-sm leading-relaxed text-[#A4B1CD]">
+            NexaCorp is counting on you to rush this {challenge.domain.toLowerCase()} operation. Stay methodical, follow the evidence, and trust your instincts. Every clue brings you closer to the breach.
+          </p>
+        </div>
+      </section>
 
       {/* 2-Column Main Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -268,6 +282,13 @@ export default function ChallengeDetailPage({
                   </div>
                 </>
               )}
+            </div>
+
+            <div className="challenge-operative-dock" aria-hidden="true">
+              <OperativeArtwork
+                sizes="(max-width: 640px) 96px, 144px"
+                className="challenge-figure h-auto w-full object-contain"
+              />
             </div>
           </div>
 
@@ -433,6 +454,7 @@ export default function ChallengeDetailPage({
           </div>
         </div>
       </div>
+
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import OperativeArtwork from '@/components/OperativeArtwork';
 
 export default function HomePage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null);
@@ -46,7 +47,14 @@ export default function HomePage() {
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
           {/* Left Column: Story Directive & Mission Brief */}
-          <div className="lg:col-span-7 space-y-4">
+          <div className="lg:col-span-7 relative isolate">
+            <OperativeArtwork
+              alt=""
+              loading="eager"
+              sizes="(max-width: 640px) 160px, (max-width: 1024px) 220px, 280px"
+              className="home-operative-watermark absolute bottom-0 right-0 w-28 sm:w-40 lg:w-48 h-auto"
+            />
+            <div className="relative z-10 space-y-4">
             {/* Status Pill */}
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#141920] border border-[#232B36] rounded-full text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
@@ -103,10 +111,12 @@ export default function HomePage() {
                 <span>Operative Roster</span>
               </Link>
             </div>
+            </div>
           </div>
 
           {/* Right Column: Infiltration Telemetry Terminal */}
           <div className="lg:col-span-5 w-full">
+            <div className="relative z-10">
             <div className="terminal-window border-[#232B36]">
               <div className="terminal-header justify-between">
                 <div className="flex items-center gap-1.5">
@@ -141,6 +151,7 @@ export default function HomePage() {
                 <span>TARGET: NEXACORP-GLOBAL-SYSTEMS</span>
                 <span className="text-[#10B981] font-semibold">● INFILTRATION READY</span>
               </div>
+            </div>
             </div>
           </div>
         </div>

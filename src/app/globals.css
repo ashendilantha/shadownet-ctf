@@ -166,6 +166,106 @@ code, pre, .font-mono {
 .site-header a[href="/admin"] > span {
   background-color: var(--primary);
 }
+
+.operative-avatar {
+  box-shadow: 0 0 0 1px rgba(159, 239, 0, 0.12), 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.operative-stage {
+  isolation: isolate;
+}
+
+.operative-stage::before {
+  position: absolute;
+  z-index: -1;
+  right: 8%;
+  bottom: -1rem;
+  width: 12rem;
+  height: 5rem;
+  border: 1px solid rgba(159, 239, 0, 0.16);
+  border-radius: 50%;
+  content: "";
+  transform: rotate(-8deg);
+  animation: operativeOrbit 7s ease-in-out infinite;
+}
+
+.operative-art {
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.36));
+  animation: operativeFloat 6s ease-in-out infinite;
+}
+
+.home-operative-watermark {
+  opacity: 0.1;
+  mix-blend-mode: screen;
+  filter: saturate(0.58);
+  pointer-events: none;
+  animation: operativeFloat 6s ease-in-out infinite;
+}
+
+.leaderboard-operative-watermark {
+  opacity: 0.09;
+  mix-blend-mode: screen;
+  filter: saturate(0.62);
+}
+
+.challenge-figure {
+  mix-blend-mode: screen;
+  filter: saturate(0.72);
+}
+
+.challenge-operative-dock {
+  position: fixed;
+  z-index: 40;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  width: clamp(6rem, 10vw, 9rem);
+  pointer-events: none;
+}
+
+.operative-callout {
+  padding: 0.625rem 0.75rem;
+  border-left: 2px solid var(--primary);
+  background: linear-gradient(90deg, rgba(20, 29, 43, 0.92), rgba(20, 29, 43, 0));
+}
+
+.operative-dialogue {
+  position: relative;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--border-hover);
+  border-radius: 0.75rem 0.75rem 0.75rem 0.25rem;
+  background: linear-gradient(135deg, rgba(36, 47, 63, 0.92), rgba(26, 35, 50, 0.96));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+.operative-dialogue::after {
+  position: absolute;
+  right: -0.75rem;
+  bottom: 1.25rem;
+  width: 0.8rem;
+  height: 1.2rem;
+  background: #202B3C;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  content: "";
+}
+
+@media (max-width: 639px) {
+  .operative-dialogue {
+    padding: 0.75rem;
+  }
+}
+
+.operative-stage::after {
+  position: absolute;
+  z-index: 2;
+  top: 37%;
+  right: 8%;
+  width: 24%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(159, 239, 0, 0.9), transparent);
+  content: "";
+  pointer-events: none;
+  animation: visorScan 4.5s ease-in-out infinite;
+}
 @media (min-width: 640px) {
   .app-container {
     padding-left: 2rem;
@@ -575,4 +675,19 @@ tbody tr:hover {
 
 .animate-scan-line {
   animation: scanProgress 2s linear infinite;
+}
+
+@keyframes operativeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes operativeOrbit {
+  0%, 100% { opacity: 0.35; transform: rotate(-8deg) scale(0.98); }
+  50% { opacity: 0.8; transform: rotate(2deg) scale(1.03); }
+}
+
+@keyframes visorScan {
+  0%, 100% { opacity: 0.15; transform: translateY(-10px); }
+  50% { opacity: 0.9; transform: translateY(10px); }
 }

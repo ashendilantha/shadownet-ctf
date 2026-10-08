@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import OperativeArtwork from '@/components/OperativeArtwork';
 
 interface LeaderboardEntry {
   rank: number;
@@ -39,10 +40,16 @@ export default function LeaderboardPage() {
   const totalBountyAwarded = leaderboard.reduce((acc, curr) => acc + curr.total_points, 0);
 
   return (
-    <div className="w-full space-y-5 sm:space-y-6">
+    <div className="relative isolate w-full space-y-5 sm:space-y-6">
+      <OperativeArtwork
+        sizes="(max-width: 640px) 256px, (max-width: 1024px) 320px, 432px"
+        loading="eager"
+        className="leaderboard-operative-watermark pointer-events-none absolute left-1/2 top-1/2 z-20 w-[clamp(16rem,30vw,27rem)] h-auto -translate-x-1/2 -translate-y-1/2"
+      />
+
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
-        <div>
+      <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-[#0E1217] border border-[#232B36] rounded-xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.35)] overflow-hidden">
+        <div className="relative z-10">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-[#141920] border border-[#232B36] rounded-full text-[11px] font-mono text-[#FF8533] mb-2 font-bold">
             <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
             <span>Live Operative Telemetry</span>
@@ -56,7 +63,7 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Global Standings Metrics */}
-        <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+        <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
           <div className="bg-[#141920] border border-[#232B36] rounded-lg px-4 py-2.5 text-right min-w-[120px]">
             <span className="text-[10px] font-mono text-[#8B949E] block">Operatives</span>
             <span className="font-mono text-lg sm:text-xl font-black text-[#FF8533]">
