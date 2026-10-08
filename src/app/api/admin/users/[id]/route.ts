@@ -41,9 +41,9 @@ export async function GET(
     // 3. Fetch all submissions for this user
     const { data: submissions } = await supabase
       .from('submissions')
-      .select('id, challenge_id, submitted_flag, is_correct, created_at')
+      .select('id, challenge_id, submitted_flag, is_correct, submitted_at')
       .eq('user_id', id)
-      .order('created_at', { ascending: false });
+      .order('submitted_at', { ascending: false });
 
     // 4. Fetch all challenges to enrich solve & submission records
     const { data: challenges } = await supabase
@@ -51,12 +51,12 @@ export async function GET(
       .select('id, name, stage_number, points, domain, difficulty');
 
     const chalMap = new Map<number, any>();
-    (challenges || []).forEach((c) => chalMap.set(c.id, c));
+    (challenges || []).forEach((c) => chalMap.set(Number(c.id), c));
 
     // Solved challenges list
     const solvedSubmissions = (submissions || []).filter((s) => s.is_correct);
     const solvedChallenges = solvedSubmissions.map((s) => {
-      const chal = chalMap.get(s.challenge_id);
+      const chal = chalMap.get(Number(s.challenge_id));
       return {
         challenge_id: s.challenge_id,
         name: chal?.name || `Stage #${s.challenge_id}`,
@@ -64,13 +64,13 @@ export async function GET(
         points: chal?.points || 0,
         domain: chal?.domain || 'Unknown',
         difficulty: chal?.difficulty || 'Unknown',
-        solved_at: s.created_at,
+        solved_at: s.submitted_at,
       };
     });
 
     // Enriched submission audit for this specific user
     const enrichedSubmissions = (submissions || []).map((s) => {
-      const chal = chalMap.get(s.challenge_id);
+      const chal = chalMap.get(Number(s.challenge_id));
       return {
         id: s.id,
         challenge_id: s.challenge_id,
@@ -78,7 +78,8 @@ export async function GET(
         stage_number: chal?.stage_number || s.challenge_id,
         submitted_flag: s.submitted_flag,
         is_correct: s.is_correct,
-        created_at: s.created_at,
+        created_at: s.submitted_at,
+        submitted_at: s.submitted_at,
       };
     });
 

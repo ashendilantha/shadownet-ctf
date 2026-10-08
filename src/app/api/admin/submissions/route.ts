@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
 
     const { data: submissions, error } = await supabase
       .from('submissions')
-      .select('id, user_id, challenge_id, submitted_flag, is_correct, created_at')
-      .order('created_at', { ascending: false })
+      .select('id, user_id, challenge_id, submitted_flag, is_correct, submitted_at')
+      .order('submitted_at', { ascending: false })
       .limit(100);
 
     if (error) {
@@ -38,10 +38,10 @@ export async function GET(request: NextRequest) {
       .select('id, name, stage_number');
 
     const chalMap = new Map<number, { name: string; stage_number: number }>();
-    (challenges || []).forEach((c) => chalMap.set(c.id, { name: c.name, stage_number: c.stage_number }));
+    (challenges || []).forEach((c) => chalMap.set(Number(c.id), { name: c.name, stage_number: c.stage_number }));
 
     const formatted = (submissions || []).map((s) => {
-      const chal = chalMap.get(s.challenge_id);
+      const chal = chalMap.get(Number(s.challenge_id));
       return {
         id: s.id,
         user_id: s.user_id,
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
         stage_number: chal ? chal.stage_number : s.challenge_id,
         submitted_flag: s.submitted_flag,
         is_correct: s.is_correct,
-        created_at: s.created_at,
+        created_at: s.submitted_at,
+        submitted_at: s.submitted_at,
       };
     });
 

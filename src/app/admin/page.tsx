@@ -66,12 +66,25 @@ interface OperativeDossier extends Operative {
 
 interface SubmissionLog {
   id: string | number;
+  user_id?: string;
   username: string;
+  challenge_id?: number;
   challenge_name: string;
   stage_number: number;
   submitted_flag: string;
   is_correct: boolean;
-  created_at: string;
+  submitted_at?: string;
+  created_at?: string;
+}
+
+function formatTimestamp(ts?: string | null, withDate = true): string {
+  if (!ts) return 'N/A';
+  try {
+    const d = new Date(ts);
+    return isNaN(d.getTime()) ? 'N/A' : (withDate ? d.toLocaleString() : d.toLocaleTimeString());
+  } catch {
+    return 'N/A';
+  }
 }
 
 export default function AdminPage() {
@@ -173,13 +186,27 @@ export default function AdminPage() {
     }
   };
 
+  const handleRefreshAll = async () => {
+    setLoadingAction(true);
+    await Promise.allSettled([
+      fetchOverview(),
+      fetchChallenges(),
+      fetchOperatives(),
+      fetchSubmissions(),
+    ]);
+    setLoadingAction(false);
+  };
+
   useEffect(() => {
     if (!currentUser?.is_admin) return;
 
-    if (activeTab === 'overview') fetchOverview();
-    if (activeTab === 'challenges') fetchChallenges();
-    if (activeTab === 'operatives') fetchOperatives();
-    if (activeTab === 'submissions') fetchSubmissions();
+    fetchOverview();
+    fetchChallenges();
+    fetchOperatives();
+
+    if (activeTab === 'submissions') {
+      fetchSubmissions();
+    }
   }, [activeTab, currentUser]);
 
   const showNotification = (msg: string, isErr = false) => {
@@ -496,12 +523,7 @@ export default function AdminPage() {
               CORE_ENGINE: ARMED
             </div>
             <button
-              onClick={() => {
-                if (activeTab === 'overview') fetchOverview();
-                if (activeTab === 'challenges') fetchChallenges();
-                if (activeTab === 'operatives') fetchOperatives();
-                if (activeTab === 'submissions') fetchSubmissions();
-              }}
+              onClick={handleRefreshAll}
               disabled={loadingAction}
               className="btn-secondary text-xs font-mono px-4 py-2 flex items-center gap-2"
             >
@@ -671,7 +693,7 @@ export default function AdminPage() {
                     recentLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-[#171B20]/40 transition-colors">
                         <td className="py-3 text-[#8B949E]">
-                          {new Date(log.created_at).toLocaleTimeString()}
+                          {formatTimestamp(log.submitted_at || log.created_at, false)}
                         </td>
                         <td className="py-3 text-[#F5F5F5] font-bold">
                           {log.username}
@@ -1205,7 +1227,7 @@ export default function AdminPage() {
                 <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30]">
                   <div className="text-[#8B949E] mb-1">LAST SUBMISSION</div>
                   <div className="text-xs font-bold text-[#F5F5F5] truncate mt-1">
-                    {selectedDossier.last_submission_at ? new Date(selectedDossier.last_submission_at).toLocaleString() : 'Never'}
+                    {formatTimestamp(selectedDossier.last_submission_at, true)}
                   </div>
                 </div>
               </div>
@@ -1225,7 +1247,7 @@ export default function AdminPage() {
                       <div key={sc.challenge_id} className="p-3 rounded-xl bg-[#171B20] border border-[#22C55E]/30 flex items-center justify-between">
                         <div>
                           <div className="text-[#F5F5F5] font-bold">Stage {sc.stage_number}: {sc.name}</div>
-                          <div className="text-[10px] text-[#8B949E]">{sc.domain} • Solved: {new Date(sc.solved_at).toLocaleTimeString()}</div>
+                          <div className="text-[10px] text-[#8B949E]">{sc.domain} • Solved: {formatTimestamp(sc.solved_at, false)}</div>
                         </div>
                         <span className="text-[#FF6B00] font-bold">+{sc.points} XP</span>
                       </div>
@@ -1255,10 +1277,10 @@ export default function AdminPage() {
                           <td colSpan={4} className="p-4 text-center text-[#8B949E]">No attempts logged.</td>
                         </tr>
                       ) : (
-                        selectedDossier.submission_history.map((sub) => (
+                        selectedDossier.submission_history.map((sub: any) => (
                           <tr key={sub.id} className="hover:bg-[#111417]/50">
                             <td className="p-2.5 text-[#8B949E] whitespace-nowrap">
-                              {new Date(sub.created_at).toLocaleTimeString()}
+                              {formatTimestamp(sub.submitted_at || sub.created_at, false)}
                             </td>
                             <td className="p-2.5 text-[#FF8533]">
                               Stage {sub.stage_number}
@@ -1416,7 +1438,7 @@ export default function AdminPage() {
                   submissions.map((sub) => (
                     <tr key={sub.id} className="hover:bg-[#171B20]/40 transition-colors">
                       <td className="py-3 text-[#8B949E] whitespace-nowrap">
-                        {new Date(sub.created_at).toLocaleString()}
+                        {formatTimestamp(sub.submitted_at || sub.created_at, true)}
                       </td>
                       <td className="py-3 text-[#F5F5F5] font-bold">
                         {sub.username}

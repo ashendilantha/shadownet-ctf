@@ -89,12 +89,17 @@ export async function POST(request: NextRequest) {
     const isCorrect = submittedHash === challenge.flag_hash;
 
     // Record submission
-    await supabase.from('submissions').insert({
+    const { error: insertError } = await supabase.from('submissions').insert({
       user_id: user.sub,
-      challenge_id,
+      challenge_id: Number(challenge_id),
       submitted_flag: flag.trim(),
       is_correct: isCorrect,
+      submitted_at: new Date().toISOString(),
     });
+
+    if (insertError) {
+      console.error('Failed to record submission in database:', insertError);
+    }
 
     if (isCorrect) {
       // Get current score

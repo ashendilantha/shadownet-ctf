@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
     // 4. Recent submissions with user and challenge details
     const { data: recentSubmissionsRaw } = await supabase
       .from('submissions')
-      .select('id, user_id, challenge_id, submitted_flag, is_correct, created_at')
-      .order('created_at', { ascending: false })
+      .select('id, user_id, challenge_id, submitted_flag, is_correct, submitted_at')
+      .order('submitted_at', { ascending: false })
       .limit(10);
 
     // Fetch user map and challenge map for formatting
@@ -71,10 +71,11 @@ export async function GET(request: NextRequest) {
       user_id: s.user_id,
       username: userMap.get(s.user_id) || 'Unknown Operative',
       challenge_id: s.challenge_id,
-      challenge_name: challengeMap.get(s.challenge_id) || `Stage #${s.challenge_id}`,
+      challenge_name: challengeMap.get(Number(s.challenge_id)) || `Stage #${s.challenge_id}`,
       submitted_flag: s.submitted_flag,
       is_correct: s.is_correct,
-      created_at: s.created_at,
+      created_at: s.submitted_at,
+      submitted_at: s.submitted_at,
     }));
 
     // 5. System Health / Overview summary
