@@ -57,7 +57,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#080A0D]/95 border-b border-[#232B36] backdrop-blur-md">
+    <header className="site-header sticky top-0 z-50 w-full border-b backdrop-blur-md">
       <div className="w-full app-container">
         <div className="flex items-center justify-between h-16">
           {/* Left: Brand Logo & Main Nav Links */}

@@ -42,7 +42,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-container">
       <div className="max-w-md w-full cyber-panel rounded-xl p-6 sm:p-8 relative overflow-hidden bg-[#0E1217] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#FF9F43] to-[#10B981]"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#9FEF00] via-[#9FEF00] to-[#9FEF00]"></div>
 
         <div className="text-center mb-6">
           <div className="inline-flex w-12 h-12 rounded-lg bg-[#141920] border border-[#FF6B00]/40 items-center justify-center font-mono font-bold text-[#FF6B00] text-xl mb-3 shadow-[0_0_12px_rgba(255,107,0,0.2)]">

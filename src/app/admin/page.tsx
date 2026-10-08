@@ -444,7 +444,7 @@ export default function AdminPage() {
 
   // 4. Admin Dashboard
   return (
-    <div className="w-full app-container py-8 sm:py-12">
+    <div className="admin-console w-full py-6 sm:py-9">
       {/* Notifications */}
       {actionMessage && (
         <div className="mb-6 p-4 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/40 font-mono text-xs text-[#22C55E] flex items-center justify-between shadow-[0_0_20px_rgba(34,197,94,0.15)] animate-fade-in">
@@ -467,7 +467,7 @@ export default function AdminPage() {
 
       {/* Header Bar */}
       <div className="p-6 sm:p-8 rounded-2xl bg-[#111417] border border-[#252A30] mb-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#EF4444] to-[#FF8533]"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#9FEF00] via-[#9FEF00] to-[#9FEF00]"></div>
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
@@ -515,51 +515,36 @@ export default function AdminPage() {
       <div className="flex flex-wrap gap-2 border-b border-[#252A30] pb-4 mb-8 font-mono text-xs">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2.5 rounded-xl font-bold tracking-wider transition-all ${
-            activeTab === 'overview'
-              ? 'bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/50 shadow-[0_0_12px_rgba(255,107,0,0.2)]'
-              : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#171B20]'
-          }`}
+          aria-pressed={activeTab === 'overview'}
+          className="admin-tab"
         >
           📊 TELEMETRY OVERVIEW
         </button>
         <button
           onClick={() => setActiveTab('challenges')}
-          className={`px-4 py-2.5 rounded-xl font-bold tracking-wider transition-all ${
-            activeTab === 'challenges'
-              ? 'bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/50 shadow-[0_0_12px_rgba(255,107,0,0.2)]'
-              : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#171B20]'
-          }`}
+          aria-pressed={activeTab === 'challenges'}
+          className="admin-tab"
         >
           🎯 MANAGE CHALLENGES ({challenges.length})
         </button>
         <button
           onClick={() => setActiveTab('operatives')}
-          className={`px-4 py-2.5 rounded-xl font-bold tracking-wider transition-all ${
-            activeTab === 'operatives'
-              ? 'bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/50 shadow-[0_0_12px_rgba(255,107,0,0.2)]'
-              : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#171B20]'
-          }`}
+          aria-pressed={activeTab === 'operatives'}
+          className="admin-tab"
         >
           👥 MANAGE OPERATIVES ({operatives.length})
         </button>
         <button
           onClick={() => setActiveTab('submissions')}
-          className={`px-4 py-2.5 rounded-xl font-bold tracking-wider transition-all ${
-            activeTab === 'submissions'
-              ? 'bg-[#FF6B00]/20 text-[#FF6B00] border border-[#FF6B00]/50 shadow-[0_0_12px_rgba(255,107,0,0.2)]'
-              : 'text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#171B20]'
-          }`}
+          aria-pressed={activeTab === 'submissions'}
+          className="admin-tab"
         >
           📋 SUBMISSIONS AUDIT
         </button>
         <button
           onClick={() => setActiveTab('danger')}
-          className={`px-4 py-2.5 rounded-xl font-bold tracking-wider transition-all ${
-            activeTab === 'danger'
-              ? 'bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/50 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
-              : 'text-[#EF4444]/70 hover:text-[#EF4444] hover:bg-[#EF4444]/10'
-          }`}
+          aria-pressed={activeTab === 'danger'}
+          className="admin-tab admin-tab--danger"
         >
           ⚠️ DANGER ZONE
         </button>

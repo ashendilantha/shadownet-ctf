@@ -73,7 +73,7 @@ export default function ChallengeCard({ challenge, onInfiltrate }: ChallengeCard
             ? 'bg-[#10B981]'
             : isLocked
             ? 'bg-[#232B36]'
-            : 'bg-gradient-to-r from-[#FF6B00] via-[#FF9F43] to-transparent'
+            : 'bg-gradient-to-r from-[#9FEF00] via-[#9FEF00] to-transparent'
         }`}
       ></div>
 

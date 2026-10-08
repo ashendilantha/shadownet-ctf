@@ -114,7 +114,7 @@ export default function AttackVectorModal({
       {/* Top 3-Second Progress Bar */}
       <div className="h-1.5 w-full bg-[#0E131A] flex-shrink-0">
         <div
-          className="h-full bg-gradient-to-r from-[#FF6B00] via-[#FF9F43] to-[#10B981] transition-all duration-100 ease-linear shadow-[0_0_12px_rgba(255,107,0,0.6)]"
+          className="h-full bg-gradient-to-r from-[#9FEF00] via-[#9FEF00] to-[#9FEF00] transition-all duration-100 ease-linear shadow-[0_0_12px_rgba(159,239,0,0.3)]"
           style={{ width: `${progressPercent}%` }}
         ></div>
       </div>
