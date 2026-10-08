@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { STAGE_CONFIGS, StageInfo } from '@/lib/constants';
 
 interface AttackVectorModalProps {
@@ -24,7 +25,12 @@ export default function AttackVectorModal({
   const stageConfig: StageInfo | undefined = STAGE_CONFIGS[stageNumber];
   const [logIndex, setLogIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(3.0);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const terminalBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
 
   const logs = stageConfig?.attackSimSteps || [
     { text: `[INIT] Target host mapped: NexaCorp Stage 0${stageNumber}`, type: 'info' },
@@ -99,12 +105,12 @@ export default function AttackVectorModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose, onProceed]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !portalContainer) return null;
 
   const progressPercent = Math.min(100, Math.round(((3.0 - timeLeft) / 3.0) * 100));
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#030508] text-[#F5F5F5] font-mono overflow-hidden animate-fade-in select-none">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] h-dvh flex flex-col bg-[#030508] text-[#F5F5F5] font-mono overflow-hidden animate-fade-in select-none">
       {/* Top 3-Second Progress Bar */}
       <div className="h-1.5 w-full bg-[#0E131A] flex-shrink-0">
         <div
@@ -239,6 +245,7 @@ export default function AttackVectorModal({
           <span>PRESS <strong className="text-[#8B949E]">[ESC]</strong> TO ABORT</span>
         </div>
       </footer>
-    </div>
+    </div>,
+    portalContainer,
   );
 }
