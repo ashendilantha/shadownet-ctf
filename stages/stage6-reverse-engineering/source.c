@@ -32,6 +32,8 @@ int check_access(const char *input) {
     return 1;
 }
 
+//SHADOWNET{you_found_the_flag!_congratulations!}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: %s <access_code>\n", argv[0]);
