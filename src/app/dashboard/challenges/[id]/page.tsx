@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
-import OperativeArtwork from '@/components/OperativeArtwork';
+import FieldCompanion from '@/components/FieldCompanion';
 import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
@@ -284,12 +284,7 @@ export default function ChallengeDetailPage({
               )}
             </div>
 
-            <div className="challenge-operative-dock" aria-hidden="true">
-              <OperativeArtwork
-                sizes="(max-width: 640px) 96px, 144px"
-                className="challenge-figure h-auto w-full object-contain"
-              />
-            </div>
+            <FieldCompanion />
           </div>
 
           {/* Downloadable Assets Deck for Stage 2 */}
