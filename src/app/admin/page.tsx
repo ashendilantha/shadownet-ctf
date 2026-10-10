@@ -16,6 +16,14 @@ interface OverviewStats {
   solveRate: number;
 }
 
+interface Hint {
+  id: number;
+  challenge_id: number;
+  hint_level: number;
+  hint_text: string;
+  point_penalty: number;
+}
+
 interface Challenge {
   id: number;
   name: string;
@@ -27,7 +35,8 @@ interface Challenge {
   stage_number: number;
   is_active: boolean;
   flag_hash?: string;
-  hints?: Array<{ id: number; hint_level: number; hint_text: string }>;
+  hints?: Hint[];
+  default_hints?: Hint[];
 }
 
 interface Operative {
@@ -113,7 +122,19 @@ export default function AdminPage() {
     description: '',
     raw_flag: '',
     is_active: true,
+    initial_hint_text: '',
+    initial_hint_cost: 40,
   });
+
+  // Hints Management State
+  const [activeHintChallengeId, setActiveHintChallengeId] = useState<number | null>(null);
+  const [showAddHintFor, setShowAddHintFor] = useState<number | null>(null);
+  const [newHintForm, setNewHintForm] = useState({
+    hint_level: 1,
+    hint_text: '',
+    point_penalty: 40,
+  });
+  const [editingHint, setEditingHint] = useState<Hint | null>(null);
 
   // Operatives Data
   const [operatives, setOperatives] = useState<Operative[]>([]);
@@ -357,7 +378,27 @@ export default function AdminPage() {
     e.preventDefault();
     try {
       setLoadingAction(true);
-      await axios.post('/api/admin/challenges', newChallengeForm);
+      const payload: any = {
+        name: newChallengeForm.name,
+        stage_number: newChallengeForm.stage_number,
+        domain: newChallengeForm.domain,
+        difficulty: newChallengeForm.difficulty,
+        points: newChallengeForm.points,
+        delivery_method: newChallengeForm.delivery_method,
+        description: newChallengeForm.description,
+        raw_flag: newChallengeForm.raw_flag,
+        is_active: newChallengeForm.is_active,
+      };
+      if (newChallengeForm.initial_hint_text && newChallengeForm.initial_hint_text.trim()) {
+        payload.hints = [
+          {
+            hint_level: 1,
+            hint_text: newChallengeForm.initial_hint_text.trim(),
+            point_penalty: newChallengeForm.initial_hint_cost,
+          },
+        ];
+      }
+      await axios.post('/api/admin/challenges', payload);
       showNotification(`New challenge "${newChallengeForm.name}" created successfully!`);
       setShowCreateChallengeModal(false);
       setNewChallengeForm({
@@ -370,6 +411,8 @@ export default function AdminPage() {
         description: '',
         raw_flag: '',
         is_active: true,
+        initial_hint_text: '',
+        initial_hint_cost: 40,
       });
       fetchChallenges();
     } catch (err: any) {
@@ -393,6 +436,97 @@ export default function AdminPage() {
       fetchChallenges();
     } catch (err: any) {
       showNotification(err.response?.data?.error || 'Failed to delete challenge', true);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  // Add Hint to a Challenge
+  const handleAddHint = async (challengeId: number) => {
+    if (!newHintForm.hint_text.trim()) {
+      showNotification('Hint text cannot be empty', true);
+      return;
+    }
+    try {
+      setLoadingAction(true);
+      const res = await axios.post('/api/admin/hints', {
+        challenge_id: challengeId,
+        hint_level: newHintForm.hint_level,
+        hint_text: newHintForm.hint_text.trim(),
+        point_penalty: newHintForm.point_penalty,
+      });
+      showNotification(res.data.message || 'Hint added successfully');
+      setShowAddHintFor(null);
+      setNewHintForm({
+        hint_level: 1,
+        hint_text: '',
+        point_penalty: 40,
+      });
+      fetchChallenges();
+    } catch (err: any) {
+      showNotification(err.response?.data?.error || 'Failed to add hint', true);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  // Update existing Hint
+  const handleUpdateHint = async () => {
+    if (!editingHint || !editingHint.hint_text.trim()) {
+      showNotification('Hint text cannot be empty', true);
+      return;
+    }
+    try {
+      setLoadingAction(true);
+      const res = await axios.patch('/api/admin/hints', {
+        id: editingHint.id,
+        hint_level: editingHint.hint_level,
+        hint_text: editingHint.hint_text.trim(),
+        point_penalty: editingHint.point_penalty,
+      });
+      showNotification(res.data.message || 'Hint updated successfully');
+      setEditingHint(null);
+      fetchChallenges();
+    } catch (err: any) {
+      showNotification(err.response?.data?.error || 'Failed to update hint', true);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  // Delete Hint
+  const handleDeleteHint = async (hintId: number, hintLevel: number) => {
+    const confirmed = window.confirm(`Are you sure you want to delete Hint #${hintLevel}?`);
+    if (!confirmed) return;
+    try {
+      setLoadingAction(true);
+      const res = await axios.delete(`/api/admin/hints?id=${hintId}`);
+      showNotification(res.data.message || 'Hint deleted successfully');
+      fetchChallenges();
+    } catch (err: any) {
+      showNotification(err.response?.data?.error || 'Failed to delete hint', true);
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
+  // Import Default Hints for a Stage
+  const handleImportDefaultHints = async (challengeId: number, stageNumber: number) => {
+    const confirmed = window.confirm(
+      `Import predefined default hints for Stage 0${stageNumber} into the database? Operatives will immediately have access to them.`
+    );
+    if (!confirmed) return;
+    try {
+      setLoadingAction(true);
+      const res = await axios.post('/api/admin/hints', {
+        challenge_id: challengeId,
+        stage_number: stageNumber,
+        action: 'import_defaults',
+      });
+      showNotification(res.data.message || 'Default hints imported');
+      fetchChallenges();
+    } catch (err: any) {
+      showNotification(err.response?.data?.error || 'Failed to import default hints', true);
     } finally {
       setLoadingAction(false);
     }
@@ -749,6 +883,8 @@ export default function AdminPage() {
                   description: '',
                   raw_flag: '',
                   is_active: true,
+                  initial_hint_text: '',
+                  initial_hint_cost: 40,
                 });
                 setShowCreateChallengeModal(true);
               }}
@@ -873,6 +1009,43 @@ export default function AdminPage() {
                   />
                 </div>
 
+                {/* Optional Initial Tactical Hint */}
+                <div className="p-4 rounded-xl bg-[#171B20] border border-[#252A30] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-mono font-bold text-[#FF8533]">
+                      💡 INITIAL TACTICAL HINT (OPTIONAL)
+                    </label>
+                    <span className="text-[10px] font-mono text-[#8B949E]">
+                      You can also add or edit hints anytime from the challenge card
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 font-mono text-xs">
+                    <div className="sm:col-span-3">
+                      <label className="block text-[#8B949E] mb-1">HINT INTEL DESCRIPTION</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Inspect the hidden metadata inside public download files..."
+                        value={newChallengeForm.initial_hint_text}
+                        onChange={(e) => setNewChallengeForm({ ...newChallengeForm, initial_hint_text: e.target.value })}
+                        className="cyber-input text-xs font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8B949E] mb-1">XP COST (PENALTY)</label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={0}
+                          value={newChallengeForm.initial_hint_cost}
+                          onChange={(e) => setNewChallengeForm({ ...newChallengeForm, initial_hint_cost: parseInt(e.target.value) || 0 })}
+                          className="cyber-input text-xs"
+                        />
+                        <span className="text-[11px] text-[#F59E0B] font-bold">XP</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-3 pt-2">
                   <button
                     type="submit"
@@ -901,53 +1074,60 @@ export default function AdminPage() {
               return (
                 <div
                   key={c.id}
-                  className="p-6 rounded-2xl bg-[#111417] border border-[#252A30] flex flex-col lg:flex-row lg:items-start justify-between gap-6"
+                  className="p-6 rounded-2xl bg-[#111417] border border-[#252A30] flex flex-col gap-6"
                 >
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                      <span className="px-2.5 py-0.5 rounded-lg bg-[#FF6B00]/15 border border-[#FF6B00]/40 text-xs font-mono font-bold text-[#FF6B00]">
-                        STAGE {c.stage_number}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#8B949E]">
-                        {c.domain}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#FF8533]">
-                        {c.delivery_method}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
-                          c.is_active
-                            ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40'
-                            : 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/40'
-                        }`}
-                      >
-                        {c.is_active ? 'ACTIVE' : 'DEACTIVATED'}
-                      </span>
-                    </div>
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-[#FF6B00]/15 border border-[#FF6B00]/40 text-xs font-mono font-bold text-[#FF6B00]">
+                          STAGE {c.stage_number}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#8B949E]">
+                          {c.domain}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#FF8533]">
+                          {c.delivery_method}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-[11px] font-mono text-[#F59E0B] flex items-center gap-1 font-bold">
+                          💡 {c.hints?.length || 0} HINT{c.hints?.length === 1 ? '' : 'S'}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                            c.is_active
+                              ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/40'
+                              : 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/40'
+                          }`}
+                        >
+                          {c.is_active ? 'ACTIVE' : 'DEACTIVATED'}
+                        </span>
+                      </div>
 
-                    {!isEditing ? (
-                      <>
-                        <h3 className="text-lg font-mono font-bold text-[#F5F5F5]">
-                          {c.name}
-                        </h3>
-                        <p className="text-xs text-[#8B949E] mt-1 max-w-3xl font-sans">
-                          {c.description}
-                        </p>
+                      {!isEditing ? (
+                        <>
+                          <h3 className="text-lg font-mono font-bold text-[#F5F5F5]">
+                            {c.name}
+                          </h3>
+                          <p className="text-xs text-[#8B949E] mt-1 max-w-3xl font-sans">
+                            {c.description}
+                          </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-4 text-xs font-mono text-[#8B949E]">
-                          <div>
-                            REWARD: <span className="text-[#FF6B00] font-bold">{c.points} XP</span>
-                          </div>
-                          <div>
-                            DIFFICULTY: <span className="text-[#F5F5F5] uppercase">{c.difficulty}</span>
-                          </div>
-                          {c.flag_hash && (
-                            <div className="text-[11px] text-[#8B949E] truncate max-w-sm">
-                              HASH: <span className="text-[#FF8533]">{c.flag_hash.substring(0, 16)}...</span>
+                          <div className="mt-3 flex flex-wrap items-center gap-4 text-xs font-mono text-[#8B949E]">
+                            <div>
+                              REWARD: <span className="text-[#FF6B00] font-bold">{c.points} XP</span>
                             </div>
-                          )}
-                        </div>
-                      </>
+                            <div>
+                              DIFFICULTY: <span className="text-[#F5F5F5] uppercase">{c.difficulty}</span>
+                            </div>
+                            <div>
+                              INTEL HINTS: <span className="text-[#F59E0B] font-bold">{c.hints?.length || 0}</span>
+                            </div>
+                            {c.flag_hash && (
+                              <div className="text-[11px] text-[#8B949E] truncate max-w-sm">
+                                HASH: <span className="text-[#FF8533]">{c.flag_hash.substring(0, 16)}...</span>
+                              </div>
+                            )}
+                          </div>
+                        </>
                     ) : (
                       /* Full Edit Form */
                       <div className="mt-2 p-5 rounded-xl bg-[#171B20] border border-[#FF6B00]/40 space-y-4">
@@ -1117,6 +1297,27 @@ export default function AdminPage() {
                     </button>
 
                     <button
+                      onClick={() => {
+                        if (activeHintChallengeId === c.id) {
+                          setActiveHintChallengeId(null);
+                          setShowAddHintFor(null);
+                          setEditingHint(null);
+                        } else {
+                          setActiveHintChallengeId(c.id);
+                          setShowAddHintFor(null);
+                          setEditingHint(null);
+                        }
+                      }}
+                      className={`w-full text-xs font-mono font-bold px-4 py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                        activeHintChallengeId === c.id
+                          ? 'bg-[#F59E0B] text-[#080A0D] shadow-[0_0_15px_rgba(245,158,11,0.35)]'
+                          : 'bg-[#F59E0B]/15 hover:bg-[#F59E0B]/25 text-[#F59E0B] border border-[#F59E0B]/40'
+                      }`}
+                    >
+                      💡 HINTS ({c.hints?.length || 0})
+                    </button>
+
+                    <button
                       onClick={() => handleDeleteChallenge(c.id, c.name)}
                       disabled={loadingAction}
                       className="w-full text-xs font-mono text-[#8B949E] hover:text-[#EF4444] px-4 py-1.5 hover:bg-[#EF4444]/10 rounded-lg transition-colors"
@@ -1125,6 +1326,334 @@ export default function AdminPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* TACTICAL HINTS & XP COST CONFIGURATION PANEL */}
+                {activeHintChallengeId === c.id && (
+                  <div className="p-5 rounded-2xl bg-[#0E1217] border border-[#F59E0B]/40 space-y-5 shadow-[0_0_30px_rgba(245,158,11,0.1)] animate-fade-in">
+                    {/* Hints Section Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#252A30] pb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#F59E0B] text-base">💡</span>
+                          <h4 className="font-mono text-sm font-bold text-[#F5F5F5]">
+                            STAGE 0{c.stage_number} TACTICAL INTEL & HINT MATRIX
+                          </h4>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/40">
+                            {c.hints?.length || 0} HINT{c.hints?.length === 1 ? '' : 'S'} CONFIGURED
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#8B949E] font-sans mt-0.5">
+                          Add tactical intel hints and configure how much XP is deducted from the player when decrypted.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(c.hints?.length || 0) === 0 && (c.default_hints?.length || 0) > 0 && (
+                          <button
+                            onClick={() => handleImportDefaultHints(c.id, c.stage_number)}
+                            disabled={loadingAction}
+                            className="btn-secondary text-[11px] font-mono px-3 py-1.5 flex items-center gap-1.5 text-[#F59E0B] border-[#F59E0B]/40 hover:border-[#F59E0B]"
+                            title="Import hardcoded stage hints into the database to edit or expand them"
+                          >
+                            📥 IMPORT DEFAULTS ({c.default_hints?.length})
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            if (showAddHintFor === c.id) {
+                              setShowAddHintFor(null);
+                            } else {
+                              setShowAddHintFor(c.id);
+                              setEditingHint(null);
+                              setNewHintForm({
+                                hint_level: (c.hints?.length || 0) + 1,
+                                hint_text: '',
+                                point_penalty: 40,
+                              });
+                            }
+                          }}
+                          className="btn-primary text-[11px] font-mono font-bold px-3 py-1.5 flex items-center gap-1.5"
+                        >
+                          {showAddHintFor === c.id ? '✕ CANCEL ADD' : '➕ ADD NEW HINT'}
+                        </button>
+
+                        <button
+                          onClick={() => setActiveHintChallengeId(null)}
+                          className="text-xs text-[#8B949E] hover:text-[#F5F5F5] px-2 py-1 font-mono"
+                        >
+                          ✕ CLOSE
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* ADD NEW HINT FORM */}
+                    {showAddHintFor === c.id && (
+                      <div className="p-4 rounded-xl bg-[#171B20] border border-[#FF6B00]/40 space-y-3 animate-fade-in shadow-[0_0_20px_rgba(255,107,0,0.1)]">
+                        <div className="flex items-center justify-between border-b border-[#252A30] pb-2">
+                          <span className="text-xs font-mono font-bold text-[#FF8533] flex items-center gap-1.5">
+                            <span>➕</span> ADD HINT FOR STAGE {c.stage_number}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#8B949E]">
+                            SPECIFY INTEL & DEDUCTION COST
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                          <div>
+                            <label className="block text-[#8B949E] mb-1">HINT LEVEL / ORDER #</label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={newHintForm.hint_level}
+                              onChange={(e) =>
+                                setNewHintForm({
+                                  ...newHintForm,
+                                  hint_level: parseInt(e.target.value) || 1,
+                                })
+                              }
+                              className="cyber-input text-xs"
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="block text-[#8B949E] mb-1">
+                              XP COST (PENALTY AMOUNT)
+                              <span className="text-[#FF8533] ml-1.5 text-[10px] font-normal">
+                                (Deducted from operative score when unlocked)
+                              </span>
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min={0}
+                                value={newHintForm.point_penalty}
+                                onChange={(e) =>
+                                  setNewHintForm({
+                                    ...newHintForm,
+                                    point_penalty: parseInt(e.target.value) || 0,
+                                  })
+                                }
+                                className="cyber-input text-xs"
+                              />
+                              <span className="text-xs font-mono text-[#F59E0B] font-bold whitespace-nowrap">
+                                XP PENALTY
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-[#8B949E] mb-1">
+                            HINT INTEL DESCRIPTION
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder="Write clear tactical intel, command suggestions, or subtle target guidance..."
+                            value={newHintForm.hint_text}
+                            onChange={(e) =>
+                              setNewHintForm({ ...newHintForm, hint_text: e.target.value })
+                            }
+                            className="cyber-input text-xs font-sans"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            onClick={() => handleAddHint(c.id)}
+                            disabled={loadingAction || !newHintForm.hint_text.trim()}
+                            className="btn-primary text-xs px-4 py-2 font-mono font-bold"
+                          >
+                            💾 DEPLOY HINT TO STAGE
+                          </button>
+                          <button
+                            onClick={() => setShowAddHintFor(null)}
+                            className="btn-secondary text-xs px-3 py-2 font-mono"
+                          >
+                            CANCEL
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* HINTS LIST */}
+                    <div className="space-y-2.5">
+                      {(!c.hints || c.hints.length === 0) ? (
+                        <div className="p-6 rounded-xl bg-[#141920] border border-[#252A30] text-center space-y-2">
+                          <div className="text-2xl">🔒</div>
+                          <p className="text-xs font-mono text-[#F5F5F5] font-bold">
+                            No Database Hints Configured for Stage {c.stage_number}
+                          </p>
+                          <p className="text-[11px] text-[#8B949E] font-sans max-w-md mx-auto">
+                            {c.default_hints && c.default_hints.length > 0
+                              ? `There are ${c.default_hints.length} hardcoded fallback hints currently active. You can import them to manage and edit them in the database, or add custom hints.`
+                              : 'Add hints above to assist operatives who get stuck on this challenge.'}
+                          </p>
+                          <div className="flex justify-center gap-2 pt-2">
+                            <button
+                              onClick={() => {
+                                setShowAddHintFor(c.id);
+                                setNewHintForm({
+                                  hint_level: 1,
+                                  hint_text: '',
+                                  point_penalty: 40,
+                                });
+                              }}
+                              className="btn-primary text-xs font-mono px-4 py-2"
+                            >
+                              ➕ ADD FIRST HINT
+                            </button>
+                            {c.default_hints && c.default_hints.length > 0 && (
+                              <button
+                                onClick={() => handleImportDefaultHints(c.id, c.stage_number)}
+                                disabled={loadingAction}
+                                className="btn-secondary text-xs font-mono px-4 py-2 text-[#F59E0B]"
+                              >
+                                📥 IMPORT DEFAULTS ({c.default_hints.length})
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        c.hints.map((hint) => {
+                          const isEditingThisHint = editingHint?.id === hint.id;
+
+                          if (isEditingThisHint && editingHint) {
+                            return (
+                              <div
+                                key={hint.id}
+                                className="p-4 rounded-xl bg-[#171B20] border border-[#F59E0B]/50 space-y-3 animate-fade-in"
+                              >
+                                <div className="flex items-center justify-between border-b border-[#252A30] pb-2 font-mono text-xs">
+                                  <span className="font-bold text-[#F59E0B]">
+                                    ✏️ EDITING HINT #{editingHint.hint_level} (ID: {hint.id})
+                                  </span>
+                                  <button
+                                    onClick={() => setEditingHint(null)}
+                                    className="text-[#8B949E] hover:text-[#F5F5F5]"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                                  <div>
+                                    <label className="block text-[#8B949E] mb-1">HINT LEVEL</label>
+                                    <input
+                                      type="number"
+                                      min={1}
+                                      value={editingHint.hint_level}
+                                      onChange={(e) =>
+                                        setEditingHint({
+                                          ...editingHint,
+                                          hint_level: parseInt(e.target.value) || 1,
+                                        })
+                                      }
+                                      className="cyber-input text-xs"
+                                    />
+                                  </div>
+                                  <div className="sm:col-span-2">
+                                    <label className="block text-[#8B949E] mb-1">XP COST (PENALTY)</label>
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        value={editingHint.point_penalty}
+                                        onChange={(e) =>
+                                          setEditingHint({
+                                            ...editingHint,
+                                            point_penalty: parseInt(e.target.value) || 0,
+                                          })
+                                        }
+                                        className="cyber-input text-xs"
+                                      />
+                                      <span className="text-xs font-mono text-[#F59E0B] font-bold whitespace-nowrap">
+                                        XP PENALTY
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-mono text-[#8B949E] mb-1">
+                                    HINT TEXT
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    value={editingHint.hint_text}
+                                    onChange={(e) =>
+                                      setEditingHint({
+                                        ...editingHint,
+                                        hint_text: e.target.value,
+                                      })
+                                    }
+                                    className="cyber-input text-xs font-sans"
+                                  />
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    onClick={handleUpdateHint}
+                                    disabled={loadingAction || !editingHint.hint_text.trim()}
+                                    className="btn-primary text-xs px-4 py-1.5 font-mono font-bold"
+                                  >
+                                    SAVE HINT
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingHint(null)}
+                                    className="btn-secondary text-xs px-3 py-1.5 font-mono"
+                                  >
+                                    CANCEL
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div
+                              key={hint.id}
+                              className="p-4 rounded-xl bg-[#141920] border border-[#232B36] hover:border-[#F59E0B]/30 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-3"
+                            >
+                              <div className="flex-1 space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="px-2 py-0.5 rounded bg-[#171B20] border border-[#252A30] text-xs font-mono font-bold text-[#F5F5F5]">
+                                    🔒 HINT #{hint.hint_level}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded bg-[#F59E0B]/15 border border-[#F59E0B]/40 text-xs font-mono font-bold text-[#F59E0B] flex items-center gap-1">
+                                    <span>⚡</span> COST: {hint.point_penalty ?? 40} XP
+                                  </span>
+                                </div>
+                                <p className="text-xs text-[#E6EDF3] font-sans leading-relaxed pt-1">
+                                  {hint.hint_text}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                                <button
+                                  onClick={() => {
+                                    setEditingHint({ ...hint });
+                                    setShowAddHintFor(null);
+                                  }}
+                                  className="px-2.5 py-1 rounded bg-[#171B20] hover:bg-[#252A30] border border-[#252A30] text-xs font-mono text-[#8B949E] hover:text-[#F5F5F5] transition-colors"
+                                >
+                                  ✏️ EDIT
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteHint(hint.id, hint.hint_level)}
+                                  disabled={loadingAction}
+                                  className="px-2.5 py-1 rounded bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-xs font-mono text-[#EF4444] transition-colors"
+                                >
+                                  🗑️ REMOVE
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               );
             })}
           </div>

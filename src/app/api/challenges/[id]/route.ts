@@ -97,9 +97,9 @@ export async function GET(
       .eq('challenge_id', challengeId)
       .order('hint_level', { ascending: true });
 
-    // Tactical hints configured for the stage
+    // Tactical hints: prefer custom database hints if present, fallback to static defaults
     const configuredHints = STAGE_CONFIGS[challenge.stage_number]?.hints;
-    const finalHints = (configuredHints && configuredHints.length > 0) ? configuredHints : (hints || []);
+    const finalHints = (hints && hints.length > 0) ? hints : (configuredHints || []);
 
     return NextResponse.json({
       challenge: {

@@ -246,7 +246,7 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     name: 'Binary Disassembly',
     domain: 'Reverse Engineering',
     difficulty: 'Hard',
-    type: 'VM',
+    type: 'Docker',
     points: 350,
     targetSystem: 'NexaCorp Proprietary Defense Daemon (x86_64 ELF)',
     subsystemCode: 'NEXA-RE-06',
@@ -254,15 +254,15 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     attackVector: 'Static Decompilation & Dynamic Binary Flow Analysis',
     vectorSummary: 'Analyze the target binary in a disassembler, inspect assembly branch conditions, and extract the internal encryption algorithm.',
     attackSimSteps: [
-      { text: '[SSH] Uplink established to isolated Reverse Engineering Sandbox VM', type: 'info' },
+      { text: '[SSH] Uplink established to isolated Reverse Engineering Sandbox container', type: 'info' },
       { text: '[ELF] Loading target binary into disassembler engine: x86_64 Linux', type: 'info' },
       { text: '[ASM] Disassembling authorization subroutine at virtual entry...', type: 'exec' },
       { text: '[FLOW] Identified cipher transform and stack comparison check', type: 'warn' },
       { text: '[PATCH] Verification logic reversed! Generated valid serial payload.', type: 'success' },
     ],
-    port: 'SSH',
-    statusCheck: 'SSH Sandbox Active',
-    accessGuide: 'Log in to the reverse engineering sandbox VM and inspect the target binary using static and dynamic analysis tools.',
+    port: '2222 (SSH)',
+    statusCheck: 'Port 2222 Active',
+    accessGuide: 'Connect via SSH: ssh -p 2222 player@localhost (Password: password123) or copy binary: scp -P 2222 player@localhost:~/challenges/stage6/target.bin ./',
     hints: [
       {
         id: 601,

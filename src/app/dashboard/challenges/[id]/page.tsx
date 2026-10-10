@@ -83,14 +83,14 @@ export default function ChallengeDetailPage({
     }
   }, [challenge?.id]);
 
-  const handleUnlockHint = (hintId: number, hintLevel: number) => {
+  const handleUnlockHint = (hintId: number, hintLevel: number, penalty: number = 40) => {
     const nextUnlocked = new Set(unlockedHints);
     nextUnlocked.add(hintId);
     setUnlockedHints(nextUnlocked);
     if (typeof window !== 'undefined' && challenge?.id) {
       localStorage.setItem(`shadownet_unlocked_hints_${challenge.id}`, JSON.stringify(Array.from(nextUnlocked)));
     }
-    setUnlockMessage(`Tactical Hint ${hintLevel} decrypted. 40 XP penalty registered.`);
+    setUnlockMessage(`Tactical Hint ${hintLevel} decrypted. ${penalty} XP penalty registered.`);
     setTimeout(() => {
       setUnlockMessage(null);
     }, 4000);
@@ -353,7 +353,7 @@ export default function ChallengeDetailPage({
                 <span className="text-[#F59E0B]">💡</span> Tactical Intelligence Hints
               </h3>
               <span className="font-mono text-[10px] text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 rounded border border-[#F59E0B]/30 font-bold">
-                40 XP / HINT
+                XP PENALTY APPLIES
               </span>
             </div>
 
@@ -373,6 +373,7 @@ export default function ChallengeDetailPage({
                 {(hints.length > 0 ? hints : (stageConfig?.hints || [])).map((hint) => {
                   const isUnlocked = unlockedHints.has(hint.id);
                   const isCollapsed = collapsedHints.has(hint.id);
+                  const penalty = typeof hint.point_penalty === 'number' ? hint.point_penalty : 40;
 
                   if (!isUnlocked) {
                     return (
@@ -385,17 +386,17 @@ export default function ChallengeDetailPage({
                             <span className="text-[#8B949E]">🔒</span> Classified Intel #{hint.hint_level}
                           </span>
                           <span className="text-[#EF4444] text-[10px] font-bold bg-[#EF4444]/10 px-2 py-0.5 rounded border border-[#EF4444]/25">
-                            -40 XP
+                            -{penalty} XP
                           </span>
                         </div>
                         <p className="text-[11px] text-[#8B949E] font-sans leading-relaxed">
                           Encrypted surveillance and tactical intelligence for Stage 0{challenge.stage_number}.
                         </p>
                         <button
-                          onClick={() => handleUnlockHint(hint.id, hint.hint_level)}
+                          onClick={() => handleUnlockHint(hint.id, hint.hint_level, penalty)}
                           className="w-full py-2 px-3 bg-[#1A212B] hover:bg-[#242C37] text-[#FF9F43] border border-[#FF9F43]/40 hover:border-[#FF9F43] rounded font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_10px_rgba(255,159,67,0.1)]"
                         >
-                          <span>🔓</span> Decrypt Intel (-40 XP)
+                          <span>🔓</span> Decrypt Intel (-{penalty} XP)
                         </button>
                       </div>
                     );
@@ -430,7 +431,7 @@ export default function ChallengeDetailPage({
                           </p>
                           <div className="flex items-center justify-between pt-1 border-t border-[#232B36]/30 text-[10px] text-[#8B949E] font-mono">
                             <span>INTEL STATUS: DECRYPTED</span>
-                            <span className="text-[#F59E0B] font-bold">COST: 40 XP</span>
+                            <span className="text-[#F59E0B] font-bold">COST: {penalty} XP</span>
                           </div>
                         </div>
                       )}

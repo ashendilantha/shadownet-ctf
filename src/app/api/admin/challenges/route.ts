@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
 import { hashFlag } from '@/lib/crypto';
+import { STAGE_CONFIGS } from '@/lib/constants';
 
 // GET: Fetch all challenges with full administrative details
 export async function GET(request: NextRequest) {
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
     const challengesWithHints = (challenges || []).map((ch) => ({
       ...ch,
       hints: (hints || []).filter((h) => h.challenge_id === ch.id),
+      default_hints: STAGE_CONFIGS[ch.stage_number]?.hints || [],
     }));
 
     return NextResponse.json({ challenges: challengesWithHints });
@@ -100,9 +102,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const createdChallenge = created && created.length > 0 ? created[0] : newChallengeData;
+
+    // If initial hints were supplied, insert them
+    if (createdChallenge.id && Array.isArray(body.hints) && body.hints.length > 0) {
+      const hintRecords = body.hints
+        .filter((h: any) => h.hint_text && h.hint_text.trim())
+        .map((h: any, idx: number) => ({
+          challenge_id: createdChallenge.id,
+          hint_level: h.hint_level ? Number(h.hint_level) : idx + 1,
+          hint_text: h.hint_text.trim(),
+          point_penalty: typeof h.point_penalty === 'number' ? Math.max(0, h.point_penalty) : 40,
+        }));
+
+      if (hintRecords.length > 0) {
+        await supabase.from('hints').insert(hintRecords);
+      }
+    }
+
     return NextResponse.json({
       message: 'Challenge created successfully',
-      challenge: created && created.length > 0 ? created[0] : newChallengeData,
+      challenge: createdChallenge,
     });
   } catch (error) {
     console.error('Admin create challenge error:', error);
