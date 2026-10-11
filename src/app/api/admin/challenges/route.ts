@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
 import { hashFlag } from '@/lib/crypto';
 import { STAGE_CONFIGS } from '@/lib/constants';
-import { STAGE_HINTS } from '@/lib/stage-hints';
 
 // GET: Fetch all challenges with full administrative details
 export async function GET(request: NextRequest) {
@@ -34,7 +33,7 @@ export async function GET(request: NextRequest) {
     const challengesWithHints = (challenges || []).map((ch) => ({
       ...ch,
       hints: (hints || []).filter((h) => h.challenge_id === ch.id),
-      default_hints: STAGE_HINTS[ch.stage_number] || [],
+      default_hints: STAGE_CONFIGS[ch.stage_number]?.hints || [],
     }));
 
     return NextResponse.json({ challenges: challengesWithHints });

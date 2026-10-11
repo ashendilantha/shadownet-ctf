@@ -29,6 +29,13 @@ export interface AttackSimStep {
   delayMs?: number;
 }
 
+export interface HintItem {
+  id: number;
+  hint_level: number;
+  hint_text: string;
+  point_penalty?: number;
+}
+
 export interface StageInfo {
   stage: number;
   name: string;
@@ -45,6 +52,7 @@ export interface StageInfo {
   port?: string;
   statusCheck: string;
   accessGuide: string;
+  hints: HintItem[];
 }
 
 export const STAGE_CONFIGS: Record<number, StageInfo> = {
@@ -70,6 +78,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '5000 (dashboard)',
     statusCheck: 'Port 5000 Active',
     accessGuide: 'Inspect public files, metadata and website headers for intelligence leaks.',
+    hints: [
+      {
+        id: 101,
+        hint_level: 1,
+        hint_text: 'Inspect the HTML source comments and look for unscrubbed developer remarks containing internal deployment coordinates.',
+        point_penalty: 40,
+      },
+      {
+        id: 102,
+        hint_level: 2,
+        hint_text: 'Examine custom HTTP response headers returned by the server for exposed debugging keys and author metadata.',
+        point_penalty: 40,
+      },
+    ],
   },
   2: {
     stage: 2,
@@ -93,6 +115,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: 'N/A (Downloadable Package)',
     statusCheck: 'Package Available',
     accessGuide: 'Download the intercepted transmission package. Analyze the photographic exhibit using passphrase "shelter" to recover hidden intel, and inspect audio spectrograms.',
+    hints: [
+      {
+        id: 201,
+        hint_level: 1,
+        hint_text: 'The whistleblower concealed an encrypted document inside the drone photo exhibit. Use the bunker emergency codeword "shelter" as the steganography extraction passphrase.',
+        point_penalty: 40,
+      },
+      {
+        id: 202,
+        hint_level: 2,
+        hint_text: 'Out of the 27 audio files, carrier channel 14 carries the authentic signal. Analyze its frequency spectrogram in an audio analysis tool to visually read the hidden flag.',
+        point_penalty: 40,
+      },
+    ],
   },
   3: {
     stage: 3,
@@ -116,6 +152,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '5000',
     statusCheck: 'Port 5000 Active',
     accessGuide: 'Connect via raw TCP socket to interact with the encryption oracle daemon.',
+    hints: [
+      {
+        id: 301,
+        hint_level: 1,
+        hint_text: 'The encryption oracle operates in Electronic Codebook (ECB) mode, meaning identical plaintext 16-byte blocks always produce identical ciphertext blocks.',
+        point_penalty: 40,
+      },
+      {
+        id: 302,
+        hint_level: 2,
+        hint_text: 'Supply crafted padding to push one secret character at a time into the last byte of a target block, allowing you to guess and recover the key byte-by-byte.',
+        point_penalty: 40,
+      },
+    ],
   },
   4: {
     stage: 4,
@@ -139,6 +189,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '3000',
     statusCheck: 'Port 3000 Active',
     accessGuide: 'Target the SQL injection vulnerability on the internal employee login gateway endpoint.',
+    hints: [
+      {
+        id: 401,
+        hint_level: 1,
+        hint_text: 'The login query uses string concatenation for the username parameter. Injecting quote characters breaks the SQL syntax and allows adding custom logic conditions.',
+        point_penalty: 40,
+      },
+      {
+        id: 402,
+        hint_level: 2,
+        hint_text: 'Use an OR condition that is always true combined with comment delimiters to bypass the password verification check and sign in as administrator.',
+        point_penalty: 40,
+      },
+    ],
   },
   5: {
     stage: 5,
@@ -162,6 +226,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '5001',
     statusCheck: 'Port 5001 Active',
     accessGuide: 'Connect to the token stream and predict upcoming pseudo-random security tokens.',
+    hints: [
+      {
+        id: 501,
+        hint_level: 1,
+        hint_text: 'The token generator generates numbers using a standard Linear Congruential Generator recurrence formula with fixed multiplier and increment constants.',
+        point_penalty: 40,
+      },
+      {
+        id: 502,
+        hint_level: 2,
+        hint_text: 'Collecting several consecutive numbers from the stream lets you solve a system of linear congruences to deduce the modulus, multiplier, and next output token.',
+        point_penalty: 40,
+      },
+    ],
   },
   6: {
     stage: 6,
@@ -185,6 +263,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: '2222 (SSH)',
     statusCheck: 'Port 2222 Active',
     accessGuide: 'Connect via SSH: ssh -p 2222 player@localhost (Password: password123) or copy binary: scp -P 2222 player@localhost:~/challenges/stage6/target.bin ./',
+    hints: [
+      {
+        id: 601,
+        hint_level: 1,
+        hint_text: 'Decompile the binary and locate the key validation function. Look at how user input is iterated over in a loop.',
+        point_penalty: 40,
+      },
+      {
+        id: 602,
+        hint_level: 2,
+        hint_text: 'The verification logic applies a symmetric bitwise XOR transformation to your input. Reversing the static reference array reveals the expected key.',
+        point_penalty: 40,
+      },
+    ],
   },
   7: {
     stage: 7,
@@ -208,6 +300,20 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: 'SSH',
     statusCheck: 'SSH Bastion Active',
     accessGuide: 'Log in to the Linux target machine, identify vulnerable SUID binaries, and escalate privileges to root.',
+    hints: [
+      {
+        id: 701,
+        hint_level: 1,
+        hint_text: 'Search for executables owned by root that have the setuid permission bit enabled across the local filesystem.',
+        point_penalty: 40,
+      },
+      {
+        id: 702,
+        hint_level: 2,
+        hint_text: 'Inspect the strings and system calls in the custom backup binary to check if it calls sub-utilities without full absolute paths, enabling PATH environment hijacking.',
+        point_penalty: 40,
+      },
+    ],
   },
   8: {
     stage: 8,
@@ -231,5 +337,19 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     port: 'SSH/HTTP',
     statusCheck: 'Subnet Cluster Active',
     accessGuide: 'Exploit the SSRF vulnerability on the entry host to pivot to internal metadata services and dump the core MySQL database.',
+    hints: [
+      {
+        id: 801,
+        hint_level: 1,
+        hint_text: 'The entry web portal accepts URL inputs that can be manipulated to make internal HTTP requests to the local cloud link-local metadata address.',
+        point_penalty: 40,
+      },
+      {
+        id: 802,
+        hint_level: 2,
+        hint_text: 'Extract the database connection credentials from the metadata endpoint, then use network pivoting or port forwarding to authenticate to the isolated internal MySQL server.',
+        point_penalty: 40,
+      },
+    ],
   },
 };

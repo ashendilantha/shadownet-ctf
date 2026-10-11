@@ -4,22 +4,15 @@ import React, { useEffect, useState, useCallback, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
-import FieldCompanion from '@/components/FieldCompanion';
+import OperativeArtwork from '@/components/OperativeArtwork';
+import Stage5ChallengePanel from '@/components/Stage5ChallengePanel';
+import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
   id: number;
   hint_level: number;
   hint_text: string;
   point_penalty: number;
-  unlocked?: boolean;
-}
-
-interface StageDisplayInfo {
-  subsystemCode: string;
-  targetSystem: string;
-  storyBrief: string;
-  accessGuide: string;
-  statusCheck: string;
 }
 
 interface ChallengeDetail {
@@ -43,13 +36,11 @@ export default function ChallengeDetailPage({
 }) {
   const { id } = use(params);
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
-  const [stageConfig, setStageConfig] = useState<StageDisplayInfo | null>(null);
   const [hints, setHints] = useState<Hint[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
-  const [unlockingHintId, setUnlockingHintId] = useState<number | null>(null);
   const [collapsedHints, setCollapsedHints] = useState<Set<number>>(new Set());
   const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
 
@@ -57,15 +48,7 @@ export default function ChallengeDetailPage({
     try {
       const res = await axios.get(`/api/challenges/${id}`);
       setChallenge(res.data.challenge);
-      setStageConfig(res.data.stage_config || null);
       setHints(res.data.hints || []);
-      setUnlockedHints(
-        new Set(
-          (res.data.hints || [])
-            .filter((hint: Hint) => hint.unlocked)
-            .map((hint: Hint) => hint.id)
-        )
-      );
       setIsLocked(false);
     } catch (err: unknown) {
       const errorObj = err as { response?: { status?: number; data?: { locked?: boolean; error?: string; challenge?: ChallengeDetail } } };
@@ -85,35 +68,33 @@ export default function ChallengeDetailPage({
     fetchChallenge();
   }, [fetchChallenge]);
 
-  const handleUnlockHint = async (hintId: number, hintLevel: number) => {
-    if (!challenge || unlockingHintId !== null) return;
-
-    setUnlockingHintId(hintId);
-    setUnlockMessage(null);
-
-    try {
-      const response = await axios.post('/api/hints/unlock', {
-        challenge_id: challenge.id,
-        hint_id: hintId,
-      });
-
-      setUnlockedHints((previous) => new Set(previous).add(hintId));
-      setHints((previous) => previous.map((hint) =>
-        hint.id === hintId
-          ? { ...hint, hint_text: response.data.hint_text, unlocked: true }
-          : hint
-      ));
-      setUnlockMessage(
-        response.data.alreadyUnlocked
-          ? `Tactical Hint ${hintLevel} was already decrypted. No XP charged.`
-          : `Tactical Hint ${hintLevel} decrypted. ${response.data.cost} XP deducted.`
-      );
-    } catch (error: unknown) {
-      const errorObj = error as { response?: { data?: { error?: string } } };
-      setUnlockMessage(errorObj.response?.data?.error || 'Unable to decrypt this hint. Please try again.');
-    } finally {
-      setUnlockingHintId(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && challenge?.id) {
+      const saved = localStorage.getItem(`shadownet_unlocked_hints_${challenge.id}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setUnlockedHints(new Set(parsed));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
+  }, [challenge?.id]);
+
+  const handleUnlockHint = (hintId: number, hintLevel: number, penalty: number = 40) => {
+    const nextUnlocked = new Set(unlockedHints);
+    nextUnlocked.add(hintId);
+    setUnlockedHints(nextUnlocked);
+    if (typeof window !== 'undefined' && challenge?.id) {
+      localStorage.setItem(`shadownet_unlocked_hints_${challenge.id}`, JSON.stringify(Array.from(nextUnlocked)));
+    }
+    setUnlockMessage(`Tactical Hint ${hintLevel} decrypted. ${penalty} XP penalty registered.`);
+    setTimeout(() => {
+      setUnlockMessage(null);
+    }, 4000);
   };
 
   const toggleCollapse = (hintId: number) => {
@@ -177,6 +158,8 @@ export default function ChallengeDetailPage({
       </div>
     );
   }
+
+  const stageConfig = STAGE_CONFIGS[challenge.stage_number];
 
   return (
     <div className="w-full space-y-6">
@@ -302,10 +285,77 @@ export default function ChallengeDetailPage({
               )}
             </div>
 
-            <FieldCompanion />
+            <div className="challenge-operative-dock" aria-hidden="true">
+              <OperativeArtwork
+                sizes="(max-width: 640px) 96px, 144px"
+                className="challenge-figure h-auto w-full object-contain"
+              />
+            </div>
           </div>
 
-          {/* Downloadable Assets Deck for Stage 2 */}
+          {/* Stage 1: NexaCorp Reconnaissance (OSINT) */}
+          {challenge.stage_number === 1 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">🌐</span> NexaCorp Public Reconnaissance Portal
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    Public-facing perimeter website. Inspect source comments, image metadata, and employee dossiers to extract intelligence leaks.
+                  </p>
+                </div>
+                <a
+                  href="/stages/stage1-osint/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
+                >
+                  🌐 OPEN NEXACORP PORTAL
+                </a>
+              </div>
+
+              {/* Section Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                <a
+                  href="/stages/stage1-osint/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-lg transition-colors block"
+                >
+                  <div className="text-[#F5F5F5] font-bold">🏢 Company Overview</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">Landing page &amp; mission statement</div>
+                </a>
+                <a
+                  href="/stages/stage1-osint/staff-directory.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-lg transition-colors block"
+                >
+                  <div className="text-[#FF9F43] font-bold">👥 Staff Directory</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">16 Employee profiles &amp; roles</div>
+                </a>
+                <a
+                  href="/stages/stage1-osint/updates.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-lg transition-colors block"
+                >
+                  <div className="text-[#10B981] font-bold">📰 Press Updates</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">Operations &amp; Research news</div>
+                </a>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">RECONNAISSANCE TACTICS:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  Right-click to inspect HTML source code and developer comments across all profile pages. Analyze photography assets and metadata in the staff directory to extract operative coordinates.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 2: Covert Transmissions (Steganography) */}
           {challenge.stage_number === 2 && (
             <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
@@ -318,7 +368,7 @@ export default function ChallengeDetailPage({
                   </p>
                 </div>
                 <a
-                  href="/downloads/stage2-covert-transmissions.zip"
+                  href="/downloads/stage2/stage2-covert-transmissions.zip"
                   download="stage2-covert-transmissions.zip"
                   className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
                 >
@@ -343,13 +393,172 @@ export default function ChallengeDetailPage({
               <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
                 <span className="text-[#FF8533] block text-[11px] font-semibold">COVERT EXTRACTION PROTOCOL:</span>
                 <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
-                  The intercepted package contains classified drone photography with encrypted intelligence payloads, alongside multi-frequency audio recordings. Analyze spectrogram signals and decode photographic assets using recovered operative passphrases.
+                  The intercepted package contains classified drone photography with encrypted intelligence payloads, alongside multi-frequency audio recordings. Analyze spectrogram signals and decode photographic assets using recovered operative passphrases (e.g. &apos;shelter&apos;).
                 </p>
               </div>
             </div>
           )}
 
-          {/* In-Browser Web Terminal Console for Stage 8 (HTB / TryHackMe Style) */}
+          {/* Stage 3: Cipher Oracle (Cryptography) */}
+          {challenge.stage_number === 3 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">🔐</span> Cryptographic Oracle Uplink
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    Hardware Security Module running AES-ECB encryption oracle on raw TCP socket port 5000.
+                  </p>
+                </div>
+                <div className="px-3 py-1.5 bg-[#141920] border border-[#10B981]/40 rounded text-xs font-mono text-[#10B981] font-bold">
+                  TCP PORT 5000
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">INTERACTIVE TCP CONNECTION</span>
+                  <code className="text-[#10B981] font-bold select-all block">nc localhost 5000</code>
+                </div>
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">DOCKER SERVICE NAME</span>
+                  <code className="text-[#FF9F43] font-bold block">stage3-crypto (Port 5000:5000)</code>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">ATTACK VECTOR BRIEF:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  The oracle appends a secret key to your plaintext and encrypts with AES in ECB mode. Exploit differential block boundary alignment to recover the secret master key one byte at a time.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 4: NexaAuth Portal Bypass (Web Security) */}
+          {challenge.stage_number === 4 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">🛡️</span> NexaAuth SSO Portal Gateway
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    Central Employee Single Sign-On and internal admin dashboard running on port 8084.
+                  </p>
+                </div>
+                <a
+                  href="http://localhost:8084"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
+                >
+                  🌐 LAUNCH NEXAAUTH PORTAL
+                </a>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <div className="text-[#F5F5F5] font-bold">🌐 Gateway Target URL</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">http://localhost:8084/login (Endpoint: /login)</div>
+                </div>
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <div className="text-[#FF9F43] font-bold">🔑 Known Staff Account</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">jordan.lee : WelcomeToNexa2026!</div>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">ATTACK VECTOR BRIEF:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  The authentication backend constructs SQL queries via string concatenation. Inject tautological SQL payload expressions (e.g. <code className="text-[#FF9F43]">admin&apos; OR &apos;1&apos;=&apos;1&apos; --</code>) to bypass the login check, authenticate as portal administrator, and exfiltrate the internal records.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 5: PRNG Token Predictor (Scripting) */}
+          {challenge.stage_number === 5 && (
+            <Stage5ChallengePanel />
+          )}
+
+          {/* Stage 6: Binary Disassembly (Reverse Engineering) */}
+          {challenge.stage_number === 6 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">🔬</span> ELF Reverse Engineering Sandbox
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    Isolated x86_64 defense daemon container with anti-debugging traps and serial verification routines.
+                  </p>
+                </div>
+                <div className="px-3 py-1.5 bg-[#141920] border border-[#10B981]/40 rounded text-xs font-mono text-[#10B981] font-bold">
+                  SSH PORT 2222 ACTIVE
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">INTERACTIVE SSH ACCESS</span>
+                  <code className="text-[#10B981] font-bold block select-all">ssh -p 2222 player@localhost</code>
+                  <span className="text-[10px] text-[#8B949E] mt-0.5 block">Password: password123</span>
+                </div>
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">DOWNLOAD TARGET BINARY</span>
+                  <code className="text-[#FF9F43] font-bold block select-all">scp -P 2222 player@localhost:~/challenges/stage6/target.bin ./</code>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">ANALYSIS WALKTHROUGH:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  Load the retrieved ELF binary into Ghidra, IDA, or GDB. Locate the validation routine, observe the symmetric XOR loop against static data, and reverse the algorithm to produce the valid license key.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 7: Production Host PrivEsc (Linux Security) */}
+          {challenge.stage_number === 7 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">👑</span> Production Host Privilege Escalation
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    NexaCorp Production Linux Bastion Host. Enumerate misconfigured SUID permissions and exploit relative binary execution to gain root.
+                  </p>
+                </div>
+                <div className="px-3 py-1.5 bg-[#141920] border border-[#FF9F43]/40 rounded text-xs font-mono text-[#FF9F43] font-bold">
+                  HOST BASTION
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">SUID RECONNAISSANCE COMMAND</span>
+                  <code className="text-[#10B981] font-bold block select-all">find / -perm -4000 -type f 2&gt;/dev/null</code>
+                </div>
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">TARGET SUBSYSTEM CODE</span>
+                  <code className="text-[#FF9F43] font-bold block">NEXA-ROOT-07 (Production Bastion)</code>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">PRIVILEGE ESCALATION VECTORS:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  Look for proprietary maintenance executables owned by root with the SUID bit set. Check if the binary calls standard utilities without an absolute path, enabling PATH environment hijacking to spawn a root shell and read <code className="text-[#FF9F43]">/root/flag.txt</code>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 8: Core Infrastructure Breach (Network Pivoting & SSRF) */}
           {challenge.stage_number === 8 && (
             <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
@@ -421,13 +630,13 @@ export default function ChallengeDetailPage({
               </div>
             )}
 
-            {hints.length === 0 ? (
+            {(hints.length === 0 && (!stageConfig?.hints || stageConfig.hints.length === 0)) ? (
               <p className="font-mono text-xs text-[#8B949E]">
                 No tactical intel logged for this target.
               </p>
             ) : (
               <div className="space-y-3 font-mono text-xs">
-                {hints.map((hint) => {
+                {(hints.length > 0 ? hints : (stageConfig?.hints || [])).map((hint) => {
                   const isUnlocked = unlockedHints.has(hint.id);
                   const isCollapsed = collapsedHints.has(hint.id);
                   const penalty = typeof hint.point_penalty === 'number' ? hint.point_penalty : 40;
@@ -450,12 +659,10 @@ export default function ChallengeDetailPage({
                           Encrypted surveillance and tactical intelligence for Stage 0{challenge.stage_number}.
                         </p>
                         <button
-                          onClick={() => handleUnlockHint(hint.id, hint.hint_level)}
-                          disabled={unlockingHintId !== null}
+                          onClick={() => handleUnlockHint(hint.id, hint.hint_level, penalty)}
                           className="w-full py-2 px-3 bg-[#1A212B] hover:bg-[#242C37] text-[#FF9F43] border border-[#FF9F43]/40 hover:border-[#FF9F43] rounded font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_10px_rgba(255,159,67,0.1)]"
                         >
-                          <span>🔓</span>{' '}
-                          {unlockingHintId === hint.id ? 'Charging XP...' : `Decrypt Intel (-${penalty} XP)`}
+                          <span>🔓</span> Decrypt Intel (-{penalty} XP)
                         </button>
                       </div>
                     );

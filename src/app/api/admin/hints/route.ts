@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
-import { STAGE_HINTS } from '@/lib/stage-hints';
+import { STAGE_CONFIGS } from '@/lib/constants';
 
 // POST: Add a new hint or import default hints for a challenge
 export async function POST(request: NextRequest) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         stageNumber = ch?.stage_number;
       }
 
-      const defaultHints = STAGE_HINTS[Number(stageNumber)];
+      const defaultHints = STAGE_CONFIGS[Number(stageNumber)]?.hints;
       if (!defaultHints || defaultHints.length === 0) {
         return NextResponse.json(
           { error: `No default hints configured in constants for stage ${stageNumber || 'unknown'}.` },

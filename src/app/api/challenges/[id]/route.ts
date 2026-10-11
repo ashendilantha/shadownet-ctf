@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyAuth } from '@/lib/auth';
 import { STAGE_CONFIGS } from '@/lib/constants';
-import { STAGE_HINTS } from '@/lib/stage-hints';
 
 export async function GET(
   request: NextRequest,
@@ -99,32 +98,8 @@ export async function GET(
       .order('hint_level', { ascending: true });
 
     // Tactical hints: prefer custom database hints if present, fallback to static defaults
-    const configuredHints = STAGE_HINTS[challenge.stage_number];
+    const configuredHints = STAGE_CONFIGS[challenge.stage_number]?.hints;
     const finalHints = (hints && hints.length > 0) ? hints : (configuredHints || []);
-    const stageConfig = STAGE_CONFIGS[challenge.stage_number];
-    const { data: hintUnlocks, error: hintUnlocksError } = await supabase
-      .from('user_hint_unlocks')
-      .select('hint_id')
-      .eq('user_id', authUser.sub)
-      .eq('challenge_id', challengeId);
-
-    if (hintUnlocksError) {
-      console.error('Failed to fetch hint unlocks:', hintUnlocksError);
-      return NextResponse.json(
-        { error: 'Hint purchase status is temporarily unavailable.' },
-        { status: 503 }
-      );
-    }
-
-    const unlockedHintIds = new Set((hintUnlocks || []).map((unlock) => unlock.hint_id));
-    const visibleHints = finalHints.map((hint) => {
-      const unlocked = unlockedHintIds.has(hint.id);
-      return {
-        ...hint,
-        hint_text: unlocked ? hint.hint_text : '',
-        unlocked,
-      };
-    });
 
     return NextResponse.json({
       challenge: {
@@ -133,16 +108,7 @@ export async function GET(
         locked: false,
         unlocked: true,
       },
-      stage_config: stageConfig
-        ? {
-            subsystemCode: stageConfig.subsystemCode,
-            targetSystem: stageConfig.targetSystem,
-            storyBrief: stageConfig.storyBrief,
-            accessGuide: stageConfig.accessGuide,
-            statusCheck: stageConfig.statusCheck,
-          }
-        : null,
-      hints: visibleHints,
+      hints: finalHints,
     });
   } catch (error) {
     console.error('Challenge detail error:', error);

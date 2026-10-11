@@ -88,97 +88,60 @@ export async function POST(request: NextRequest) {
     const submittedHash = hashFlag(flag);
     const isCorrect = submittedHash === challenge.flag_hash;
 
-    const { data: submissionResult, error: submissionError } = await supabase.rpc(
-      'record_flag_submission',
-      {
-        p_user_id: user.sub,
-        p_challenge_id: Number(challenge_id),
-        p_submitted_flag: flag.trim(),
-        p_is_correct: isCorrect,
+    // Record submission
+    const { error: insertError } = await supabase.from('submissions').insert({
+      user_id: user.sub,
+      challenge_id: Number(challenge_id),
+      submitted_flag: flag.trim(),
+      is_correct: isCorrect,
+      submitted_at: new Date().toISOString(),
+    });
+
+    if (insertError) {
+      console.error('Failed to record submission in database:', insertError);
+    }
+
+    if (isCorrect) {
+      // Get current score
+      const { data: currentScore } = await supabase
+        .from('scores')
+        .select('total_points, challenges_solved')
+        .eq('user_id', user.sub)
+        .single();
+
+      const newPoints = (currentScore?.total_points || 0) + challenge.points;
+      const newSolved = (currentScore?.challenges_solved || 0) + 1;
+
+      // Update score
+      const { error: scoreUpdateError } = await supabase
+        .from('scores')
+        .update({
+          total_points: newPoints,
+          challenges_solved: newSolved,
+          last_submission_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.sub);
+
+      if (scoreUpdateError) {
+        console.error('Score update error:', scoreUpdateError);
       }
-    );
 
-    if (submissionError || !submissionResult) {
-      console.error('Failed to apply flag submission rate limit:', submissionError);
-      return NextResponse.json(
-        { error: 'Flag submission protection is temporarily unavailable. Please try again shortly.' },
-        { status: 503 }
-      );
-    }
+      const nextStageMsg =
+        challenge.stage_number < 8
+          ? ` 🔓 Stage 0${challenge.stage_number + 1} has been unlocked!`
+          : ' 🏆 All 8 stages pwned! Campaign completed!';
 
-    if (submissionResult.status === 'blocked') {
-      const retryAfterSeconds = Math.max(
-        1,
-        Math.ceil((Date.parse(submissionResult.blocked_until) - Date.now()) / 1000)
-      );
-
-      return NextResponse.json(
-        {
-          error: 'Too many incorrect flags. Flag submissions are blocked for 10 minutes.',
-          retryAfterSeconds,
-        },
-        {
-          status: 429,
-          headers: { 'Retry-After': String(retryAfterSeconds) },
-        }
-      );
-    }
-
-    if (submissionResult.status === 'already_solved') {
       return NextResponse.json({
-        correct: false,
-        alreadySolved: true,
-        message: 'You have already solved this challenge!',
+        correct: true,
+        message: `🎯 Correct Flag! You earned +${challenge.points} XP!${nextStageMsg}`,
+        points: challenge.points,
       });
     }
-
-    if (submissionResult.status !== (isCorrect ? 'correct' : 'incorrect')) {
-      console.error('Unexpected flag submission result:', submissionResult.status);
-      return NextResponse.json(
-        { error: 'Failed to process submission' },
-        { status: 500 }
-      );
-    }
-
-    if (!isCorrect) {
-      return NextResponse.json({
-        correct: false,
-        message: '❌ Incorrect flag. Verify your analysis and try again.',
-        points: 0,
-      });
-    }
-
-    const { data: currentScore } = await supabase
-      .from('scores')
-      .select('total_points, challenges_solved')
-      .eq('user_id', user.sub)
-      .single();
-
-    const newPoints = (currentScore?.total_points || 0) + challenge.points;
-    const newSolved = (currentScore?.challenges_solved || 0) + 1;
-
-    const { error: scoreUpdateError } = await supabase
-      .from('scores')
-      .update({
-        total_points: newPoints,
-        challenges_solved: newSolved,
-        last_submission_at: new Date().toISOString(),
-      })
-      .eq('user_id', user.sub);
-
-    if (scoreUpdateError) {
-      console.error('Score update error:', scoreUpdateError);
-    }
-
-    const nextStageMsg =
-      challenge.stage_number < 8
-        ? ` 🔓 Stage 0${challenge.stage_number + 1} has been unlocked!`
-        : ' 🏆 All 8 stages pwned! Campaign completed!';
 
     return NextResponse.json({
-      correct: true,
-      message: `🎯 Correct Flag! You earned +${challenge.points} XP!${nextStageMsg}`,
-      points: challenge.points,
+      correct: false,
+      message: '❌ Incorrect flag. Verify your analysis and try again.',
+      points: 0,
     });
   } catch (error) {
     console.error('Submission processing error:', error);
