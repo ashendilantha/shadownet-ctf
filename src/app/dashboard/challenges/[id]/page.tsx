@@ -331,6 +331,50 @@ export default function ChallengeDetailPage({
             </div>
           )}
 
+          {/* In-Browser Web Terminal Console for Stage 8 (HTB / TryHackMe Style) */}
+          {challenge.stage_number === 8 && (
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">⚡</span> PwnBox Web Terminal (HTB / TryHackMe Style)
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    Interactive in-browser attack console. Probe the entry gateway and pivot into the internal network without leaving your browser.
+                  </p>
+                </div>
+                <a
+                  href="http://localhost:7681"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary text-xs font-mono font-bold px-4 py-2.5 flex items-center gap-2 text-center justify-center flex-shrink-0"
+                >
+                  🖥️ LAUNCH BROWSER TERMINAL
+                </a>
+              </div>
+
+              {/* Endpoints Details Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <div className="text-[#F5F5F5] font-bold">🌐 Entry Host Gateway</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">http://localhost:3008 (SSRF Endpoint: /fetch)</div>
+                </div>
+
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <div className="text-[#FF9F43] font-bold">🔒 Isolated Internal Subnet</div>
+                  <div className="text-[10px] text-[#8B949E] mt-1">192.168.100.10:8080 (Metadata) &amp; 3306 (MySQL)</div>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">ATTACK VECTOR BRIEF:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  Start the VM using <code className="text-[#FF9F43]">./stages/stage8-network/start_stage8_vm.sh</code>, launch the in-browser terminal above, query the cloud metadata service via SSRF, and use the recovered credentials to authenticate to the isolated internal MySQL database.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Flag Submission Form */}
           <FlagSubmitForm
             challengeId={challenge.id}
