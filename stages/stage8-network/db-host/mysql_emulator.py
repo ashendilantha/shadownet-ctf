@@ -11,8 +11,7 @@ import struct
 import threading
 import sys
 
-FLAG = "SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}"
-ALT_FLAG = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
+FLAG = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
 
 def build_packet(seq, payload):
     length = len(payload)
@@ -108,12 +107,6 @@ def handle_client(conn, addr):
                     if "SELECT FLAG" in query_upper:
                         cols = ["flag"]
                         rows = [[FLAG]]
-                    elif "SELECT CHALLENGE, FLAG" in query_upper or "SELECT *" in query_upper:
-                        cols = ["id", "challenge", "flag"]
-                        rows = [
-                            ["1", "final_breach", FLAG],
-                            ["2", "final_breach_alt", ALT_FLAG]
-                        ]
                     else:
                         cols = ["id", "challenge", "flag"]
                         rows = [["1", "final_breach", FLAG]]

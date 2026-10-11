@@ -1,0 +1,8 @@
+services:
+  stage7-privesc:
+    build: .
+    container_name: stage7-bastion
+    ports:
+      - "2227:22"
+    restart: unless-stopped
+

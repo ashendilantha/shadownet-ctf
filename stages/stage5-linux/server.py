@@ -29,7 +29,7 @@ def load_flag(configured=None, path='/tmp/nexacorp-stage5/challenge.flag'):
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
         with path.open('x') as file:
-            file.write('SHADOWNET{token_' + secrets.token_hex(16) + '}')
+            file.write(os.environ.get('FLAG', 'SHADOWNET{token_df5b719d0a3044843bf77b0e56b5bbc6}'))
         path.chmod(0o600)
     except FileExistsError:
         pass

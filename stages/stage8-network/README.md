@@ -6,7 +6,7 @@
 - **Points:** 500 XP
 - **Target:** NexaCorp Core Infrastructure & Internal Database
 - **Delivery:** Ubuntu Virtual Machine (Zero Docker) + In-Browser Terminal (HTB / TryHackMe Style)
-- **Flag:** `SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}`
+- **Flag:** `SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}`
 
 ---
 
@@ -116,7 +116,7 @@ mysql -h 192.168.100.10 -u db_user -pSecurePass123 -D nexacorp -e "SELECT flag F
 ```
 **Flag:**
 ```
-SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}
+SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}
 ```
 
 ### Step 4: Automated Verification

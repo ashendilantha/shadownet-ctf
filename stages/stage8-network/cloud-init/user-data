@@ -293,8 +293,7 @@ write_files:
       import threading
       import sys
 
-      FLAG = "SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}"
-      ALT_FLAG = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
+      FLAG = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
 
       def build_packet(seq, payload):
           length = len(payload)
@@ -368,7 +367,7 @@ write_files:
                               rows = [[FLAG]]
                           else:
                               cols = ["id", "challenge", "flag"]
-                              rows = [["1", "final_breach", FLAG], ["2", "final_breach_alt", ALT_FLAG]]
+                              rows = [["1", "final_breach", FLAG]]
                           send_resultset(conn, seq + 1, cols, rows)
                       elif "SELECT" in query_upper:
                           cols = ["result"]

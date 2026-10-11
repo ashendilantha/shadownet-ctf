@@ -75,9 +75,9 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[EXIF] Found leaked PDF & image metadata with author credentials', type: 'warn' },
       { text: '[INTEL] Security policy breach detected! Perimeter flag extracted.', type: 'success' },
     ],
-    port: '5000 (dashboard)',
-    statusCheck: 'Port 5000 Active',
-    accessGuide: 'Inspect public files, metadata and website headers for intelligence leaks.',
+    port: 'Static Web Portal',
+    statusCheck: 'Bundled with CTF (Instant Access)',
+    accessGuide: 'Browse the public reconnaissance portal directly via /stages/stage1-osint/index.html. Inspect source comments and staff directory metadata for leaked credentials.',
     hints: [
       {
         id: 101,
@@ -186,9 +186,9 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[BYPASS] Database tautology true: SQL parser returns root record', type: 'warn' },
       { text: '[AUTH] 200 OK — Admin session established. Internal dashboard unlocked!', type: 'success' },
     ],
-    port: '3000',
-    statusCheck: 'Port 3000 Active',
-    accessGuide: 'Target the SQL injection vulnerability on the internal employee login gateway endpoint.',
+    port: '8084 (HTTP)',
+    statusCheck: 'Docker Container / Standalone (port 8084)',
+    accessGuide: 'Launch target with docker compose -f stages/stage4-web/docker-compose.yml up -d (or python3 stages/stage4-web/app.py) and browse to http://localhost:8084/login.',
     hints: [
       {
         id: 401,
@@ -213,19 +213,19 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     points: 300,
     targetSystem: 'NexaCorp Dynamic Token Engine & Session Synchronizer',
     subsystemCode: 'NEXA-PRNG-05',
-    storyBrief: 'NexaCorp uses an automated session token dispenser running on TCP port 5001. The token generator relies on a flawed Linear Congruential Generator (LCG) pseudo-random algorithm. Sample consecutive outputs, compute the internal state parameters, and predict future session keys.',
+    storyBrief: 'NexaCorp uses an automated session token dispenser running on TCP port 5005. The token generator relies on a flawed Linear Congruential Generator (LCG) pseudo-random algorithm. Sample consecutive outputs, compute the internal state parameters, and predict future session keys.',
     attackVector: 'LCG Mathematical State Recovery & Sequence Forecasting',
     vectorSummary: 'Sample consecutive pseudo-random states over TCP netcat, solve for multiplier a and increment c, and predict the next security challenge token.',
     attackSimSteps: [
-      { text: '[TCP] Connecting to Token Stream Service on port 5001...', type: 'info' },
+      { text: '[TCP] Connecting to Token Stream Service on port 5005...', type: 'info' },
       { text: '[STREAM] Intercepted consecutive 64-bit pseudo-random token states', type: 'info' },
       { text: '[MATH] Solving Linear Congruential state parameters...', type: 'exec' },
       { text: '[STATE] Modulus and seed state successfully synchronized!', type: 'warn' },
       { text: '[EXPLOIT] Future challenge token predicted with mathematical precision!', type: 'success' },
     ],
-    port: '5001',
-    statusCheck: 'Port 5001 Active',
-    accessGuide: 'Connect to the token stream and predict upcoming pseudo-random security tokens.',
+    port: '5005 (TCP Netcat)',
+    statusCheck: 'Docker Container / Standalone (port 5005)',
+    accessGuide: 'Launch target with docker compose -f stages/stage5-linux/docker-compose.yml up -d (or python3 stages/stage5-linux/server.py) and connect via nc localhost 5005.',
     hints: [
       {
         id: 501,
@@ -283,7 +283,7 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
     name: 'Privilege Escalation',
     domain: 'Linux Security',
     difficulty: 'Hard',
-    type: 'VM',
+    type: 'Docker',
     points: 400,
     targetSystem: 'NexaCorp Production Linux Host (Bastion)',
     subsystemCode: 'NEXA-ROOT-07',
@@ -297,9 +297,9 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[HIJACK] Exploiting relative executable execution path in SUID wrapper...', type: 'exec' },
       { text: '[PWN] Elevated execution confirmed: UID 0 (root) shell active', type: 'success' },
     ],
-    port: 'SSH',
-    statusCheck: 'SSH Bastion Active',
-    accessGuide: 'Log in to the Linux target machine, identify vulnerable SUID binaries, and escalate privileges to root.',
+    port: '2227 (SSH Bastion)',
+    statusCheck: 'Docker Container / Linux Bastion (port 2227)',
+    accessGuide: 'Start target with docker compose -f stages/stage7-linux-security/docker-compose.yml up -d and connect via ssh -o StrictHostKeyChecking=no -p 2227 player@localhost (Password: password123).',
     hints: [
       {
         id: 701,

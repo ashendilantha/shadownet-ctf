@@ -48,7 +48,7 @@ def create_app(test_config=None):
     app.config.update(
         SECRET_KEY=os.environ.get('SESSION_SECRET') or secrets.token_hex(32),
         DATABASE=os.environ.get('DATABASE_PATH', '/tmp/nexacorp-stage4/portal.sqlite3'),
-        FLAG=os.environ.get('FLAG'),
+        FLAG=os.environ.get('FLAG', 'SHADOWNET{front_door_bdc72fd1e584a689f94276ab}'),
         MAX_CONTENT_LENGTH=8192,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
@@ -61,7 +61,7 @@ def create_app(test_config=None):
         flag_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             with flag_path.open('x') as file:
-                file.write('SHADOWNET{portal_' + secrets.token_hex(16) + '}')
+                file.write(os.environ.get('FLAG', 'SHADOWNET{front_door_bdc72fd1e584a689f94276ab}'))
             flag_path.chmod(0o600)
         except FileExistsError:
             pass

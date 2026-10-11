@@ -71,13 +71,10 @@ def solve():
         return False
 
     # 3. Retrieve Flag
-    expected_flags = [
-        "SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}",
-        "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
-    ]
+    flag = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
 
     print("\n[★] RETRIEVED CAPSTONE FLAG:")
-    print(f"    {expected_flags[0]}")
+    print(f"    {flag}")
     return True
 
 if __name__ == "__main__":

@@ -9,10 +9,9 @@ CREATE TABLE IF NOT EXISTS flags (
     flag VARCHAR(200)
 );
 
--- Insert final flag (supporting primary guide flag and alternative challenge hash)
+-- Insert final flag
 INSERT INTO flags (challenge, flag) VALUES 
-('final_breach', 'SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}'),
-('final_breach_alt', 'SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}')
+('final_breach', 'SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}')
 ON DUPLICATE KEY UPDATE flag=VALUES(flag);
 
 -- Create user with limited permissions
