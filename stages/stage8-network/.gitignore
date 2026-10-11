@@ -1,0 +1,10 @@
+# Virtual Machine Images & Overlays
+*.img
+*.qcow2
+*.iso
+*.pid
+.stage8_pids
+logs/
+__pycache__/
+*.pyc
+

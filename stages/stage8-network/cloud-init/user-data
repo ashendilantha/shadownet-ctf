@@ -1,0 +1,482 @@
+#cloud-config
+# ==============================================================================
+# ShadowNet CTF - Stage 8: Ubuntu VM Cloud-Init Provisioning
+# Sets up isolated network pivoting challenge environment inside an Ubuntu VM
+# 100% self-contained, zero internet dependencies, fast 5-second boot
+# ==============================================================================
+
+hostname: shadownet-stage8-vm
+manage_etc_hosts: true
+
+users:
+  - name: shadownet
+    gecos: ShadowNet CTF Operative
+    primary_group: shadownet
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    passwd: "$6$shadownet$2KVHAQ8zgHCeOCi3DIyp8FNnSuC1t0U.tM8TTlzQR546V2gMEQF5Fs3NZhoupwcf8KZPUX7Ri9N.zIM/Qfux4/" # password123
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA2bVtu7Xf6ojWMVziuSunBzaUOzSES9q2HghCAji2KN shadownet-ctf
+
+chpasswd:
+  list: |
+    shadownet:password123
+    root:password123
+  expire: false
+
+ssh_pwauth: true
+disable_root: false
+
+package_update: false
+
+write_files:
+  # Static SSH Host Key (Prevents "REMOTE HOST IDENTIFICATION HAS CHANGED" warnings)
+  - path: /etc/ssh/ssh_host_ed25519_key
+    permissions: '0600'
+    content: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+      QyNTUxOQAAACAoABMgD8ZOYUm4hiVYgJcC1T5B1EsnC+xs2a5U7q2OQAAAAJDslp5b7Jae
+      WwAAAAtzc2gtZWQyNTUxOQAAACAoABMgD8ZOYUm4hiVYgJcC1T5B1EsnC+xs2a5U7q2OQA
+      AAAEA1ohuBOTUm1TpM0u5SKV28bYI2+pl+phzm/QPI+fpgaSgAEyAPxk5hSbiGJViAlwLV
+      PkHUSycL7GzZrlTurY5AAAAADWFzaGVuQHNhbmRib3g=
+      -----END OPENSSH PRIVATE KEY-----
+
+  - path: /etc/ssh/ssh_host_ed25519_key.pub
+    permissions: '0644'
+    content: |
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgAEyAPxk5hSbiGJViAlwLVPkHUSycL7GzZrlTurY5A ashen@sandbox
+
+  # Enable password authentication in OpenSSH
+  - path: /etc/ssh/sshd_config.d/01-shadownet.conf
+    permissions: '0644'
+    content: |
+      PasswordAuthentication yes
+      KbdInteractiveAuthentication yes
+      PermitRootLogin yes
+      UsePAM yes
+
+  # Challenge Files placed in /home/shadownet/
+  - path: /home/shadownet/README.txt
+    permissions: '0644'
+    content: |
+      ======================================================================
+      SHADOWNET CTF // STAGE 8: CORE INFRASTRUCTURE BREACH
+      ======================================================================
+      Target System: NexaCorp Isolated Cloud Perimeter & Core Datacenter
+
+      Operative Objectives:
+      1. Probe the Entry Host Web Service on port 3000.
+      2. Discover the Server-Side Request Forgery (SSRF) vulnerability.
+      3. Pivot across the internal subnet (192.168.100.0/24) to query
+         the internal cloud metadata service on 192.168.100.10:8080.
+      4. Extract the database credentials and query the internal MySQL
+         database to exfiltrate the capstone flag.
+
+      Challenge directory: ~/challenge/
+      Network coordinates: ~/network_info.txt
+      ======================================================================
+
+  - path: /home/shadownet/network_info.txt
+    permissions: '0644'
+    content: |
+      ======================================================================
+      SHADOWNET CTF // STAGE 8 NETWORK ARCHITECTURE
+      ======================================================================
+      [Perimeter Gateway]
+        • Entry Host Web App: http://127.0.0.1:3000 (SSRF Endpoint: /fetch)
+        • External Host Port: 3008
+
+      [Isolated Internal Subnet: 192.168.100.0/24]
+        • Cloud Metadata API: http://192.168.100.10:8080/metadata/db-credentials
+        • Core MySQL DB:      192.168.100.10:3306 (DB: nexacorp)
+      ======================================================================
+
+  - path: /home/shadownet/challenge/entry-host/app.py
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env python3
+      import sys
+      import json
+      import urllib.parse
+
+      try:
+          from flask import Flask, request, render_template, jsonify
+          import requests
+          USE_FLASK = True
+      except ImportError:
+          USE_FLASK = False
+          import urllib.request
+          from http.server import HTTPServer, BaseHTTPRequestHandler
+
+      if USE_FLASK:
+          app = Flask(__name__)
+
+          @app.route('/')
+          def home():
+              return render_template('index.html')
+
+          @app.route('/fetch', methods=['GET'])
+          def fetch():
+              url = request.args.get('url', '')
+              if not url:
+                  return {'error': 'URL parameter missing'}, 400
+              if not url.startswith('http'):
+                  return {'error': 'Invalid URL'}, 400
+
+              try:
+                  response = requests.get(url, timeout=5)
+                  return {
+                      'url': url,
+                      'status': response.status_code,
+                      'content': response.text[:500]
+                  }
+              except Exception as e:
+                  return {'url': url, 'error': str(e)}, 500
+
+          @app.route('/admin', methods=['GET', 'POST'])
+          def admin():
+              return {'message': "This endpoint doesn't do anything yet"}
+
+          if __name__ == '__main__':
+              app.run(host='0.0.0.0', port=3000, debug=False)
+      else:
+          import os
+          from pathlib import Path
+          HTML_FILE = Path(__file__).parent / "templates" / "index.html"
+
+          class EntryHandler(BaseHTTPRequestHandler):
+              def do_GET(self):
+                  parsed = urllib.parse.urlparse(self.path)
+                  if parsed.path == '/' or parsed.path == '/index.html':
+                      if HTML_FILE.exists():
+                          content = HTML_FILE.read_bytes()
+                      else:
+                          content = b"<h1>NexaCorp URL Fetcher</h1>"
+                      self.send_response(200)
+                      self.send_header('Content-Type', 'text/html; charset=utf-8')
+                      self.end_headers()
+                      self.wfile.write(content)
+                  elif parsed.path == '/fetch':
+                      qs = urllib.parse.parse_qs(parsed.query)
+                      url = qs.get('url', [''])[0]
+                      if not url:
+                          self._send_json({'error': 'URL parameter missing'}, status=400)
+                          return
+                      if not url.startswith('http'):
+                          self._send_json({'error': 'Invalid URL'}, status=400)
+                          return
+                      try:
+                          req = urllib.request.Request(url, headers={'User-Agent': 'NexaCorp-Fetcher/1.0'})
+                          with urllib.request.urlopen(req, timeout=5) as resp:
+                              content = resp.read(500).decode('utf-8', errors='replace')
+                              self._send_json({'url': url, 'status': resp.status, 'content': content})
+                      except Exception as e:
+                          self._send_json({'url': url, 'error': str(e)}, status=500)
+                  elif parsed.path == '/admin':
+                      self._send_json({'message': "This endpoint doesn't do anything yet"})
+                  else:
+                      self.send_response(404)
+                      self.end_headers()
+
+              def _send_json(self, data, status=200):
+                  payload = json.dumps(data).encode('utf-8')
+                  self.send_response(status)
+                  self.send_header('Content-Type', 'application/json')
+                  self.end_headers()
+                  self.wfile.write(payload)
+
+              def log_message(self, format, *args):
+                  pass
+
+          server = HTTPServer(('0.0.0.0', 3000), EntryHandler)
+          server.serve_forever()
+
+  - path: /home/shadownet/challenge/entry-host/templates/index.html
+    permissions: '0644'
+    content: |
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>NexaCorp - URL Fetcher Service</title>
+          <style>
+              body { font-family: monospace; background: #080a0d; color: #f5f5f5; padding: 20px; }
+              .container { background: #0e1217; padding: 30px; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #242c37; }
+              input { width: 90%; padding: 10px; background: #141920; border: 1px solid #3d4b5c; color: #f5f5f5; margin-bottom: 12px; }
+              button { padding: 10px 20px; background: #ff6b00; color: white; border: none; cursor: pointer; font-weight: bold; }
+              .result { background: #141920; padding: 15px; margin-top: 20px; border-radius: 4px; border: 1px solid #242c37; }
+              pre { color: #10b981; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h2>NexaCorp - Internal URL Fetcher</h2>
+              <p style="color:#8b949e;margin-bottom:15px;">Diagnostic gateway for internal subsystem testing.</p>
+              <form id="fetchForm">
+                  <label>URL to fetch:</label><br>
+                  <input type="text" id="urlInput" placeholder="http://192.168.100.10:8080/metadata/db-credentials" required><br>
+                  <button type="submit">Execute Request</button>
+              </form>
+              <div id="result" class="result" style="display:none;">
+                  <h4 style="color:#ff9f43;margin-bottom:8px;">Response Content:</h4>
+                  <pre id="resultContent"></pre>
+              </div>
+          </div>
+          <script>
+              document.getElementById('fetchForm').onsubmit = async function(e) {
+                  e.preventDefault();
+                  const url = document.getElementById('urlInput').value;
+                  const response = await fetch(`/fetch?url=${encodeURIComponent(url)}`);
+                  const data = await response.json();
+                  document.getElementById('resultContent').textContent = JSON.stringify(data, null, 2);
+                  document.getElementById('result').style.display = 'block';
+              };
+          </script>
+      </body>
+      </html>
+
+  - path: /opt/shadownet/stage8/db-host/metadata_service.py
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env python3
+      import sys
+      import json
+      import urllib.parse
+      from http.server import HTTPServer, BaseHTTPRequestHandler
+
+      METADATA = {
+          "database": {
+              "host": "192.168.100.10",
+              "port": 3306,
+              "username": "db_user",
+              "password": "SecurePass123",
+              "database": "nexacorp"
+          },
+          "credentials": {
+              "api_key": "sk-1234567890abcdef",
+              "secret": "secret-key-for-internal-api"
+          }
+      }
+
+      class MetadataHandler(BaseHTTPRequestHandler):
+          def do_GET(self):
+              parsed = urllib.parse.urlparse(self.path)
+              if parsed.path == '/metadata/db-credentials':
+                  self._send_json(METADATA['database'])
+              elif parsed.path == '/metadata/all':
+                  self._send_json(METADATA)
+              else:
+                  self.send_response(404)
+                  self.end_headers()
+
+          def _send_json(self, data):
+              payload = json.dumps(data).encode('utf-8')
+              self.send_response(200)
+              self.send_header('Content-Type', 'application/json')
+              self.end_headers()
+              self.wfile.write(payload)
+
+          def log_message(self, format, *args):
+              pass
+
+      server = HTTPServer(('0.0.0.0', 8080), MetadataHandler)
+      server.serve_forever()
+
+  - path: /opt/shadownet/stage8/db-host/mysql_emulator.py
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env python3
+      import socket
+      import struct
+      import threading
+      import sys
+
+      FLAG = "SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}"
+      ALT_FLAG = "SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}"
+
+      def build_packet(seq, payload):
+          length = len(payload)
+          return struct.pack("<I", length | (seq << 24)) + payload
+
+      def parse_packet(data, offset=0):
+          if len(data) < offset + 4:
+              return None, None, offset
+          pkt_len = data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16)
+          seq = data[offset+3]
+          payload = data[offset+4 : offset+4+pkt_len]
+          return seq, payload, offset + 4 + pkt_len
+
+      def handle_client(conn, addr):
+          try:
+              proto_version = b"\x0a"
+              server_version = b"10.6.18-MariaDB\x00"
+              thread_id = struct.pack("<I", 1)
+              salt_part1 = b"shadown1\x00"
+              cap_low = struct.pack("<H", 0xf7ff)
+              charset = b"\x21"
+              status = struct.pack("<H", 0x0002)
+              cap_high = struct.pack("<H", 0x81ff)
+              auth_len = struct.pack("B", 21)
+              reserved = b"\x00" * 10
+              salt_part2 = b"etpasssalt12\x00"
+              auth_plugin = b"mysql_native_password\x00"
+              
+              payload = (proto_version + server_version + thread_id + 
+                         salt_part1[:8] + b"\x00" + cap_low + charset + status + 
+                         cap_high + auth_len + reserved + salt_part2 + auth_plugin)
+              conn.sendall(build_packet(0, payload))
+
+              data = conn.recv(4096)
+              if not data:
+                  return
+              
+              ok_payload = b"\x00\x00\x00\x02\x00\x00\x00"
+              conn.sendall(build_packet(2, ok_payload))
+
+              while True:
+                  data = conn.recv(4096)
+                  if not data or len(data) < 4:
+                      break
+                  seq, cmd_payload, _ = parse_packet(data)
+                  if not cmd_payload:
+                      break
+                  cmd_type = cmd_payload[0]
+                  if cmd_type == 0x01: # COM_QUIT
+                      break
+                  elif cmd_type in (0x02, 0x0e): # COM_INIT_DB, COM_PING
+                      conn.sendall(build_packet(seq + 1, ok_payload))
+                  elif cmd_type == 0x03: # COM_QUERY
+                      query = cmd_payload[1:].decode("utf-8", errors="ignore").strip().rstrip(";")
+                      query_upper = query.upper()
+                      if "SELECT @@VERSION" in query_upper or "SELECT @@VERSION_COMMENT" in query_upper:
+                          cols = ["@@version"]
+                          rows = [["10.6.18-MariaDB"]]
+                          send_resultset(conn, seq + 1, cols, rows)
+                      elif "SHOW TABLES" in query_upper:
+                          cols = ["Tables_in_nexacorp"]
+                          rows = [["flags"]]
+                          send_resultset(conn, seq + 1, cols, rows)
+                      elif "SHOW DATABASES" in query_upper:
+                          cols = ["Database"]
+                          rows = [["information_schema"], ["nexacorp"]]
+                          send_resultset(conn, seq + 1, cols, rows)
+                      elif "FLAGS" in query_upper:
+                          if "SELECT FLAG" in query_upper:
+                              cols = ["flag"]
+                              rows = [[FLAG]]
+                          else:
+                              cols = ["id", "challenge", "flag"]
+                              rows = [["1", "final_breach", FLAG], ["2", "final_breach_alt", ALT_FLAG]]
+                          send_resultset(conn, seq + 1, cols, rows)
+                      elif "SELECT" in query_upper:
+                          cols = ["result"]
+                          rows = [["1"]]
+                          send_resultset(conn, seq + 1, cols, rows)
+                      else:
+                          conn.sendall(build_packet(seq + 1, ok_payload))
+                  else:
+                      conn.sendall(build_packet(seq + 1, ok_payload))
+          except Exception:
+              pass
+          finally:
+              try:
+                  conn.close()
+              except Exception:
+                  pass
+
+      def send_resultset(conn, start_seq, cols, rows):
+          seq = start_seq
+          conn.sendall(build_packet(seq, bytes([len(cols)])))
+          seq += 1
+          for col in cols:
+              col_b = col.encode("utf-8")
+              def_payload = (b"\x03def\x08nexacorp\x05flags\x05flags" +
+                             bytes([len(col_b)]) + col_b + bytes([len(col_b)]) + col_b +
+                             b"\x0c\x21\x00\xff\x00\x00\x00\xfd\x00\x00\x00\x00")
+              conn.sendall(build_packet(seq, def_payload))
+              seq += 1
+          conn.sendall(build_packet(seq, b"\xfe\x00\x00\x02\x00"))
+          seq += 1
+          for row in rows:
+              row_payload = b""
+              for val in row:
+                  val_b = str(val).encode("utf-8")
+                  row_payload += bytes([len(val_b)]) + val_b
+              conn.sendall(build_packet(seq, row_payload))
+              seq += 1
+          conn.sendall(build_packet(seq, b"\xfe\x00\x00\x02\x00"))
+
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      s.bind(("0.0.0.0", 3306))
+      s.listen(10)
+      while True:
+          c, a = s.accept()
+          threading.Thread(target=handle_client, args=(c, a), daemon=True).start()
+
+  - path: /etc/systemd/system/stage8-entry.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Stage 8 Entry Host Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory=/home/shadownet/challenge/entry-host
+      ExecStart=/usr/bin/python3 /home/shadownet/challenge/entry-host/app.py
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/stage8-metadata.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Stage 8 Metadata Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory=/opt/shadownet/stage8/db-host
+      ExecStart=/usr/bin/python3 /opt/shadownet/stage8/db-host/metadata_service.py
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/stage8-db.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Stage 8 Database Service
+      After=network.target
+
+      [Service]
+      Type=simple
+      WorkingDirectory=/opt/shadownet/stage8/db-host
+      ExecStart=/usr/bin/python3 /opt/shadownet/stage8/db-host/mysql_emulator.py
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - chown -R shadownet:shadownet /home/shadownet
+  - chmod 755 /home/shadownet
+  - chmod 600 /etc/ssh/ssh_host_ed25519_key
+  - chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+  - echo "shadownet:password123" | chpasswd
+  - echo "root:password123" | chpasswd
+  - systemctl restart ssh || systemctl restart sshd
+  - ip addr add 192.168.100.10/24 dev lo 2>/dev/null || true
+  - systemctl daemon-reload
+  - systemctl enable --now stage8-entry.service
+  - systemctl enable --now stage8-metadata.service
+  - systemctl enable --now stage8-db.service
+  - iptables -I INPUT -p tcp --dport 8080 -s 127.0.0.1 -j ACCEPT 2>/dev/null || true
+  - iptables -I INPUT -p tcp --dport 8080 -s 192.168.100.10 -j ACCEPT 2>/dev/null || true
+  - iptables -A INPUT -p tcp --dport 8080 -j DROP 2>/dev/null || true

