@@ -1,46 +1,30 @@
-version: '3.8'
-
 services:
   stage3-crypto:
     build:
-      context: ./stages/stage3-cryptography
+      context: ./stages/stage3-crypto
       dockerfile: Dockerfile
     container_name: stage3-crypto
     ports:
       - "5000:5000"
+    volumes:
+      - ./stages/stage3-crypto/oracle.py:/app/oracle.py
     networks:
       - stage3-net
       - backend
     restart: unless-stopped
     environment:
       - KEY=SECRET
-      - FLAG=SHADOWNET{VIGENERE_ORACLE_BROKEN}
+      - FLAG=SHADOWNET{7h_0f_7h3_3ncrypt10n_1s_4w3s0m3}
 
-  stage4-web:
+  stage6-re:
     build:
-      context: ./stages/stage4-web-security
+      context: ./stages/stage6-reverse-engineering
       dockerfile: Dockerfile
-    container_name: stage4-web
+    container_name: stage6-re
     ports:
-      - "3000:3000"
+      - "2222:22"
     networks:
-      - stage4-net
-      - backend
-    restart: unless-stopped
-    volumes:
-      - ./stages/stage4-web-security/database.db:/app/database.db
-    environment:
-      - FLASK_ENV=production
-
-  stage5-scripting:
-    build:
-      context: ./stages/stage5-scripting
-      dockerfile: Dockerfile
-    container_name: stage5-scripting
-    ports:
-      - "5001:5001"
-    networks:
-      - stage5-net
+      - stage6-net
       - backend
     restart: unless-stopped
 
@@ -51,7 +35,5 @@ networks:
     driver: bridge
   stage3-net:
     driver: bridge
-  stage4-net:
-    driver: bridge
-  stage5-net:
+  stage6-net:
     driver: bridge
