@@ -50,7 +50,8 @@ export default function ChallengeCard({ challenge, onInfiltrate }: ChallengeCard
         return 'Docker runtime';
       case 'vm':
       case 'vms':
-        return 'VM sandbox';
+      case 'isolated vm cluster':
+        return 'Ubuntu VM (QEMU)';
       default:
         return 'Daemon service';
     }

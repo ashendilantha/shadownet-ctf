@@ -334,9 +334,9 @@ export const STAGE_CONFIGS: Record<number, StageInfo> = {
       { text: '[SQL] Tunneling queries to isolated internal MySQL host...', type: 'exec' },
       { text: '[EXFIL] NexaCorp Crown Jewels breached! Flag extracted.', type: 'success' },
     ],
-    port: 'SSH/HTTP',
-    statusCheck: 'Subnet Cluster Active',
-    accessGuide: 'Exploit the SSRF vulnerability on the entry host to pivot to internal metadata services and dump the core MySQL database.',
+    port: 'SSH: 2228 | Web: 3008 | Terminal: 7681',
+    statusCheck: 'Hardware Accelerated QEMU/KVM Cluster',
+    accessGuide: 'Launch VM with ./stages/stage8-network/start_stage8_vm.sh --vm, open browser terminal at http://localhost:7681 (or ssh -p 2228 shadownet@localhost), query metadata on 192.168.100.10:8080 via SSRF, and dump the isolated MySQL database.',
     hints: [
       {
         id: 801,

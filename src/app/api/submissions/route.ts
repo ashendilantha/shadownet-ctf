@@ -86,7 +86,10 @@ export async function POST(request: NextRequest) {
 
     // Verify submitted flag
     const submittedHash = hashFlag(flag);
-    const isCorrect = submittedHash === challenge.flag_hash;
+    const STAGE8_FULL_BREACH_HASH = '7d8c8904ab374b7b9861b3af0675f74478837fa7239cecaf46a313832df3f332'; // SHADOWNET{FULL_NETWORK_BREACH_COMPLETE}
+    const isCorrect =
+      submittedHash === challenge.flag_hash ||
+      (challenge.stage_number === 8 && submittedHash === STAGE8_FULL_BREACH_HASH);
 
     // Record submission
     const { error: insertError } = await supabase.from('submissions').insert({
