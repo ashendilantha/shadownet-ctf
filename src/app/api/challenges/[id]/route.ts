@@ -31,9 +31,17 @@ export async function GET(
       .from('challenges')
       .select('id, name, domain, difficulty, description, points, delivery_method, stage_number, is_active')
       .eq('id', challengeId)
-      .single();
+      .maybeSingle();
 
-    if (error || !challenge) {
+    if (error) {
+      console.error('Challenge query error:', error);
+      return NextResponse.json(
+        { error: 'Unable to load the challenge from the database.' },
+        { status: 500 }
+      );
+    }
+
+    if (!challenge) {
       return NextResponse.json(
         { error: 'Challenge not found' },
         { status: 404 }

@@ -39,12 +39,14 @@ export default function ChallengeDetailPage({
   const [hints, setHints] = useState<Hint[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
   const [collapsedHints, setCollapsedHints] = useState<Set<number>>(new Set());
   const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
 
   const fetchChallenge = useCallback(async () => {
+    setLoadError(null);
     try {
       const res = await axios.get(`/api/challenges/${id}`);
       setChallenge(res.data.challenge);
@@ -56,8 +58,14 @@ export default function ChallengeDetailPage({
         setIsLocked(true);
         setLockedMsg(errorObj.response?.data?.error || 'Target perimeter is locked.');
         setChallenge(errorObj.response?.data?.challenge || null);
+      } else if (errorObj.response?.status === 401) {
+        setChallenge(null);
+        setLoadError('Your sign-in session is missing or expired. Sign in again to load this target.');
+      } else if (errorObj.response?.status === 404) {
+        setChallenge(null);
       } else {
         setChallenge(null);
+        setLoadError(errorObj.response?.data?.error || 'Unable to load this target. Please retry.');
       }
     } finally {
       setLoading(false);
@@ -141,6 +149,30 @@ export default function ChallengeDetailPage({
           </Link>
           <Link href="/dashboard/progress" className="btn-secondary w-full sm:w-auto h-10 px-5 text-xs font-bold">
             Killchain Map
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div role="alert" className="max-w-md mx-auto my-12 bg-[#0E1217] border border-[#EF4444]/30 rounded-xl p-6 text-center font-mono space-y-4">
+        <h2 className="text-lg font-bold text-[#EF4444] font-sans">Target Could Not Be Loaded</h2>
+        <p className="text-xs text-[#8B949E]">{loadError}</p>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              fetchChallenge();
+            }}
+            className="btn-primary text-xs py-2 px-4"
+          >
+            Retry
+          </button>
+          <Link href={loadError.startsWith('Your sign-in') ? '/auth/login' : '/dashboard/challenges'} className="btn-secondary text-xs py-2 px-4">
+            {loadError.startsWith('Your sign-in') ? 'SIGN IN' : 'TARGET DECK'}
           </Link>
         </div>
       </div>

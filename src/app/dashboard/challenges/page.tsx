@@ -14,6 +14,7 @@ export default function ChallengesListPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filterDomain, setFilterDomain] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -22,13 +23,16 @@ export default function ChallengesListPage() {
   const [activeChallengeData, setActiveChallengeData] = useState<Challenge | null>(null);
 
   const fetchChallenges = async () => {
+    setLoadError(null);
     try {
       const res = await axios.get('/api/challenges');
       setChallenges(res.data.challenges || []);
     } catch (err: unknown) {
-      const errorObj = err as { response?: { status?: number } };
+      const errorObj = err as { response?: { status?: number; data?: { error?: string } } };
       if (errorObj.response?.status === 401) {
         setAuthError(true);
+      } else {
+        setLoadError(errorObj.response?.data?.error || 'Unable to load challenge systems. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -217,6 +221,20 @@ export default function ChallengesListPage() {
         <div className="text-center py-20 font-mono text-xs text-[#8B949E]">
           <span className="inline-block animate-spin mr-2 text-[#FF6B00]">⚙️</span>
           Scanning NexaCorp perimeter targets...
+        </div>
+      ) : loadError ? (
+        <div role="alert" className="text-center py-16 bg-[#0E1217] border border-[#EF4444]/30 rounded-xl font-mono text-xs text-[#EF4444] space-y-4">
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              fetchChallenges();
+            }}
+            className="btn-secondary px-4 py-2"
+          >
+            Retry
+          </button>
         </div>
       ) : filteredChallenges.length === 0 ? (
         <div className="text-center py-16 bg-[#0E1217] border border-[#232B36] rounded-xl font-mono text-xs text-[#8B949E]">
