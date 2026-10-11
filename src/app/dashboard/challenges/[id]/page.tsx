@@ -5,6 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
 import FieldCompanion from '@/components/FieldCompanion';
+import VictoryModal from '@/components/VictoryModal';
 import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
@@ -26,6 +27,8 @@ interface ChallengeDetail {
   solved?: boolean;
   locked?: boolean;
   required_stage?: number;
+  next_challenge_id?: number | null;
+  next_challenge_name?: string | null;
 }
 
 export default function ChallengeDetailPage({
@@ -35,6 +38,7 @@ export default function ChallengeDetailPage({
 }) {
   const { id } = use(params);
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
+  const [showVictoryModal, setShowVictoryModal] = useState(false);
   const [hints, setHints] = useState<Hint[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
@@ -265,9 +269,27 @@ export default function ChallengeDetailPage({
               +{challenge.points} <span className="text-xs font-bold text-[#FF9F43]">XP</span>
             </span>
             {challenge.solved && (
-              <span className="font-mono text-xs font-bold text-[#10B981] flex items-center gap-1">
-                <span>●</span> Breached
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="font-mono text-xs font-bold text-[#10B981] flex items-center gap-1">
+                  <span>●</span> Breached
+                </span>
+                {challenge.stage_number < 8 ? (
+                  <Link
+                    href={`/dashboard/challenges/${challenge.next_challenge_id || (challenge.stage_number + 1)}`}
+                    className="btn-primary mt-1 text-[11px] font-mono font-bold px-2.5 py-1 flex items-center gap-1 shadow-[0_0_12px_rgba(255,107,0,0.3)]"
+                  >
+                    <span>➔ Next Target</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowVictoryModal(true)}
+                    className="btn-primary mt-1 text-[11px] font-mono font-bold px-2.5 py-1 flex items-center gap-1 shadow-[0_0_12px_rgba(16,185,129,0.35)] bg-[#10B981] hover:bg-[#059669] border-[#10B981]"
+                  >
+                    <span>👑 Full Access</span>
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -375,6 +397,87 @@ export default function ChallengeDetailPage({
                 </div>
               </div>
 
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap gap-1.5 border-b border-[#232B36] pb-2 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setStage1Tab('portal')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                    stage1Tab === 'portal'
+                      ? 'bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.3)]'
+                      : 'bg-[#141920] text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#1A212B]'
+                  }`}
+                >
+                  🏢 Portal Sections
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStage1Tab('runner')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                    stage1Tab === 'runner'
+                      ? 'bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.3)]'
+                      : 'bg-[#141920] text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#1A212B]'
+                  }`}
+                >
+                  ⚙️ Standalone Local Server
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStage1Tab('intel')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
+                    stage1Tab === 'intel'
+                      ? 'bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.3)]'
+                      : 'bg-[#141920] text-[#8B949E] hover:text-[#F5F5F5] hover:bg-[#1A212B]'
+                  }`}
+                >
+                  🔍 Recon Intel Clues
+                </button>
+              </div>
+
+              {/* Tab 1: Portal Sections */}
+              {stage1Tab === 'portal' && (
+                <div className="space-y-4 animate-fade-in font-mono text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <a
+                      href="/stages/stage1-osint/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3.5 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-xl transition-all block group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#F5F5F5] font-bold group-hover:text-[#FF9F43] transition-colors">🏢 Company Overview</span>
+                        <span className="text-[10px] text-[#10B981]">ONLINE ↗</span>
+                      </div>
+                      <div className="text-[11px] text-[#8B949E] mt-1 font-sans">Landing page, corporate mission &amp; public newsfeed</div>
+                    </a>
+                    <a
+                      href="/stages/stage1-osint/staff-directory.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3.5 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-xl transition-all block group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#FF9F43] font-bold">👥 Staff Directory</span>
+                        <span className="text-[10px] text-[#10B981]">ONLINE ↗</span>
+                      </div>
+                      <div className="text-[11px] text-[#8B949E] mt-1 font-sans">16 Employee dossiers, emails, titles &amp; profile pictures</div>
+                    </a>
+                    <a
+                      href="/stages/stage1-osint/updates.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3.5 bg-[#080A0D] hover:bg-[#141920] border border-[#232B36] hover:border-[#FF9F43]/40 rounded-xl transition-all block group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#10B981] font-bold">📰 Press Updates</span>
+                        <span className="text-[10px] text-[#10B981]">ONLINE ↗</span>
+                      </div>
+                      <div className="text-[11px] text-[#8B949E] mt-1 font-sans">Security bulletins, research statements &amp; leak breadcrumbs</div>
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {/* Tab 2: Standalone Local Runner */}
               {stage1Tab === 'runner' && (
                 <div className="space-y-4 animate-fade-in font-mono text-xs">
@@ -412,6 +515,20 @@ export default function ChallengeDetailPage({
                         {copiedSnippet === 's1_stop' ? '✓ Copied!' : '📋 Copy'}
                       </button>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Recon Intel Clues */}
+              {stage1Tab === 'intel' && (
+                <div className="space-y-4 animate-fade-in font-mono text-xs">
+                  <div className="p-4 bg-[#080A0D] border border-[#232B36] rounded-xl space-y-2">
+                    <span className="text-[#FF8533] block text-xs font-bold">RECONNAISSANCE TACTICS:</span>
+                    <ul className="list-disc list-inside space-y-1 text-[#8B949E] text-xs font-sans leading-relaxed">
+                      <li>Inspect the raw HTML source code of each page using browser DevTools (Ctrl+Shift+I / Cmd+Option+I).</li>
+                      <li>Review developer comments and metadata tags on <code className="text-[#FF9F43] font-mono">staff-directory.html</code> and <code className="text-[#FF9F43] font-mono">updates.html</code>.</li>
+                      <li>Look for exposed archive hashes or test credentials placed in public dossiers.</li>
+                    </ul>
                   </div>
                 </div>
               )}
@@ -1636,8 +1753,12 @@ export default function ChallengeDetailPage({
           {/* Flag Submission Form */}
           <FlagSubmitForm
             challengeId={challenge.id}
+            stageNumber={challenge.stage_number}
             solved={challenge.solved}
+            nextChallengeId={challenge.next_challenge_id}
+            nextChallengeName={challenge.next_challenge_name}
             onSuccess={fetchChallenge}
+            onTriggerFinalVictory={() => setShowVictoryModal(true)}
           />
         </div>
 
@@ -1755,6 +1876,12 @@ export default function ChallengeDetailPage({
         </div>
       </div>
 
+      {/* Full Access Congratulatory Pop-up Modal */}
+      <VictoryModal
+        isOpen={showVictoryModal}
+        onClose={() => setShowVictoryModal(false)}
+      />
     </div>
   );
 }
+

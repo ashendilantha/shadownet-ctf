@@ -131,10 +131,27 @@ export async function POST(request: NextRequest) {
           ? ` 🔓 Stage 0${challenge.stage_number + 1} has been unlocked!`
           : ' 🏆 All 8 stages pwned! Campaign completed!';
 
+      let nextChallengeId: number | null = null;
+      let nextChallengeName: string | null = null;
+      if (challenge.stage_number < 8) {
+        const { data: nextChallenge } = await supabase
+          .from('challenges')
+          .select('id, name, stage_number')
+          .eq('stage_number', challenge.stage_number + 1)
+          .maybeSingle();
+
+        nextChallengeId = nextChallenge?.id ?? (challenge.stage_number + 1);
+        nextChallengeName = nextChallenge?.name ?? `Stage 0${challenge.stage_number + 1}`;
+      }
+
       return NextResponse.json({
         correct: true,
         message: `🎯 Correct Flag! You earned +${challenge.points} XP!${nextStageMsg}`,
         points: challenge.points,
+        stage_number: challenge.stage_number,
+        is_final_stage: challenge.stage_number === 8,
+        next_challenge_id: nextChallengeId,
+        next_challenge_name: nextChallengeName,
       });
     }
 

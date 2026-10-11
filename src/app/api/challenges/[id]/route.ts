@@ -130,12 +130,28 @@ export async function GET(
     const configuredHints = STAGE_CONFIGS[challenge.stage_number]?.hints;
     const finalHints = (hints && hints.length > 0) ? hints : (configuredHints || []);
 
+    // Look up next challenge
+    let nextChallengeId: number | null = null;
+    let nextChallengeName: string | null = null;
+    if (challenge.stage_number < 8) {
+      const { data: nextChallenge } = await supabase
+        .from('challenges')
+        .select('id, name, stage_number')
+        .eq('stage_number', challenge.stage_number + 1)
+        .maybeSingle();
+
+      nextChallengeId = nextChallenge?.id ?? (challenge.stage_number + 1);
+      nextChallengeName = nextChallenge?.name ?? (STAGE_CONFIGS[challenge.stage_number + 1]?.name || `Stage 0${challenge.stage_number + 1}`);
+    }
+
     return NextResponse.json({
       challenge: {
         ...challenge,
         solved: isSolved,
         locked: false,
         unlocked: true,
+        next_challenge_id: nextChallengeId,
+        next_challenge_name: nextChallengeName,
       },
       hints: finalHints,
     });
