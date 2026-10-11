@@ -18,3 +18,4 @@ ON DUPLICATE KEY UPDATE flag=VALUES(flag);
 CREATE USER IF NOT EXISTS 'db_user'@'%' IDENTIFIED BY 'SecurePass123';
 GRANT SELECT ON nexacorp.* TO 'db_user'@'%';
 FLUSH PRIVILEGES;
+
