@@ -213,6 +213,65 @@ code, pre, .font-mono {
   filter: saturate(0.72);
 }
 
+.target-deck-operative {
+  position: fixed;
+  z-index: 40;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  display: flex;
+  width: min(19rem, calc(100vw - 1.5rem));
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.target-deck-figure {
+  width: clamp(4.25rem, 7vw, 5.5rem);
+  mix-blend-mode: screen;
+  filter: saturate(0.78) drop-shadow(0 5px 12px rgba(0, 0, 0, 0.35));
+  animation: operativeFloat 5s ease-in-out infinite;
+}
+
+.target-deck-speech {
+  position: relative;
+  width: min(19rem, 100%);
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(159, 239, 0, 0.38);
+  border-radius: 0.6rem;
+  background: linear-gradient(145deg, rgba(26, 35, 50, 0.98), rgba(14, 18, 23, 0.98));
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+  color: #e2e8f0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.target-deck-speech::after {
+  position: absolute;
+  right: 1.25rem;
+  bottom: -0.35rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-right: 1px solid rgba(159, 239, 0, 0.38);
+  border-bottom: 1px solid rgba(159, 239, 0, 0.38);
+  background: #111720;
+  content: '';
+  transform: rotate(45deg);
+}
+
+.target-deck-speech-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #9fef00;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.target-deck-speech p {
+  animation: fadeIn 0.3s ease-out;
+}
+
 .challenge-operative-dock {
   position: fixed;
   z-index: 40;
@@ -778,4 +837,11 @@ tbody tr:hover {
 @keyframes visorScan {
   0%, 100% { opacity: 0.15; transform: translateY(-10px); }
   50% { opacity: 0.9; transform: translateY(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .target-deck-figure,
+  .target-deck-speech p {
+    animation: none;
+  }
 }

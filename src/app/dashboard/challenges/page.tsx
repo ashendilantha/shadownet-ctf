@@ -9,6 +9,12 @@ import ProgressBar from '@/components/ProgressBar';
 import AttackVectorModal from '@/components/AttackVectorModal';
 import OperativeArtwork from '@/components/OperativeArtwork';
 
+const operativeLines = [
+  'Hey, hacker. You made it. Ready to make NexaCorp sweat?',
+  'Take a breath, trust your instincts, and work the challenge one step at a time.',
+  'NexaCorp calls surveillance "customer care." Let\'s remind them people notice.',
+];
+
 export default function ChallengesListPage() {
   const router = useRouter();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -17,6 +23,7 @@ export default function ChallengesListPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [filterDomain, setFilterDomain] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [operativeLine, setOperativeLine] = useState(-1);
 
   // Attack Vector Animation Modal state
   const [activeModalStage, setActiveModalStage] = useState<number | null>(null);
@@ -41,6 +48,16 @@ export default function ChallengesListPage() {
 
   useEffect(() => {
     fetchChallenges();
+  }, []);
+
+  useEffect(() => {
+    const timers = [
+      window.setTimeout(() => setOperativeLine(0), 2000),
+      window.setTimeout(() => setOperativeLine(1), 7000),
+      window.setTimeout(() => setOperativeLine(2), 12000),
+      window.setTimeout(() => setOperativeLine(-1), 19000),
+    ];
+    return () => timers.forEach(window.clearTimeout);
   }, []);
 
   const handleOpenAttackModal = (challenge: Challenge) => {
@@ -252,10 +269,17 @@ export default function ChallengesListPage() {
         </div>
       )}
 
-      <div className="challenge-operative-dock" aria-hidden="true">
+      <div className="target-deck-operative" aria-label="Shade, ShadowNet operative">
+        {operativeLine >= 0 && (
+          <div className="target-deck-speech" role="status" aria-live="polite">
+            <span className="target-deck-speech-label">SHADE // FIELD COMMS</span>
+            <p key={operativeLine}>{operativeLines[operativeLine]}</p>
+          </div>
+        )}
         <OperativeArtwork
-          sizes="(max-width: 640px) 96px, 144px"
-          className="challenge-figure h-auto w-full object-contain"
+          alt="ShadowNet operative Shade"
+          sizes="(max-width: 640px) 72px, 88px"
+          className="target-deck-figure h-auto w-full object-contain"
         />
       </div>
     </div>
