@@ -5,7 +5,6 @@ import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
 import OperativeArtwork from '@/components/OperativeArtwork';
-import Stage5ChallengePanel from '@/components/Stage5ChallengePanel';
 import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
@@ -512,7 +511,48 @@ export default function ChallengeDetailPage({
 
           {/* Stage 5: PRNG Token Predictor (Scripting) */}
           {challenge.stage_number === 5 && (
-            <Stage5ChallengePanel />
+            <div className="cyber-panel p-5 sm:p-6 space-y-4 bg-[#0E1217]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#232B36] pb-3">
+                <div>
+                  <h3 className="font-sans text-base font-bold text-[#F5F5F5] flex items-center gap-2">
+                    <span className="text-[#FF6B00]">⚡</span> PRNG Token Engine Stream
+                  </h3>
+                  <p className="text-xs text-[#8B949E] font-sans mt-0.5">
+                    NexaCorp Dynamic Token Engine running on TCP port 5005 using a Linear Congruential Generator.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href="/downloads/stage5-starter.py"
+                    download
+                    className="btn-primary text-xs font-mono font-bold px-3 py-1.5 flex items-center gap-1.5"
+                  >
+                    <span>📥</span> STARTER SCRIPT
+                  </a>
+                  <div className="px-3 py-1.5 bg-[#141920] border border-[#10B981]/40 rounded text-xs font-mono text-[#10B981] font-bold">
+                    PORT 5005 ACTIVE
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">INTERACTIVE TCP CONNECTION</span>
+                  <code className="text-[#10B981] font-bold select-all block">nc localhost 5005</code>
+                </div>
+                <div className="p-3 bg-[#080A0D] border border-[#232B36] rounded-lg">
+                  <span className="text-[10px] text-[#8B949E] block mb-1">ALGORITHM</span>
+                  <code className="text-[#FF9F43] font-bold block">LCG: next = (a * x + c) % m</code>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-[#080A0D] border border-[#232B36] rounded-lg text-xs font-mono space-y-1">
+                <span className="text-[#FF8533] block text-[11px] font-semibold">ATTACK VECTOR BRIEF:</span>
+                <p className="text-[#8B949E] text-[11px] font-sans leading-relaxed">
+                  Connect to the token dispenser daemon, capture sequential pseudo-random tokens, deduce the internal recurrence state parameters, and submit the correctly predicted next token in sequence to unlock the flag.
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Stage 6: Binary Disassembly (Reverse Engineering) */}

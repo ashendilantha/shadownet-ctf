@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         .from('challenges')
         .select('id')
         .eq('stage_number', challenge.stage_number - 1)
-        .single();
+        .maybeSingle();
 
       if (prevChallenge) {
         const { data: prevSolved } = await supabase
@@ -53,9 +53,9 @@ export async function POST(request: NextRequest) {
           .eq('user_id', user.sub)
           .eq('challenge_id', prevChallenge.id)
           .eq('is_correct', true)
-          .single();
+          .limit(1);
 
-        if (!prevSolved) {
+        if (!prevSolved || prevSolved.length === 0) {
           return NextResponse.json(
             { error: `Stage ${challenge.stage_number} is locked. You must solve Stage ${challenge.stage_number - 1} first.` },
             { status: 403 }
@@ -71,9 +71,9 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.sub)
       .eq('challenge_id', challenge_id)
       .eq('is_correct', true)
-      .single();
+      .limit(1);
 
-    if (existingSolve) {
+    if (existingSolve && existingSolve.length > 0) {
       return NextResponse.json(
         {
           correct: false,
