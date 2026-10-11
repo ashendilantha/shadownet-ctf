@@ -5,13 +5,21 @@ import Link from 'next/link';
 import axios from 'axios';
 import FlagSubmitForm from '@/components/FlagSubmitForm';
 import FieldCompanion from '@/components/FieldCompanion';
-import { STAGE_CONFIGS } from '@/lib/constants';
 
 interface Hint {
   id: number;
   hint_level: number;
   hint_text: string;
   point_penalty: number;
+  unlocked?: boolean;
+}
+
+interface StageDisplayInfo {
+  subsystemCode: string;
+  targetSystem: string;
+  storyBrief: string;
+  accessGuide: string;
+  statusCheck: string;
 }
 
 interface ChallengeDetail {
@@ -35,11 +43,13 @@ export default function ChallengeDetailPage({
 }) {
   const { id } = use(params);
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null);
+  const [stageConfig, setStageConfig] = useState<StageDisplayInfo | null>(null);
   const [hints, setHints] = useState<Hint[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
   const [lockedMsg, setLockedMsg] = useState('');
   const [unlockedHints, setUnlockedHints] = useState<Set<number>>(new Set());
+  const [unlockingHintId, setUnlockingHintId] = useState<number | null>(null);
   const [collapsedHints, setCollapsedHints] = useState<Set<number>>(new Set());
   const [unlockMessage, setUnlockMessage] = useState<string | null>(null);
 
@@ -47,7 +57,15 @@ export default function ChallengeDetailPage({
     try {
       const res = await axios.get(`/api/challenges/${id}`);
       setChallenge(res.data.challenge);
+      setStageConfig(res.data.stage_config || null);
       setHints(res.data.hints || []);
+      setUnlockedHints(
+        new Set(
+          (res.data.hints || [])
+            .filter((hint: Hint) => hint.unlocked)
+            .map((hint: Hint) => hint.id)
+        )
+      );
       setIsLocked(false);
     } catch (err: unknown) {
       const errorObj = err as { response?: { status?: number; data?: { locked?: boolean; error?: string; challenge?: ChallengeDetail } } };
@@ -67,33 +85,35 @@ export default function ChallengeDetailPage({
     fetchChallenge();
   }, [fetchChallenge]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && challenge?.id) {
-      const saved = localStorage.getItem(`shadownet_unlocked_hints_${challenge.id}`);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            setUnlockedHints(new Set(parsed));
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-  }, [challenge?.id]);
+  const handleUnlockHint = async (hintId: number, hintLevel: number) => {
+    if (!challenge || unlockingHintId !== null) return;
 
-  const handleUnlockHint = (hintId: number, hintLevel: number, penalty: number = 40) => {
-    const nextUnlocked = new Set(unlockedHints);
-    nextUnlocked.add(hintId);
-    setUnlockedHints(nextUnlocked);
-    if (typeof window !== 'undefined' && challenge?.id) {
-      localStorage.setItem(`shadownet_unlocked_hints_${challenge.id}`, JSON.stringify(Array.from(nextUnlocked)));
+    setUnlockingHintId(hintId);
+    setUnlockMessage(null);
+
+    try {
+      const response = await axios.post('/api/hints/unlock', {
+        challenge_id: challenge.id,
+        hint_id: hintId,
+      });
+
+      setUnlockedHints((previous) => new Set(previous).add(hintId));
+      setHints((previous) => previous.map((hint) =>
+        hint.id === hintId
+          ? { ...hint, hint_text: response.data.hint_text, unlocked: true }
+          : hint
+      ));
+      setUnlockMessage(
+        response.data.alreadyUnlocked
+          ? `Tactical Hint ${hintLevel} was already decrypted. No XP charged.`
+          : `Tactical Hint ${hintLevel} decrypted. ${response.data.cost} XP deducted.`
+      );
+    } catch (error: unknown) {
+      const errorObj = error as { response?: { data?: { error?: string } } };
+      setUnlockMessage(errorObj.response?.data?.error || 'Unable to decrypt this hint. Please try again.');
+    } finally {
+      setUnlockingHintId(null);
     }
-    setUnlockMessage(`Tactical Hint ${hintLevel} decrypted. ${penalty} XP penalty registered.`);
-    setTimeout(() => {
-      setUnlockMessage(null);
-    }, 4000);
   };
 
   const toggleCollapse = (hintId: number) => {
@@ -157,8 +177,6 @@ export default function ChallengeDetailPage({
       </div>
     );
   }
-
-  const stageConfig = STAGE_CONFIGS[challenge.stage_number];
 
   return (
     <div className="w-full space-y-6">
@@ -403,13 +421,13 @@ export default function ChallengeDetailPage({
               </div>
             )}
 
-            {(hints.length === 0 && (!stageConfig?.hints || stageConfig.hints.length === 0)) ? (
+            {hints.length === 0 ? (
               <p className="font-mono text-xs text-[#8B949E]">
                 No tactical intel logged for this target.
               </p>
             ) : (
               <div className="space-y-3 font-mono text-xs">
-                {(hints.length > 0 ? hints : (stageConfig?.hints || [])).map((hint) => {
+                {hints.map((hint) => {
                   const isUnlocked = unlockedHints.has(hint.id);
                   const isCollapsed = collapsedHints.has(hint.id);
                   const penalty = typeof hint.point_penalty === 'number' ? hint.point_penalty : 40;
@@ -432,10 +450,12 @@ export default function ChallengeDetailPage({
                           Encrypted surveillance and tactical intelligence for Stage 0{challenge.stage_number}.
                         </p>
                         <button
-                          onClick={() => handleUnlockHint(hint.id, hint.hint_level, penalty)}
+                          onClick={() => handleUnlockHint(hint.id, hint.hint_level)}
+                          disabled={unlockingHintId !== null}
                           className="w-full py-2 px-3 bg-[#1A212B] hover:bg-[#242C37] text-[#FF9F43] border border-[#FF9F43]/40 hover:border-[#FF9F43] rounded font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_10px_rgba(255,159,67,0.1)]"
                         >
-                          <span>🔓</span> Decrypt Intel (-{penalty} XP)
+                          <span>🔓</span>{' '}
+                          {unlockingHintId === hint.id ? 'Charging XP...' : `Decrypt Intel (-${penalty} XP)`}
                         </button>
                       </div>
                     );
