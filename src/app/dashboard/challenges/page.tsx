@@ -252,9 +252,9 @@ export default function ChallengesListPage() {
         </div>
       )}
 
-      <div className="challenge-deck-operative-dock" aria-hidden="true">
+      <div className="challenge-operative-dock" aria-hidden="true">
         <OperativeArtwork
-          sizes="(max-width: 640px) 72px, 96px"
+          sizes="(max-width: 640px) 96px, 144px"
           className="challenge-figure h-auto w-full object-contain"
         />
       </div>
