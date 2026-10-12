@@ -38,8 +38,8 @@ def handle_client(conn, addr):
         # CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION
         cap_low = struct.pack("<H", 0xf7ff)
         charset = b"\x21"  # utf8_general_ci
-        status = struct.pack("<H", 0x0002)  # SERVER_STATUS_AUTOCOMMIT
-        cap_high = struct.pack("<H", 0x81ff)
+        # Clear CLIENT_DEPRECATE_EOF flag (0x0100) -> 0x80ff so MySQL 8 client accepts standard EOF packets
+        cap_high = struct.pack("<H", 0x80ff)
         auth_len = struct.pack("B", 21)
         reserved = b"\x00" * 10
         salt_part2 = b"etpasssalt12\x00"  # 12 bytes + 0
