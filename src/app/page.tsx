@@ -4,16 +4,32 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import OperativeArtwork from '@/components/OperativeArtwork';
+import CyberThreatMap from '@/components/CyberThreatMap';
+import { STAGE_CONFIGS } from '@/lib/constants';
+
+interface LeaderboardEntry {
+  rank: number;
+  username: string;
+  team_name: string;
+  total_points: number;
+  challenges_solved: number;
+}
 
 export default function HomePage() {
   const [user, setUser] = useState<{ id: string; username: string } | null>(null);
   const [terminalStep, setTerminalStep] = useState(0);
+  const [topOperatives, setTopOperatives] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
     axios
       .get('/api/auth/me')
       .then((res) => setUser(res.data.user))
       .catch(() => setUser(null));
+
+    axios
+      .get('/api/scores/leaderboard')
+      .then((res) => setTopOperatives((res.data.leaderboard || []).slice(0, 5)))
+      .catch(() => setTopOperatives([]));
   }, []);
 
   const terminalLogs = [
@@ -38,8 +54,17 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [terminalLogs.length]);
 
+  const stagesList = Object.values(STAGE_CONFIGS).sort((a, b) => a.stage - b.stage);
+
+  const arsenalTools = [
+    { name: 'OSINT & EXIF Recon', tag: 'DMZ-01', tools: 'curl · exiftool · source inspection', accent: 'text-[#9FEF00]' },
+    { name: 'SIGINT & Audio Stego', tag: 'SIGINT-02', tools: 'steghide · Sonic Visualiser · FFT', accent: 'text-[#38BDF8]' },
+    { name: 'Cipher & PRNG Math', tag: 'CRYPTO-03/05', tools: 'ECB oracle · LCG modular inversion', accent: 'text-[#D9A441]' },
+    { name: 'Web, RE & Root Pivot', tag: 'CORE-04/06/07/08', tools: 'SQLi · Ghidra · SUID PATH · SSRF', accent: 'text-[#F87171]' },
+  ];
+
   return (
-    <div className="w-full space-y-8 sm:space-y-10 pb-6">
+    <div className="w-full space-y-8 sm:space-y-10 pb-8">
       {/* Hero Section: Frosted Glass Command Deck */}
       <section className="glass-hero overflow-hidden p-5 sm:p-7 lg:p-9">
         {/* Top Luminous Plasma Accent Line */}
@@ -209,6 +234,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Interactive Global Cyber Threat & Attack Vector Map */}
+      <CyberThreatMap />
+
       {/* Killchain Phase Roadmap */}
       <section className="space-y-6">
         <div className="text-center max-w-xl mx-auto space-y-2">
@@ -236,7 +264,7 @@ export default function HomePage() {
                 <span className="text-[11px] font-mono text-[#9FEF00] font-bold">Stages 1–2</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F8FAFC]">
-                Perimeter Recon & SIGINT
+                Perimeter Recon &amp; SIGINT
               </h3>
               <p className="text-xs text-[#A4B1CD] leading-relaxed font-sans">
                 Harvest leaked employee metadata and demodulate intercepted whistleblower transmissions.
@@ -258,7 +286,7 @@ export default function HomePage() {
                 <span className="text-[11px] font-mono text-[#38BDF8] font-bold">Stages 3–4</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F8FAFC]">
-                Crypto Oracle & SSO Bypass
+                Crypto Oracle &amp; SSO Bypass
               </h3>
               <p className="text-xs text-[#A4B1CD] leading-relaxed font-sans">
                 Recover cryptographic keys via oracle probing and inject SQL payloads into the employee SSO gateway.
@@ -280,7 +308,7 @@ export default function HomePage() {
                 <span className="text-[11px] font-mono text-[#D9A441] font-bold">Stages 5–6</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F8FAFC]">
-                PRNG Forecast & Binary RE
+                PRNG Forecast &amp; Binary RE
               </h3>
               <p className="text-xs text-[#A4B1CD] leading-relaxed font-sans">
                 Solve pseudo-random generator state algorithms and decompile proprietary ELF binaries in Ghidra.
@@ -302,7 +330,7 @@ export default function HomePage() {
                 <span className="text-[11px] font-mono text-[#F87171] font-bold">Stages 7–8</span>
               </div>
               <h3 className="font-sans text-base font-bold text-[#F8FAFC]">
-                Root PrivEsc & Subnet Pivoting
+                Root PrivEsc &amp; Subnet Pivoting
               </h3>
               <p className="text-xs text-[#A4B1CD] leading-relaxed font-sans">
                 Escalate Linux execution to root and trigger SSRF pivots to exfiltrate NexaCorp&apos;s master database.
@@ -311,6 +339,154 @@ export default function HomePage() {
             <div className="pt-3 border-t border-white/[0.08] font-mono text-[10px] text-[#F87171] font-semibold">
               Linux Root · SSRF Exfiltration
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NexaCorp Defense Matrix: Live 8-Stage Subsystem Grid */}
+      <section className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div className="space-y-1">
+            <div className="glass-pill inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono text-[#D9A441] font-bold">
+              <span>⬡</span>
+              <span>NEXACORP DEFENSE MATRIX</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-[#F8FAFC] tracking-tight">
+              Target Subsystems &amp; Active Endpoints
+            </h2>
+          </div>
+          <Link
+            href={user ? '/dashboard/challenges' : '/auth/login'}
+            className="btn-secondary text-xs h-9 px-4 self-start sm:self-auto"
+          >
+            Open Target Deck →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {stagesList.map((st) => {
+            const diffStyle =
+              st.difficulty === 'Easy'
+                ? 'text-[#9FEF00] bg-[#9FEF00]/10 border-[#9FEF00]/30'
+                : st.difficulty === 'Medium'
+                ? 'text-[#D9A441] bg-[#D9A441]/10 border-[#D9A441]/30'
+                : 'text-[#F87171] bg-[#F87171]/10 border-[#F87171]/30';
+            return (
+              <Link
+                key={st.stage}
+                href={user ? `/dashboard/challenges/${st.stage}` : '/auth/login'}
+                className="cyber-card p-4 flex flex-col justify-between space-y-3 group"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2 font-mono text-[10px]">
+                    <span className="text-[#38BDF8] font-bold">{st.subsystemCode}</span>
+                    <span className={`px-2 py-0.5 rounded-full border font-bold ${diffStyle}`}>
+                      {st.difficulty}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-[#F8FAFC] group-hover:text-[#9FEF00] transition-colors">
+                    0{st.stage}. {st.name}
+                  </h3>
+                  <p className="text-[11px] text-[#A4B1CD] line-clamp-2 leading-relaxed">
+                    {st.vectorSummary}
+                  </p>
+                </div>
+
+                <div className="pt-2.5 border-t border-white/[0.07] flex items-center justify-between font-mono text-[10px]">
+                  <span className="text-[#A4B1CD] uppercase">{st.type} · {st.domain}</span>
+                  <span className="text-[#9FEF00] font-black">+{st.points} XP</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Live Collective Standings + Operative Arsenal */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Top Operatives Live Preview */}
+        <div className="lg:col-span-7 cyber-panel p-5 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#9FEF00]">
+                LIVE COLLECTIVE STANDINGS
+              </span>
+              <h3 className="text-lg font-bold text-[#F8FAFC]">Top Active Operatives</h3>
+            </div>
+            <Link href="/dashboard/leaderboard" className="btn-ghost text-xs font-mono">
+              Full Roster →
+            </Link>
+          </div>
+
+          {topOperatives.length > 0 ? (
+            <div className="space-y-2">
+              {topOperatives.map((op) => (
+                <div
+                  key={op.rank}
+                  className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.07] hover:border-[#9FEF00]/30 transition-colors font-mono text-xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-black ${
+                        op.rank === 1
+                          ? 'bg-[#9FEF00]/20 text-[#9FEF00] border border-[#9FEF00]/40'
+                          : 'bg-white/[0.06] text-[#A4B1CD] border border-white/[0.08]'
+                      }`}
+                    >
+                      #{op.rank}
+                    </span>
+                    <div className="truncate">
+                      <span className="text-[#F8FAFC] font-bold block truncate">{op.username}</span>
+                      <span className="text-[10px] text-[#6B7894]">{op.team_name}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="text-[11px] text-[#38BDF8] font-semibold">
+                      {op.challenges_solved}/8
+                    </span>
+                    <span className="text-xs text-[#9FEF00] font-black">
+                      {op.total_points} XP
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 rounded-xl bg-white/[0.02] border border-dashed border-white/[0.1] text-center space-y-2">
+              <p className="font-mono text-xs text-[#A4B1CD]">
+                No operatives have claimed the #1 spot yet — be the first to breach NexaCorp.
+              </p>
+              <Link href="/auth/register" className="btn-primary text-xs h-9 px-4 inline-flex">
+                Enlist &amp; Claim First Blood
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Operative Toolkit & Attack Surface */}
+        <div className="lg:col-span-5 cyber-panel p-5 sm:p-6 space-y-4">
+          <div>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#38BDF8]">
+              RECOMMENDED FIELD ARSENAL
+            </span>
+            <h3 className="text-lg font-bold text-[#F8FAFC]">Attack Surface Coverage</h3>
+          </div>
+
+          <div className="space-y-2.5">
+            {arsenalTools.map((item) => (
+              <div
+                key={item.name}
+                className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.07] space-y-1"
+              >
+                <div className="flex items-center justify-between font-mono text-xs">
+                  <span className={`font-bold ${item.accent}`}>{item.name}</span>
+                  <span className="text-[10px] text-[#A4B1CD] px-2 py-0.5 rounded bg-white/[0.05] border border-white/[0.08]">
+                    {item.tag}
+                  </span>
+                </div>
+                <p className="font-mono text-[11px] text-[#A4B1CD]">{item.tools}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

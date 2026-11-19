@@ -58,9 +58,10 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="site-header sticky top-0 z-50 w-full border-b backdrop-blur-md">
-      <div className="w-full app-container">
-        <div className="flex items-center justify-between h-16">
+    <div className="relative z-40 w-full app-container pt-4">
+      <header className="site-header w-full rounded-2xl">
+        <div className="w-full px-5 sm:px-7">
+          <div className="flex items-center justify-between h-16">
           {/* Left: Brand Logo & Main Nav Links */}
           <div className="flex items-center gap-6 lg:gap-8">
             <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
@@ -258,7 +259,8 @@ export default function Navbar() {
             </div>
           </div>
         )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </div>
   );
 }
