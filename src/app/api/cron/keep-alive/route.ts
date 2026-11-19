@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseUrl } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: 'ok',
       active: true,
+      supabase_host: new URL(supabaseUrl).host,
       records_checked: data?.length ?? 0,
       latency_ms: latencyMs,
       timestamp: new Date().toISOString(),
