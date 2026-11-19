@@ -9,15 +9,17 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "axios": "^1.5.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.0.0",
     "next": "16.3.6",
+    "nodemailer": "^10.6.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "@supabase/supabase-js": "^2.38.0",
-    "jose": "^5.0.0",
-    "bcryptjs": "^2.4.3",
-    "axios": "^1.5.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0"
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
