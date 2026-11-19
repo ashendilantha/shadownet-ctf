@@ -15,10 +15,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark h-full bg-[#07090C]">
-      <body className="bg-[#07090C] bg-cyber-grid bg-cyber-radial text-[#F5F5F5] min-h-screen flex flex-col antialiased overflow-x-hidden">
+    <html lang="en" className="dark h-full bg-[#070B14]">
+      <body className="relative bg-[#070B14] text-[#F5F5F5] min-h-screen flex flex-col antialiased overflow-x-hidden">
+        {/* Ambient Cyber Glass Backdrop */}
+        <div className="ambient-glass-backdrop" aria-hidden="true">
+          <div className="ambient-orb ambient-orb-lime" />
+          <div className="ambient-orb ambient-orb-cyan" />
+          <div className="ambient-orb ambient-orb-amber" />
+          <div className="ambient-grid-layer" />
+        </div>
+
         <Navbar />
-        <main className="flex-1 w-full app-container py-6 sm:py-8 lg:py-10 flex flex-col">
+        <main className="relative z-10 flex-1 w-full app-container py-6 sm:py-8 lg:py-10 flex flex-col">
           {children}
         </main>
         <Footer />

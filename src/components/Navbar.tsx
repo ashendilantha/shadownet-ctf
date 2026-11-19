@@ -122,32 +122,32 @@ export default function Navbar() {
           {/* Right: Live Status Pill + Auth / User Area */}
           <div className="hidden sm:flex items-center gap-3.5">
             {/* Live Target Status Indicator */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#10151C] border border-[#232B36] rounded-full text-[11px] font-mono text-[#8B949E]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
-              <span className="text-[#10B981] font-bold">NexaCorp Uplink</span>
+            <div className="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono text-[#A4B1CD]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#9FEF00] shadow-[0_0_8px_#9FEF00] animate-pulse"></span>
+              <span className="text-[#9FEF00] font-bold">NexaCorp Uplink</span>
             </div>
 
             {!loading && user ? (
               <div className="flex items-center gap-2.5">
                 {/* Operative Score Pill */}
-                <div className="flex items-center gap-2 px-3 py-1 bg-[#10151C] border border-[#232B36] rounded-lg">
-                  <span className="text-[10px] font-mono text-[#8B949E]">OPERATIVE</span>
-                  <span className="text-xs font-mono font-bold text-[#F5F5F5]">
+                <div className="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-lg">
+                  <span className="text-[10px] font-mono text-[#A4B1CD]">OPERATIVE</span>
+                  <span className="text-xs font-mono font-bold text-[#F8FAFC]">
                     {user.username}
                   </span>
-                  <span className="text-[#232B36]">|</span>
-                  <span className="text-xs font-mono font-black text-[#FF6B00]">
+                  <span className="text-white/15">|</span>
+                  <span className="text-xs font-mono font-black text-[#9FEF00]">
                     {user.total_points} XP
                   </span>
-                  <span className="text-[#232B36]">|</span>
-                  <span className="text-xs font-mono text-[#10B981] font-bold">
+                  <span className="text-white/15">|</span>
+                  <span className="text-xs font-mono text-[#38BDF8] font-bold">
                     {user.challenges_solved}/8
                   </span>
                 </div>
 
                 <button
                   onClick={handleLogout}
-                  className="px-2.5 py-1 text-xs font-mono font-semibold text-[#8B949E] hover:text-[#EF4444] hover:bg-[#141920] border border-[#232B36] rounded-lg transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-mono font-semibold text-[#A4B1CD] hover:text-[#F87171] hover:bg-white/[0.06] border border-white/[0.1] rounded-lg transition-colors cursor-pointer"
                 >
                   Sign out
                 </button>
@@ -156,13 +156,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/auth/login"
-                  className="btn-secondary text-xs h-8.5 px-3.5"
+                  className="btn-secondary text-xs h-9 px-3.5"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="btn-primary text-xs h-8.5 px-4"
+                  className="btn-primary text-xs h-9 px-4"
                 >
                   Join Collective
                 </Link>
