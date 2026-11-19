@@ -23,8 +23,8 @@ jobs:
           echo "HTTP Status: $HTTP_STATUS"
           cat response.json || true
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
-            echo "✅ Supabase keep-alive ping succeeded."
+            echo "Supabase keep-alive ping succeeded."
           else
-            echo "❌ Supabase keep-alive ping returned status $HTTP_STATUS. Verify the project is active in the Supabase Dashboard."
+            echo "Supabase keep-alive ping returned status $HTTP_STATUS. Verify the project is active in the Supabase Dashboard."
             exit 1
           fi

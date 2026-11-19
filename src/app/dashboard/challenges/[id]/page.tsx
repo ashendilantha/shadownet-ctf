@@ -69,6 +69,9 @@ export default function ChallengeDetailPage({
       const res = await axios.get(`/api/challenges/${id}`);
       setChallenge(res.data.challenge);
       setHints(res.data.hints || []);
+      if (Array.isArray(res.data.unlocked_hint_ids) && res.data.unlocked_hint_ids.length > 0) {
+        setUnlockedHints((prev) => new Set([...prev, ...res.data.unlocked_hint_ids]));
+      }
       setIsLocked(false);
     } catch (err: unknown) {
       const errorObj = err as { response?: { status?: number; data?: { locked?: boolean; error?: string; challenge?: ChallengeDetail } } };
@@ -115,7 +118,16 @@ export default function ChallengeDetailPage({
     setUnlockMessage(null);
     try {
       const response = await axios.post(`/api/challenges/${id}/hints`, { hintId });
-      setUnlockedHints((previous) => new Set(previous).add(hintId));
+      setUnlockedHints((previous) => {
+        const next = new Set(previous).add(hintId);
+        if (typeof window !== 'undefined' && challenge?.id) {
+          localStorage.setItem(
+            `shadownet_unlocked_hints_${challenge.id}`,
+            JSON.stringify(Array.from(next))
+          );
+        }
+        return next;
+      });
       setHints((previous) => previous.map((hint) =>
         hint.id === hintId
           ? { ...hint, hint_text: response.data.hint_text }

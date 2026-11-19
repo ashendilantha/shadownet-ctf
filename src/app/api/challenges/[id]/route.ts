@@ -130,6 +130,15 @@ export async function GET(
     const configuredHints = STAGE_CONFIGS[challenge.stage_number]?.hints;
     const finalHints = (hints && hints.length > 0) ? hints : (configuredHints || []);
 
+    // Fetch already unlocked hint IDs for this user
+    const { data: userUnlocks } = await supabase
+      .from('hint_unlocks')
+      .select('hint_id')
+      .eq('user_id', authUser.sub)
+      .or(`challenge_id.eq.${challenge.id},challenge_id.eq.${challenge.stage_number}`);
+
+    const unlockedHintIds = (userUnlocks || []).map((u) => u.hint_id);
+
     // Look up next challenge
     let nextChallengeId: number | null = null;
     let nextChallengeName: string | null = null;
@@ -154,6 +163,7 @@ export async function GET(
         next_challenge_name: nextChallengeName,
       },
       hints: finalHints,
+      unlocked_hint_ids: unlockedHintIds,
     });
   } catch (error) {
     console.error('Challenge detail error:', error);
