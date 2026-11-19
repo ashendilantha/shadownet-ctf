@@ -667,40 +667,44 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[#252A30] pb-4 mb-8 font-mono text-xs">
+      {/* Navigation Tabs (Swipeable on mobile, clean single row on desktop) */}
+      <div
+        role="region"
+        aria-label="Admin sections"
+        className="flex items-center gap-2 overflow-x-auto snap-x snap-mandatory border-b border-white/[0.08] pb-3.5 mb-8 font-mono text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         <button
           onClick={() => setActiveTab('overview')}
           aria-pressed={activeTab === 'overview'}
-          className="admin-tab"
+          className="admin-tab flex-shrink-0 snap-start"
         >
           📊 TELEMETRY OVERVIEW
         </button>
         <button
           onClick={() => setActiveTab('challenges')}
           aria-pressed={activeTab === 'challenges'}
-          className="admin-tab"
+          className="admin-tab flex-shrink-0 snap-start"
         >
           🎯 MANAGE CHALLENGES ({challenges.length})
         </button>
         <button
           onClick={() => setActiveTab('operatives')}
           aria-pressed={activeTab === 'operatives'}
-          className="admin-tab"
+          className="admin-tab flex-shrink-0 snap-start"
         >
           👥 MANAGE OPERATIVES ({operatives.length})
         </button>
         <button
           onClick={() => setActiveTab('submissions')}
           aria-pressed={activeTab === 'submissions'}
-          className="admin-tab"
+          className="admin-tab flex-shrink-0 snap-start"
         >
           📋 SUBMISSIONS AUDIT
         </button>
         <button
           onClick={() => setActiveTab('danger')}
           aria-pressed={activeTab === 'danger'}
-          className="admin-tab admin-tab--danger"
+          className="admin-tab admin-tab--danger flex-shrink-0 snap-start"
         >
           ⚠️ DANGER ZONE
         </button>
