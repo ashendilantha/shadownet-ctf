@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Lightweight MySQL Protocol Service for Stage 8 Capstone Challenge
-Accepts MySQL client connections, authenticates 'db_user':'SecurePass123',
-and responds to SQL queries for the 'nexacorp' database and 'flags' table.
-Zero external dependencies, 100% Python 3 standard library.
-"""
-
 import socket
 import struct
 import threading
