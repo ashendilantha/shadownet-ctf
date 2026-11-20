@@ -109,12 +109,12 @@ export default function Navbar() {
                     href="/admin"
                     className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ml-1 ${
                       pathname.startsWith('/admin')
-                        ? 'bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/40'
-                        : 'text-[#EF4444] hover:bg-[#EF4444]/15 border border-[#EF4444]/30'
+                        ? 'bg-[#9FEF00]/15 text-[#9FEF00] border border-[#9FEF00]/45'
+                        : 'text-[#9FEF00] hover:bg-[#9FEF00]/15 border border-[#9FEF00]/30'
                     }`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444] animate-pulse flex-shrink-0"></span>
-                    <span>COMMAND CORE</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#9FEF00] animate-pulse flex-shrink-0"></span>
+                    COMMAND CORE
                   </Link>
                 )}
               </nav>
@@ -122,11 +122,13 @@ export default function Navbar() {
 
             {/* Right: Live Status Pill + Auth / User Area (Desktop lg+) */}
             <div className="hidden lg:flex items-center gap-2.5 flex-shrink-0">
-              {/* Live Target Status Indicator (shown on xl+ so admin navbar never crowds) */}
-              <div className="glass-pill hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono text-[#A4B1CD] whitespace-nowrap">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#9FEF00] shadow-[0_0_8px_#9FEF00] animate-pulse flex-shrink-0"></span>
-                <span className="text-[#9FEF00] font-bold">NexaCorp Uplink</span>
-              </div>
+              {/* Live Target Status Indicator (omitted for admins since COMMAND CORE occupies nav space) */}
+              {!user?.is_admin && (
+                <div className="glass-pill hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-mono text-[#A4B1CD] whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#9FEF00] shadow-[0_0_8px_#9FEF00] animate-pulse flex-shrink-0"></span>
+                  <span className="text-[#9FEF00] font-bold">NexaCorp Uplink</span>
+                </div>
+              )}
 
               {!loading && user ? (
                 <div className="flex items-center gap-2 flex-shrink-0">

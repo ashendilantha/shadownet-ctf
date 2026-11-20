@@ -270,7 +270,7 @@ code, pre, .font-mono {
   border-color: rgba(159, 239, 0, 0.38);
   background-color: rgba(159, 239, 0, 0.1);
 }
-.site-header a[href="/admin"] > span {
+.site-header a[href="/admin"] > span:first-child {
   background-color: var(--primary);
 }
 
